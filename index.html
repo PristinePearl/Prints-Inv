@@ -167,7 +167,7 @@
 
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
-  <div class="loading-msg" id="loading-msg">Connecting to Google Sheets…</div>
+  <div class="loading-msg" id="loading-msg">Connecting…</div>
 </div>
 
 <nav>
@@ -565,7 +565,7 @@ async function syncAll(silent = false) {
       DB.dieStock      = data.dieStock      || [];
       DB.productions   = data.productions   || [];
       DB.logs          = data.logs          || [];
-      if (!silent) toast('Synced from Google Sheets ✓');
+      if (!silent) toast('Synced from Database ✓');
     } else {
       throw new Error(data?.error || 'Unknown error from server');
     }
