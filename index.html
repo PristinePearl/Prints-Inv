@@ -554,7 +554,7 @@ async function gasRequest(payload) {
 //  SYNC — fetch all data from Google Sheets (no local seed fallback)
 // ============================================================
 async function syncAll(silent = false) {
-  if (!silent) showLoading('Fetching data from Google Sheets…');
+  if (!silent) showLoading('Fetching data…');
   try {
     const data = await gasRequest({ action: 'getAll' });
     if (data && data.success) {
