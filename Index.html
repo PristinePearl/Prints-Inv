@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRINTS — Stock Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --card: #1d2026;
+    --border: #2a2d35;
+    --accent: #f5a623;
+    --accent2: #3ecf8e;
+    --accent3: #4f9cf9;
+    --danger: #f05252;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --tag-bg: #252830;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .nav-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-tab { padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; border: none; background: none; color: var(--muted); transition: all 0.15s; }
+  .nav-tab:hover { color: var(--text); background: var(--card); }
+  .nav-tab.active { color: var(--accent); background: rgba(245,166,35,0.1); }
+  .nav-right { display: flex; gap: 8px; align-items: center; }
+  .sync-btn { background: var(--accent); color: #000; border: none; padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.15s; font-family: 'DM Sans', sans-serif; }
+  .sync-btn:hover { opacity: 0.85; }
+  .sync-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .conn-status { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); }
+  .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+  .conn-dot.online { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+  .conn-dot.offline { background: var(--danger); }
+  .conn-dot.syncing { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  main { padding: 28px 24px; max-width: 1400px; margin: 0 auto; }
+
+  .panel { display: none; animation: fadeIn 0.2s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .sec-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+  .sec-title small { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 10px; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  input, select, textarea {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 12px; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--card); }
+  .search-input { min-width: 220px; }
+  .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-success { background: var(--accent2); color: #000; }
+  .btn-success:hover { opacity: 0.85; }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+  .btn-danger:hover { background: rgba(240,82,82,0.1); }
+  .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface); padding: 10px 14px; text-align: left; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .mono { font-family: 'DM Mono', monospace; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: 'DM Mono', monospace; }
+  .badge-green { background: rgba(62,207,142,0.15); color: var(--accent2); }
+  .badge-orange { background: rgba(245,166,35,0.15); color: var(--accent); }
+  .badge-red { background: rgba(240,82,82,0.15); color: var(--danger); }
+  .badge-blue { background: rgba(79,156,249,0.15); color: var(--accent3); }
+  .badge-gray { background: var(--tag-bg); color: var(--muted); }
+  .action-cell { display: flex; gap: 6px; }
+  .icon-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.15s; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; position: relative; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; }
+  .field input, .field select, .field textarea { width: 100%; }
+  .field textarea { height: 80px; resize: vertical; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; }
+  .close-btn:hover { color: var(--text); }
+  .span2 { grid-column: span 2; }
+
+  .recipe-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .recipe-row select, .recipe-row input { font-size: 12px; padding: 7px 10px; }
+  .add-row-btn { background: none; border: 1px dashed var(--border); color: var(--muted); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; transition: all 0.15s; }
+  .add-row-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .section-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; font-family: 'DM Mono', monospace; margin: 16px 0 8px; }
+
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface); border: 1px solid var(--border); padding: 12px 20px; border-radius: 8px; font-size: 13px; display: none; z-index: 999; border-left: 3px solid var(--accent2); max-width: 320px; }
+  #toast.error { border-left-color: var(--danger); }
+  #toast.warn { border-left-color: var(--accent); }
+  #toast.show { display: block; animation: slideIn 0.2s ease; }
+  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .log-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; gap: 14px; align-items: flex-start; }
+  .log-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; margin-top: 2px; }
+  .log-msg { font-size: 13px; }
+  .log-type { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+
+  .rm-preview { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-top: 12px; font-size: 12px; }
+  .rm-preview-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .rm-preview-row:last-child { border: none; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .low-stock td:first-child { border-left: 3px solid var(--danger); }
+  .mfr-tag { background: var(--tag-bg); border: 1px solid var(--border); color: var(--text); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .qty-ctrl { display: flex; align-items: center; gap: 6px; }
+  .qty-ctrl button { background: var(--surface); border: 1px solid var(--border); color: var(--text); width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .qty-ctrl button:hover { border-color: var(--accent); color: var(--accent); }
+
+  .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+  .quick-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; transition: all 0.2s; }
+  .quick-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .qc-icon { font-size: 28px; margin-bottom: 10px; }
+  .qc-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .qc-desc { font-size: 12px; color: var(--muted); }
+
+  .type-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: rgba(79,156,249,0.15); color: var(--accent3); }
+
+  .loading-overlay { position: fixed; inset: 0; background: rgba(14,15,17,0.85); z-index: 500; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .loading-overlay.hidden { display: none; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-msg { font-size: 14px; color: var(--muted); }
+
+  /* avail hint in recipe row */
+  .avail-hint { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); padding: 0 4px; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-msg" id="loading-msg">Connecting to Google Sheets…</div>
+</div>
+
+<nav>
+  <div class="logo">PRINTS <span>DB</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPanel('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPanel('machine')">Machines</button>
+    <button class="nav-tab" onclick="showPanel('rawmat')">Raw Materials</button>
+    <button class="nav-tab" onclick="showPanel('finished')">Finished Stock</button>
+    <button class="nav-tab" onclick="showPanel('dies')">Die Stock</button>
+    <button class="nav-tab" onclick="showPanel('produce')">Production</button>
+    <button class="nav-tab" onclick="showPanel('logs')">Logs</button>
+  </div>
+  <div class="nav-right">
+    <div class="conn-status" id="conn-status">
+      <div class="conn-dot" id="conn-dot"></div>
+      <span id="conn-text">Connecting…</span>
+    </div>
+    <button class="sync-btn" onclick="syncAll()">⟳ Sync</button>
+    <button class="sync-btn" style="background:var(--card);color:var(--text);border:1px solid var(--border);" onclick="exportToCSV()">⬇ CSV</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="panel-dashboard" class="panel active">
+  <div class="sec-head">
+    <div class="sec-title">Dashboard <small id="dash-date"></small></div>
+    <button class="btn btn-ghost" onclick="syncAll()">⟳ Refresh All</button>
+  </div>
+  <div class="stats-grid" id="dash-stats"></div>
+  <div class="section-label">Quick Actions</div>
+  <div class="quick-grid">
+    <div class="quick-card" onclick="showPanel('machine'); openModal('modal-machine')">
+      <div class="qc-icon">⚙️</div>
+      <div class="qc-title">Add Machine</div>
+      <div class="qc-desc">Register a printing or finishing machine</div>
+    </div>
+    <div class="quick-card" onclick="showPanel('rawmat'); openModal('modal-rawmat')">
+      <div class="qc-icon">📦</div>
+      <div class="qc-title">Add Raw Material</div>
+      <div class="qc-desc">Add paper, ink, chemicals to raw stock</div>
+    </div>
+    <div class="quick-card" onclick="showPanel('produce')">
+      <div class="qc-icon">🏭</div>
+      <div class="qc-title">Create Production Run</div>
+      <div class="qc-desc">Convert raw materials into finished goods</div>
+    </div>
+    <div class="quick-card" onclick="showPanel('finished'); openModal('modal-finished')">
+      <div class="qc-icon">🗃️</div>
+      <div class="qc-title">Add Finished Stock</div>
+      <div class="qc-desc">Manually add finished carton stock</div>
+    </div>
+    <div class="quick-card" onclick="showPanel('dies'); openModal('modal-die')">
+      <div class="qc-icon">✂️</div>
+      <div class="qc-title">Add Die</div>
+      <div class="qc-desc">Register a new die into stock</div>
+    </div>
+  </div>
+  <div class="section-label" style="margin-top:28px">Low Stock Alerts</div>
+  <div id="low-stock-list"></div>
+</div>
+
+<!-- MACHINES -->
+<div id="panel-machine" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Machines <small id="machine-count"></small></div>
+    <div class="toolbar">
+      <input class="search-input" type="text" placeholder="Search machine..." oninput="filterTable('machine', this.value)">
+      <select id="machine-type-filter" onchange="filterTable('machine','')">
+        <option value="">All Types</option>
+        <option>offset</option>
+<option>Digital</option>
+        <option>Printing</option>
+        <option>Cutting</option>
+        <option>Lamination</option>
+        <option>Binding</option>
+        <option>Finishing</option>
+        <option>Other</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal('modal-machine')">+ Add Machine</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="machine-table">
+      <thead><tr>
+        <th>#</th><th>Type</th><th>Machine Name</th><th>Purpose / Notes</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="machine-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- RAW MATERIALS -->
+<div id="panel-rawmat" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Raw Materials <small id="rm-count"></small></div>
+    <div class="toolbar">
+      <input class="search-input" type="text" placeholder="Search material..." oninput="filterTable('rm', this.value)">
+      <button class="btn btn-primary" onclick="openModal('modal-rawmat')">+ Add Material</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="rm-table">
+      <thead><tr>
+        <th>#</th><th>Material</th><th>Size (inch)</th><th>Size (cm)</th>
+        <th>Qty</th><th>Rate (₹)</th><th>Amount (₹)</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="rm-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FINISHED STOCK -->
+<div id="panel-finished" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Finished Stock <small id="fs-count"></small></div>
+    <div class="toolbar">
+      <input class="search-input" type="text" placeholder="Search carton / MFR..." oninput="filterTable('fs', this.value)">
+      <select id="fs-mfr-filter" onchange="filterTable('fs','')">
+        <option value="">All MFRs</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal('modal-finished')">+ Add Stock</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="fs-table">
+      <thead><tr>
+        <th>#</th><th>MFR Name</th><th>Carton Name</th>
+        <th>Stock Qty</th><th>Rate (₹)</th><th>Value (₹)</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="fs-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DIE STOCK -->
+<div id="panel-dies" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Die Stock <small id="die-count"></small></div>
+    <div class="toolbar">
+      <input class="search-input" type="text" placeholder="Search die / MFR..." oninput="filterTable('die', this.value)">
+      <select id="die-mfr-filter" onchange="filterTable('die','')">
+        <option value="">All MFRs</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal('modal-die')">+ Add Die</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="die-table">
+      <thead><tr>
+        <th>#</th><th>Die Name</th><th>MFR</th><th>Qty</th><th>Amount (₹)</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="die-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PRODUCTION -->
+<div id="panel-produce" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Production Run</div>
+  </div>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start;">
+    <div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">New Production Entry</div>
+
+        <div class="section-label">Production Details</div>
+        <div class="form-grid">
+          <div class="field span2">
+            <label>Production Item Name <span style="color:var(--accent)">*</span></label>
+            <input id="prod-item-name" type="text" placeholder="e.g. Batch #B2401 — Flutiprl OX">
+          </div>
+          <div class="field span2">
+            <label>Machine Used <span style="color:var(--accent)">*</span></label>
+            <select id="prod-machine">
+              <option value="">— Select Machine —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>MFR Name</label>
+            <input id="prod-mfr" type="text" placeholder="e.g. SAVA">
+          </div>
+          <div class="field">
+            <label>Carton / Product Name</label>
+            <input id="prod-name" type="text" placeholder="e.g. Flutiprl OX">
+          </div>
+          <div class="field">
+            <label>Qty Produced</label>
+            <input id="prod-qty" type="number" placeholder="e.g. 5000">
+          </div>
+          <div class="field">
+            <label>Rate per unit (₹)</label>
+            <input id="prod-rate" type="number" step="0.01" placeholder="e.g. 1.55">
+          </div>
+        </div>
+
+        <div class="section-label">Raw Materials Used</div>
+        <div id="recipe-rows"></div>
+        <button class="add-row-btn" onclick="addRecipeRow()">+ Add Raw Material</button>
+
+        <div style="margin-top:20px; display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn btn-ghost" onclick="clearProdForm()">Clear</button>
+          <button class="btn btn-success" onclick="createProduction()">✓ Confirm Production</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">Production Summary</div>
+        <div id="prod-preview">
+          <div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;">Recent Productions</div>
+        <div id="prod-history"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGS -->
+<div id="panel-logs" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Activity Logs</div>
+    <div class="toolbar">
+      <button class="btn btn-danger" onclick="clearLogs()">Clear Logs</button>
+    </div>
+  </div>
+  <div id="logs-list"></div>
+</div>
+
+</main>
+
+<!-- MODALS -->
+
+<!-- Machine Modal -->
+<div class="modal-overlay" id="modal-machine">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('modal-machine')">✕</button>
+    <div class="modal-title" id="machine-modal-title">Add Machine</div>
+    <div class="form-grid">
+      <input type="hidden" id="machine-edit-id">
+      <div class="field">
+        <label>Machine Type</label>
+        <select id="machine-type">
+          <option value="">— Select Type —</option>
+          <option>Printing</option>
+          <option>Cutting</option>
+          <option>Lamination</option>
+          <option>Binding</option>
+          <option>Finishing</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Machine Name</label>
+        <input id="machine-name" placeholder="e.g. Heidelberg SM 52">
+      </div>
+      <div class="field span2">
+        <label>Purpose / Notes</label>
+        <textarea id="machine-purpose" placeholder="e.g. 4-colour offset printing, A3 max sheet size"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-machine')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMachine()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Raw Material Modal -->
+<div class="modal-overlay" id="modal-rawmat">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('modal-rawmat')">✕</button>
+    <div class="modal-title" id="rawmat-modal-title">Add Raw Material</div>
+    <div class="form-grid">
+      <input type="hidden" id="rm-edit-id">
+      <div class="field span2"><label>Material Name</label><input id="rm-material" placeholder="e.g. TNPL, 210 GSM ART PAPER"></div>
+      <div class="field"><label>Size (inch)</label><input id="rm-size-inch" placeholder="e.g. 23X36"></div>
+      <div class="field"><label>Size (cm)</label><input id="rm-size-cm" placeholder="e.g. 58.42*91.44"></div>
+      <div class="field"><label>Quantity</label><input id="rm-qty" type="number" placeholder="0"></div>
+      <div class="field"><label>Rate (₹)</label><input id="rm-rate" type="number" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-rawmat')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRawMaterial()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Finished Stock Modal -->
+<div class="modal-overlay" id="modal-finished">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('modal-finished')">✕</button>
+    <div class="modal-title" id="finished-modal-title">Add Finished Stock</div>
+    <div class="form-grid">
+      <input type="hidden" id="fs-edit-id">
+      <div class="field"><label>MFR Name</label><input id="fs-mfr" placeholder="e.g. SAVA"></div>
+      <div class="field"><label>Carton Name</label><input id="fs-carton" placeholder="e.g. Flutiprl OX"></div>
+      <div class="field"><label>Stock Qty</label><input id="fs-qty" type="number" placeholder="0"></div>
+      <div class="field"><label>Rate per unit (₹)</label><input id="fs-rate" type="number" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-finished')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFinished()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Die Modal -->
+<div class="modal-overlay" id="modal-die">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('modal-die')">✕</button>
+    <div class="modal-title" id="die-modal-title">Add Die</div>
+    <div class="form-grid">
+      <input type="hidden" id="die-edit-id">
+      <div class="field span2"><label>Die Name</label><input id="die-name" placeholder="e.g. FEXOPRL SUSPENSION"></div>
+      <div class="field"><label>MFR</label><input id="die-mfr" placeholder="e.g. REVIVE PRODUCT"></div>
+      <div class="field"><label>Qty</label><input id="die-qty" type="number" placeholder="1"></div>
+      <div class="field span2"><label>Amount (₹)</label><input id="die-amount" type="number" step="0.01" placeholder="0"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-die')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDie()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+//  CONFIG — replace with your deployed Apps Script URL
+// ============================================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxMV3UK6ywnI1QdiJPHWmueonivtmzE7T5YlJ-6j-7yKctsQTgHe7u9dwQc-zFgg5gS/exec';
+
+// ============================================================
+//  DATA STORE — no seed data; always fetched from GAS
+// ============================================================
+let DB = {
+  machines: [],
+  rawMaterials: [],
+  finishedStock: [],
+  dieStock: [],
+  productions: [],
+  logs: []
+};
+
+// ============================================================
+//  GAS API
+// ============================================================
+async function gasRequest(payload) {
+  try {
+    setConnStatus('syncing', 'Syncing…');
+    const url = new URL(GAS_URL);
+    if (payload.action === 'getAll') {
+      url.searchParams.set('action', 'getAll');
+      const resp = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
+      const data = await resp.json();
+      setConnStatus('online', 'Connected');
+      return data;
+    }
+    const resp = await fetch(url.toString(), {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    setConnStatus('online', 'Connected');
+    return data;
+  } catch (err) {
+    console.error('GAS error:', err);
+    setConnStatus('offline', 'Offline');
+    throw err;
+  }
+}
+
+// ============================================================
+//  SYNC — fetch all data from Google Sheets (no local seed fallback)
+// ============================================================
+async function syncAll(silent = false) {
+  if (!silent) showLoading('Fetching data from Google Sheets…');
+  try {
+    const data = await gasRequest({ action: 'getAll' });
+    if (data && data.success) {
+      DB.machines      = data.machines      || [];
+      DB.rawMaterials  = data.rawMaterials  || [];
+      DB.finishedStock = data.finishedStock || [];
+      DB.dieStock      = data.dieStock      || [];
+      DB.productions   = data.productions   || [];
+      DB.logs          = data.logs          || [];
+      if (!silent) toast('Synced from Google Sheets ✓');
+    } else {
+      throw new Error(data?.error || 'Unknown error from server');
+    }
+  } catch (err) {
+    toast('Sync failed: ' + err.message, 'error');
+    setConnStatus('offline', 'Offline');
+  } finally {
+    hideLoading();
+    refreshCurrentPanel();
+  }
+}
+
+async function writeToSheet(payload) {
+  try {
+    const result = await gasRequest(payload);
+    if (!result?.success) throw new Error(result?.error || 'Write failed');
+    await syncAll(true);
+    return true;
+  } catch (err) {
+    toast('Save failed: ' + err.message, 'error');
+    return false;
+  }
+}
+
+// ============================================================
+//  UTILS
+// ============================================================
+function fmt(n) { return (isNaN(n)||n===''||n===null) ? '—' : '₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2}); }
+function fmtN(n) { return isNaN(n) ? '—' : Number(n).toLocaleString('en-IN'); }
+
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  setTimeout(() => el.className = '', 3500);
+}
+
+function setConnStatus(state, text) {
+  document.getElementById('conn-dot').className = 'conn-dot ' + state;
+  document.getElementById('conn-text').textContent = text;
+}
+
+function showLoading(msg) {
+  document.getElementById('loading-msg').textContent = msg || 'Loading…';
+  document.getElementById('loading-overlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+// ============================================================
+//  PANEL NAVIGATION
+// ============================================================
+const PANELS = ['dashboard','machine','rawmat','finished','dies','produce','logs'];
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelectorAll('.nav-tab')[PANELS.indexOf(id)].classList.add('active');
+  renderPanel(id);
+}
+
+function renderPanel(id) {
+  if (id === 'dashboard') renderDash();
+  if (id === 'machine')   renderMachines();
+  if (id === 'rawmat')    renderRM();
+  if (id === 'finished')  renderFS();
+  if (id === 'dies')      renderDies();
+  if (id === 'produce')   renderProdForm();
+  if (id === 'logs')      renderLogs();
+}
+
+function refreshCurrentPanel() {
+  const active = document.querySelector('.panel.active');
+  if (!active) return;
+  renderPanel(active.id.replace('panel-', ''));
+}
+
+// ============================================================
+//  MODALS
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.getElementById(id).querySelectorAll('input,select,textarea').forEach(el => { if (el.type !== 'hidden') el.value = ''; });
+}
+document.querySelectorAll('.modal-overlay').forEach(o =>
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); })
+);
+
+// ============================================================
+//  DASHBOARD
+// ============================================================
+function renderDash() {
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const rmTotal  = DB.rawMaterials.reduce((s,r) => s + (r.qty * r.rate), 0);
+  const fsTotal  = DB.finishedStock.reduce((s,r) => s + (r.qty * r.rate), 0);
+  const dieTotal = DB.dieStock.reduce((s,r) => s + (r.amount || 0), 0);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Machines</div><div class="stat-value" style="color:var(--accent3)">${DB.machines.length}</div><div class="stat-sub">Registered machines</div></div>
+    <div class="stat-card"><div class="stat-label">Raw Materials</div><div class="stat-value" style="color:var(--accent3)">${DB.rawMaterials.length}</div><div class="stat-sub">Total value ${fmt(rmTotal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Finished Stock</div><div class="stat-value" style="color:var(--accent2)">${DB.finishedStock.length}</div><div class="stat-sub">Total value ${fmt(fsTotal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Die Stock</div><div class="stat-value" style="color:var(--accent)">${DB.dieStock.length}</div><div class="stat-sub">Total value ${fmt(dieTotal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Production Runs</div><div class="stat-value">${DB.productions.length}</div><div class="stat-sub">Recorded sessions</div></div>
+  `;
+
+  const lowRM = DB.rawMaterials.filter(r => r.qty < 10);
+  const lowFS = DB.finishedStock.filter(r => r.qty < 500);
+  const allLow = [
+    ...lowRM.map(r => ({name: r.material + (r.sizeInch ? ' ' + r.sizeInch : ''), qty: r.qty, type: 'Raw Material'})),
+    ...lowFS.map(r => ({name: r.carton + ' (' + r.mfr + ')', qty: r.qty, type: 'Finished Stock'}))
+  ];
+  document.getElementById('low-stock-list').innerHTML = allLow.length === 0
+    ? '<div class="empty"><div class="empty-icon">✅</div><p>No low stock alerts</p></div>'
+    : allLow.map(a => `<div class="log-item">
+        <div class="log-type" style="background:var(--danger)"></div>
+        <div class="log-time">${a.type}</div>
+        <div class="log-msg"><strong>${a.name}</strong> — Only <span style="color:var(--danger)">${fmtN(a.qty)}</span> units remaining</div>
+      </div>`).join('');
+}
+
+// ============================================================
+//  MACHINES
+// ============================================================
+function renderMachines(filter = '') {
+  let rows = DB.machines;
+  if (filter) rows = rows.filter(r => (r.name + r.type + r.purpose).toLowerCase().includes(filter.toLowerCase()));
+  const selType = document.getElementById('machine-type-filter').value;
+  if (selType) rows = rows.filter(r => r.type === selType);
+  document.getElementById('machine-count').textContent = rows.length + ' machines';
+  document.getElementById('machine-tbody').innerHTML = rows.length === 0
+    ? `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">No machines added yet.</td></tr>`
+    : rows.map((r, i) => `
+    <tr>
+      <td class="mono" style="color:var(--muted)">${i+1}</td>
+      <td><span class="type-tag">${r.type || '—'}</span></td>
+      <td><strong>${r.name}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${r.purpose || '—'}</td>
+      <td><div class="action-cell">
+        <button class="icon-btn" onclick="editMachine(${r.id})">✏ Edit</button>
+        <button class="icon-btn del" onclick="deleteMachine(${r.id})">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function saveMachine() {
+  const type    = document.getElementById('machine-type').value;
+  const name    = document.getElementById('machine-name').value.trim();
+  const purpose = document.getElementById('machine-purpose').value.trim();
+  if (!name) { toast('Machine name required', 'error'); return; }
+  const editId = parseInt(document.getElementById('machine-edit-id').value) || 0;
+  showLoading(editId ? 'Updating machine…' : 'Saving machine…');
+  writeToSheet({ action: editId ? 'updateMachine' : 'addMachine', id: editId, type, name, purpose })
+    .then(ok => { if (ok) { closeModal('modal-machine'); toast(editId ? 'Machine updated!' : 'Machine added!'); } });
+}
+
+function editMachine(id) {
+  const r = DB.machines.find(x => x.id == id);
+  if (!r) return;
+  document.getElementById('machine-modal-title').textContent = 'Edit Machine';
+  document.getElementById('machine-edit-id').value = r.id;
+  document.getElementById('machine-type').value = r.type || '';
+  document.getElementById('machine-name').value = r.name;
+  document.getElementById('machine-purpose').value = r.purpose || '';
+  openModal('modal-machine');
+}
+
+function deleteMachine(id) {
+  const r = DB.machines.find(x => x.id == id);
+  if (!r || !confirm('Delete machine: ' + r.name + '?')) return;
+  showLoading('Deleting machine…');
+  writeToSheet({ action: 'deleteMachine', id: r.id }).then(ok => { if (ok) toast('Deleted'); });
+}
+
+function filterTable(type, val) {
+  if (type === 'machine') renderMachines(val);
+  if (type === 'rm')      renderRM(val);
+  if (type === 'fs')      renderFS(val, document.getElementById('fs-mfr-filter').value);
+  if (type === 'die')     renderDies(val, document.getElementById('die-mfr-filter').value);
+}
+
+// ============================================================
+//  RAW MATERIALS
+// ============================================================
+function renderRM(filter = '') {
+  let rows = DB.rawMaterials;
+  if (filter) rows = rows.filter(r => (r.material + r.sizeInch).toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('rm-count').textContent = rows.length + ' items';
+  document.getElementById('rm-tbody').innerHTML = rows.length === 0
+    ? `<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No materials found.</td></tr>`
+    : rows.map((r, i) => `
+    <tr class="${r.qty < 10 ? 'low-stock' : ''}">
+      <td class="mono" style="color:var(--muted)">${i+1}</td>
+      <td><strong>${r.material}</strong></td>
+      <td class="mono">${r.sizeInch || '—'}</td>
+      <td class="mono" style="color:var(--muted);font-size:11px">${r.sizeCm || '—'}</td>
+      <td><span class="badge ${r.qty<10?'badge-red':r.qty<50?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td>
+      <td class="mono">${fmt(r.rate)}</td>
+      <td class="mono">${fmt(r.qty * r.rate)}</td>
+      <td><div class="action-cell">
+        <button class="icon-btn" onclick="editRM(${r.id})">✏ Edit</button>
+        <button class="icon-btn del" onclick="deleteRM(${r.id})">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function saveRawMaterial() {
+  const mat  = document.getElementById('rm-material').value.trim();
+  const qty  = parseFloat(document.getElementById('rm-qty').value) || 0;
+  const rate = parseFloat(document.getElementById('rm-rate').value) || 0;
+  if (!mat) { toast('Material name required', 'error'); return; }
+  const editId = parseInt(document.getElementById('rm-edit-id').value) || 0;
+  showLoading(editId ? 'Updating material…' : 'Saving material…');
+  writeToSheet({
+    action: editId ? 'updateRawMaterial' : 'addRawMaterial',
+    id: editId,
+    material: mat,
+    sizeInch: document.getElementById('rm-size-inch').value,
+    sizeCm: document.getElementById('rm-size-cm').value,
+    qty, rate
+  }).then(ok => { if (ok) { closeModal('modal-rawmat'); toast(editId ? 'Updated!' : 'Added!'); } });
+}
+
+function editRM(id) {
+  const r = DB.rawMaterials.find(x => x.id == id);
+  if (!r) return;
+  document.getElementById('rawmat-modal-title').textContent = 'Edit Raw Material';
+  document.getElementById('rm-edit-id').value = id;
+  document.getElementById('rm-material').value = r.material;
+  document.getElementById('rm-size-inch').value = r.sizeInch || '';
+  document.getElementById('rm-size-cm').value = r.sizeCm || '';
+  document.getElementById('rm-qty').value = r.qty;
+  document.getElementById('rm-rate').value = r.rate;
+  openModal('modal-rawmat');
+}
+
+function deleteRM(id) {
+  const r = DB.rawMaterials.find(x => x.id == id);
+  if (!r || !confirm('Delete ' + r.material + '?')) return;
+  showLoading('Deleting material…');
+  writeToSheet({ action: 'deleteRawMaterial', id }).then(ok => { if (ok) toast('Deleted'); });
+}
+
+// ============================================================
+//  FINISHED STOCK
+// ============================================================
+function renderFS(filter = '', mfrFilter = '') {
+  let rows = DB.finishedStock;
+  if (filter) rows = rows.filter(r => (r.carton + r.mfr).toLowerCase().includes(filter.toLowerCase()));
+  if (mfrFilter) rows = rows.filter(r => r.mfr === mfrFilter);
+  const mfrs = [...new Set(DB.finishedStock.map(r => r.mfr))].sort();
+  const sel = document.getElementById('fs-mfr-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All MFRs</option>' + mfrs.map(m => `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
+  document.getElementById('fs-count').textContent = rows.length + ' items';
+  document.getElementById('fs-tbody').innerHTML = rows.length === 0
+    ? `<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No items found.</td></tr>`
+    : rows.map((r, i) => `
+    <tr class="${r.qty < 500 ? 'low-stock' : ''}">
+      <td class="mono" style="color:var(--muted)">${i+1}</td>
+      <td><span class="mfr-tag">${r.mfr}</span></td>
+      <td><strong>${r.carton}</strong></td>
+      <td><span class="badge ${r.qty<500?'badge-red':r.qty<5000?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td>
+      <td class="mono">${fmt(r.rate)}</td>
+      <td class="mono">${fmt(r.qty * r.rate)}</td>
+      <td><div class="action-cell">
+        <button class="icon-btn" onclick="editFS(${r.id})">✏ Edit</button>
+        <button class="icon-btn del" onclick="deleteFS(${r.id})">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function saveFinished() {
+  const mfr    = document.getElementById('fs-mfr').value.trim();
+  const carton = document.getElementById('fs-carton').value.trim();
+  const qty    = parseInt(document.getElementById('fs-qty').value) || 0;
+  const rate   = parseFloat(document.getElementById('fs-rate').value) || 0;
+  if (!mfr || !carton) { toast('MFR and carton name required', 'error'); return; }
+  const editId = parseInt(document.getElementById('fs-edit-id').value) || 0;
+  showLoading(editId ? 'Updating stock…' : 'Saving stock…');
+  writeToSheet({ action: editId ? 'updateFinishedStock' : 'addFinishedStock', id: editId, mfr, carton, qty, rate })
+    .then(ok => { if (ok) { closeModal('modal-finished'); toast(editId ? 'Updated!' : 'Added!'); } });
+}
+
+function editFS(id) {
+  const r = DB.finishedStock.find(x => x.id == id);
+  if (!r) return;
+  document.getElementById('finished-modal-title').textContent = 'Edit Finished Stock';
+  document.getElementById('fs-edit-id').value = id;
+  document.getElementById('fs-mfr').value = r.mfr;
+  document.getElementById('fs-carton').value = r.carton;
+  document.getElementById('fs-qty').value = r.qty;
+  document.getElementById('fs-rate').value = r.rate;
+  openModal('modal-finished');
+}
+
+function deleteFS(id) {
+  const r = DB.finishedStock.find(x => x.id == id);
+  if (!r || !confirm('Delete ' + r.carton + '?')) return;
+  showLoading('Deleting…');
+  writeToSheet({ action: 'deleteFinishedStock', id }).then(ok => { if (ok) toast('Deleted'); });
+}
+
+// ============================================================
+//  DIE STOCK
+// ============================================================
+function renderDies(filter = '', mfrFilter = '') {
+  let rows = DB.dieStock;
+  if (filter) rows = rows.filter(r => (r.name + r.mfr).toLowerCase().includes(filter.toLowerCase()));
+  const selMfr = mfrFilter || document.getElementById('die-mfr-filter').value;
+  if (selMfr) rows = rows.filter(r => r.mfr === selMfr);
+  const mfrs = [...new Set(DB.dieStock.map(r => r.mfr))].sort();
+  const sel = document.getElementById('die-mfr-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All MFRs</option>' + mfrs.map(m => `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
+  document.getElementById('die-count').textContent = rows.length + ' dies';
+  document.getElementById('die-tbody').innerHTML = rows.length === 0
+    ? `<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted)">No dies found.</td></tr>`
+    : rows.map((r, i) => `
+    <tr>
+      <td class="mono" style="color:var(--muted)">${i+1}</td>
+      <td><strong>${r.name}</strong></td>
+      <td><span class="mfr-tag">${r.mfr}</span></td>
+      <td>
+        <div class="qty-ctrl">
+          <button onclick="changeDieQty(${r.id},-1)">−</button>
+          <span class="mono">${r.qty}</span>
+          <button onclick="changeDieQty(${r.id},1)">+</button>
+        </div>
+      </td>
+      <td class="mono">${r.amount ? fmt(r.amount) : '—'}</td>
+      <td><div class="action-cell">
+        <button class="icon-btn" onclick="editDie(${r.id})">✏ Edit</button>
+        <button class="icon-btn del" onclick="deleteDie(${r.id})">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function changeDieQty(id, delta) {
+  const r = DB.dieStock.find(x => x.id == id);
+  if (!r) return;
+  const newQty = Math.max(0, (r.qty || 0) + delta);
+  writeToSheet({ action: 'updateDieQty', id, qty: newQty })
+    .then(ok => { if (!ok) toast('Update failed', 'error'); });
+}
+
+function saveDie() {
+  const name   = document.getElementById('die-name').value.trim();
+  const mfr    = document.getElementById('die-mfr').value.trim();
+  const qty    = parseInt(document.getElementById('die-qty').value) || 1;
+  const amount = parseFloat(document.getElementById('die-amount').value) || 0;
+  if (!name || !mfr) { toast('Die name and MFR required', 'error'); return; }
+  const editId = parseInt(document.getElementById('die-edit-id').value) || 0;
+  showLoading(editId ? 'Updating die…' : 'Saving die…');
+  writeToSheet({ action: editId ? 'updateDie' : 'addDie', id: editId, name, mfr, qty, amount })
+    .then(ok => { if (ok) { closeModal('modal-die'); toast(editId ? 'Updated!' : 'Added!'); } });
+}
+
+function editDie(id) {
+  const r = DB.dieStock.find(x => x.id == id);
+  if (!r) return;
+  document.getElementById('die-modal-title').textContent = 'Edit Die';
+  document.getElementById('die-edit-id').value = id;
+  document.getElementById('die-name').value = r.name;
+  document.getElementById('die-mfr').value = r.mfr;
+  document.getElementById('die-qty').value = r.qty;
+  document.getElementById('die-amount').value = r.amount || 0;
+  openModal('modal-die');
+}
+
+function deleteDie(id) {
+  const r = DB.dieStock.find(x => x.id == id);
+  if (!r || !confirm('Delete die: ' + r.name + '?')) return;
+  showLoading('Deleting die…');
+  writeToSheet({ action: 'deleteDie', id }).then(ok => { if (ok) toast('Deleted'); });
+}
+
+// ============================================================
+//  PRODUCTION
+// ============================================================
+let recipeRows = [];
+
+function renderProdForm() {
+  // Populate machine dropdown
+  const sel = document.getElementById('prod-machine');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select Machine —</option>' +
+    DB.machines.map(m => `<option value="${m.id}" ${m.id==cur?'selected':''}>${m.name}${m.type?' ('+m.type+')':''}</option>`).join('');
+
+  if (recipeRows.length === 0) addRecipeRow();
+  renderProdHistory();
+}
+
+function addRecipeRow() {
+  const id = Date.now();
+  recipeRows.push({ id, rmId: '', qty: 0 });
+  renderRecipeRows();
+}
+
+function renderRecipeRows() {
+  document.getElementById('recipe-rows').innerHTML = recipeRows.map(row => `
+    <div class="recipe-row" id="rrow-${row.id}">
+      <select onchange="updateRecipeRow(${row.id},'rmId',this.value)">
+        <option value="">— Select Material —</option>
+        ${DB.rawMaterials.map(r => `<option value="${r.id}" ${r.id==row.rmId?'selected':''}>${r.material}${r.sizeInch?' ('+r.sizeInch+')':''} [${fmtN(r.qty)} avail]</option>`).join('')}
+      </select>
+      <input type="number" placeholder="Qty used" value="${row.qty || ''}" onchange="updateRecipeRow(${row.id},'qty',this.value)">
+      <button class="icon-btn del" onclick="removeRecipeRow(${row.id})">✕</button>
+    </div>`).join('');
+  updateProdPreview();
+}
+
+function updateRecipeRow(id, field, val) {
+  const row = recipeRows.find(r => r.id === id);
+  if (row) { row[field] = field === 'qty' ? parseFloat(val) || 0 : parseInt(val) || ''; }
+  updateProdPreview();
+}
+
+function removeRecipeRow(id) {
+  recipeRows = recipeRows.filter(r => r.id !== id);
+  renderRecipeRows();
+}
+
+function updateProdPreview() {
+  const itemName = document.getElementById('prod-item-name').value;
+  const machineId = document.getElementById('prod-machine').value;
+  const machineName = machineId
+    ? (DB.machines.find(m => m.id == machineId) || {}).name || '—'
+    : '—';
+  const mfr  = document.getElementById('prod-mfr').value;
+  const name = document.getElementById('prod-name').value;
+  const qty  = parseInt(document.getElementById('prod-qty').value) || 0;
+  const rate = parseFloat(document.getElementById('prod-rate').value) || 0;
+
+  const usedMats = recipeRows.filter(r => r.rmId && r.qty > 0).map(r => {
+    const mat = DB.rawMaterials.find(x => x.id == r.rmId);
+    return { mat, qty: r.qty, ok: mat && mat.qty >= r.qty };
+  });
+  const allOk = usedMats.every(u => u.ok);
+
+  document.getElementById('prod-preview').innerHTML = `
+    <div style="margin-bottom:12px">
+      ${itemName ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.05em">Production Name</div>
+      <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px">${itemName}</div>` : ''}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+        🖨 Machine: <strong style="color:var(--accent3)">${machineName}</strong>
+      </div>
+      <div style="font-size:13px;color:var(--muted)">Finished Product</div>
+      <div style="font-size:16px;font-weight:700;margin-top:4px">${name || '—'} <span class="mfr-tag" style="font-size:12px">${mfr || '—'}</span></div>
+      <div style="margin-top:6px;font-family:'DM Mono',monospace;font-size:13px">
+        Qty: <strong>${fmtN(qty)}</strong> &nbsp; Rate: <strong>${fmt(rate)}</strong> &nbsp; Value: <strong style="color:var(--accent2)">${fmt(qty*rate)}</strong>
+      </div>
+    </div>
+    <div class="rm-preview">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">Raw Materials Used</div>
+      ${usedMats.length === 0
+        ? '<div style="color:var(--muted);font-size:12px">No materials added</div>'
+        : usedMats.map(u => `<div class="rm-preview-row">
+            <span>${u.mat.material}${u.mat.sizeInch ? ' ('+u.mat.sizeInch+')' : ''}</span>
+            <span style="color:${u.ok ? 'var(--accent2)' : 'var(--danger)'}">Use ${fmtN(u.qty)} / ${fmtN(u.mat.qty)} avail</span>
+          </div>`).join('')}
+    </div>
+    <div style="margin-top:12px">
+      <span class="badge ${allOk && name && qty && machineId ? 'badge-green' : 'badge-red'}">
+        ${allOk && name && qty && machineId ? '✓ Ready to produce' : '⚠ Check inputs'}
+      </span>
+    </div>`;
+}
+
+['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate','prod-machine'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateProdPreview);
+  document.getElementById(id).addEventListener('change', updateProdPreview);
+});
+
+async function createProduction() {
+  const itemName  = document.getElementById('prod-item-name').value.trim();
+  const machineId = document.getElementById('prod-machine').value;
+  const mfr       = document.getElementById('prod-mfr').value.trim();
+  const name      = document.getElementById('prod-name').value.trim();
+  const qty       = parseInt(document.getElementById('prod-qty').value) || 0;
+  const rate      = parseFloat(document.getElementById('prod-rate').value) || 0;
+
+  if (!itemName)   { toast('Production item name required', 'error'); return; }
+  if (!machineId)  { toast('Please select a machine', 'error'); return; }
+  if (!mfr || !name || !qty) { toast('Fill MFR, product name, and qty', 'error'); return; }
+
+  const usedMats = recipeRows.filter(r => r.rmId && r.qty > 0);
+  for (const row of usedMats) {
+    const mat = DB.rawMaterials.find(x => x.id == row.rmId);
+    if (!mat) { toast('Invalid material selected', 'error'); return; }
+    if (mat.qty < row.qty) { toast(`Insufficient: ${mat.material} (need ${row.qty}, have ${mat.qty})`, 'error'); return; }
+  }
+
+  const machine = DB.machines.find(m => m.id == machineId);
+  const machineName = machine ? machine.name + (machine.type ? ' (' + machine.type + ')' : '') : machineId;
+
+  showLoading('Recording production run…');
+  const ok = await writeToSheet({
+    action: 'createProduction',
+    itemName, machineId, machineName, mfr, name, qty, rate,
+    materials: usedMats.map(r => {
+      const mat = DB.rawMaterials.find(x => x.id == r.rmId);
+      return { rmId: r.rmId, material: mat.material + (mat.sizeInch ? ' ' + mat.sizeInch : ''), qty: r.qty };
+    })
+  });
+  if (ok) {
+    toast('Production recorded! ✓');
+    clearProdForm();
+    renderProdHistory();
+  }
+}
+
+function clearProdForm() {
+  ['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('prod-machine').value = '';
+  recipeRows = [];
+  addRecipeRow();
+  document.getElementById('prod-preview').innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div>';
+}
+
+function renderProdHistory() {
+  const el = document.getElementById('prod-history');
+  if (DB.productions.length === 0) {
+    el.innerHTML = '<div class="empty" style="padding:20px"><p>No production runs yet</p></div>';
+    return;
+  }
+  el.innerHTML = DB.productions.slice(0, 8).map(p => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          ${p.itemName ? `<div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:2px">${p.itemName}</div>` : ''}
+          <strong>${p.name}</strong>
+        </div>
+        <span class="badge badge-green">${fmtN(p.qty)} units</span>
+      </div>
+      <div style="color:var(--muted);font-size:11px;margin-top:4px">
+        ${p.mfr} · ${p.machineName || ''} · ${p.date || ''}
+      </div>
+      ${p.materials && p.materials.length
+        ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${p.materials.map(m => (m.material || m.name || '') + ' (' + fmtN(m.qty) + ')').join(', ')}</div>`
+        : ''}
+    </div>`).join('');
+}
+
+// ============================================================
+//  LOGS
+// ============================================================
+function renderLogs() {
+  const el = document.getElementById('logs-list');
+  if (DB.logs.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📄</div><p>No activity logged yet</p></div>';
+    return;
+  }
+  const colors = {
+    'PRODUCTION':     'var(--accent3)',
+    'RAW MATERIAL':   'var(--accent2)',
+    'FINISHED STOCK': 'var(--accent)',
+    'MACHINE':        'var(--accent3)',
+    'DIE STOCK':      'var(--accent)',
+    'EDIT':           'var(--muted)'
+  };
+  el.innerHTML = DB.logs.map(l => `
+    <div class="log-item">
+      <div class="log-type" style="background:${colors[l.type] || 'var(--muted)'}"></div>
+      <div class="log-time">${l.time || l.date || ''}</div>
+      <div class="log-msg">
+        ${l.action || l.msg || ''}
+        ${l.details ? `<span style="color:var(--muted);font-size:11px"> — ${l.details}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function clearLogs() {
+  if (!confirm('Clear all logs?')) return;
+  showLoading('Clearing logs…');
+  const ok = await writeToSheet({ action: 'clearLogs' });
+  if (ok) toast('Logs cleared');
+}
+
+// ============================================================
+//  EXPORT CSV
+// ============================================================
+function exportToCSV() {
+  const sections = [
+    { title: 'MACHINES', headers: ['Type','Name','Purpose'], rows: DB.machines.map(r => [r.type, r.name, r.purpose]) },
+    { title: 'RAW MATERIALS', headers: ['Material','Size Inch','Size CM','Qty','Rate','Amount'], rows: DB.rawMaterials.map(r => [r.material, r.sizeInch, r.sizeCm, r.qty, r.rate, r.qty*r.rate]) },
+    { title: 'FINISHED STOCK', headers: ['MFR','Carton','Qty','Rate','Value'], rows: DB.finishedStock.map(r => [r.mfr, r.carton, r.qty, r.rate, r.qty*r.rate]) },
+    { title: 'DIE STOCK', headers: ['Die Name','MFR','Qty','Amount'], rows: DB.dieStock.map(r => [r.name, r.mfr, r.qty, r.amount]) },
+    { title: 'PRODUCTIONS', headers: ['Item Name','Machine','MFR','Product','Qty','Rate','Date'], rows: DB.productions.map(r => [r.itemName, r.machineName||'', r.mfr, r.name, r.qty, r.rate, r.date]) },
+  ];
+  let csv = '';
+  for (const s of sections) {
+    csv += `\n${s.title}\n`;
+    csv += s.headers.join(',') + '\n';
+    csv += s.rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    csv += '\n';
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'prints_db_export.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported to CSV!');
+}
+
+// ============================================================
+//  BOOT — fetch from server, no seed data
+// ============================================================
+document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+});
+syncAll();
+</script>
+</body>
+</html>
