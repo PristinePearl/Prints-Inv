@@ -59,6 +59,8 @@
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-blue { background: var(--accent3); color: #fff; }
   .btn-blue:hover { opacity: 0.85; }
+  .btn-purple { background: #9b59b6; color: #fff; }
+  .btn-purple:hover { opacity: 0.85; }
 
   .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -72,10 +74,13 @@
   .badge-orange { background: rgba(245,166,35,0.15); color: var(--accent); }
   .badge-red { background: rgba(240,82,82,0.15); color: var(--danger); }
   .badge-blue { background: rgba(79,156,249,0.15); color: var(--accent3); }
-  .action-cell { display: flex; gap: 6px; }
+  .badge-purple { background: rgba(155,89,182,0.15); color: #c39bd3; }
+  .action-cell { display: flex; gap: 6px; flex-wrap: wrap; }
   .icon-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.15s; }
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
   .icon-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+  .icon-btn.view-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+  .icon-btn.print-btn:hover { border-color: var(--accent2); color: var(--accent2); }
 
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
   .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
@@ -85,7 +90,7 @@
 
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 620px; max-width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 680px; max-width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
   .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .field { display: flex; flex-direction: column; gap: 5px; }
@@ -96,6 +101,7 @@
   .close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; }
   .close-btn:hover { color: var(--text); }
   .span2 { grid-column: span 2; }
+  .span3 { grid-column: span 3; }
 
   .section-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; font-family: 'DM Mono', monospace; margin: 16px 0 8px; }
   .recipe-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
@@ -103,14 +109,10 @@
   .add-row-btn { background: none; border: 1px dashed var(--border); color: var(--muted); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; transition: all 0.15s; }
   .add-row-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* Multi-machine checkbox list */
   .machine-check-list { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px; max-height: 130px; overflow-y: auto; }
   .machine-check-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 4px; cursor: pointer; font-size: 13px; }
   .machine-check-item:hover { background: rgba(255,255,255,0.04); }
   .machine-check-item input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; }
-
-  /* Die select */
-  .die-select-wrap { position: relative; }
 
   #toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface); border: 1px solid var(--border); padding: 12px 20px; border-radius: 8px; font-size: 13px; display: none; z-index: 999; border-left: 3px solid var(--accent2); max-width: 320px; }
   #toast.error { border-left-color: var(--danger); }
@@ -156,20 +158,40 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-msg { font-size: 14px; color: var(--muted); }
 
-  /* Documents panel */
-  .doc-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
-  .doc-type-card { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; transition: all 0.2s; text-align: center; }
+  /* Documents */
+  .doc-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .doc-type-card { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; text-align: center; }
   .doc-type-card:hover, .doc-type-card.selected { border-color: var(--accent); background: rgba(245,166,35,0.05); }
-  .doc-type-card .dt-icon { font-size: 30px; margin-bottom: 8px; }
-  .doc-type-card .dt-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
-  .doc-type-card .dt-desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .doc-type-card .dt-icon { font-size: 28px; margin-bottom: 8px; }
+  .doc-type-card .dt-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+  .doc-type-card .dt-desc { font-size: 10px; color: var(--muted); margin-top: 4px; }
   .doc-form-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
-  .line-item-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .line-item-row { display: grid; grid-template-columns: 2fr 80px 90px 90px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
   .line-item-row input, .line-item-row select { font-size: 12px; padding: 6px 10px; }
 
-  /* Invoice print area */
   .invoice-preview-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 20px; }
-  #invoice-preview { background: #fff; color: #000; padding: 0; border-radius: 6px; overflow: hidden; }
+
+  /* GST type tabs */
+  .gst-tabs { display: flex; gap: 4px; }
+  .gst-tab { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .gst-tab.active { background: rgba(245,166,35,0.15); border-color: var(--accent); color: var(--accent); }
+
+  /* Party panel */
+  .party-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .party-card-info .party-name { font-weight: 700; font-size: 14px; }
+  .party-card-info .party-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Doc view modal */
+  .doc-view-modal { width: 850px; }
+  #doc-view-content { background: #fff; color: #000; border-radius: 6px; overflow: hidden; padding: 0; }
+
+  /* PO to Receipt */
+  .po-select-list { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 200px; overflow-y: auto; }
+  .po-item { padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+  .po-item:hover { background: rgba(255,255,255,0.04); }
+  .po-item:last-child { border: none; }
+  .po-item .po-ref { font-weight: 700; font-size: 13px; }
+  .po-item .po-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
   /* Saved docs table */
   .doc-history { margin-top: 24px; }
@@ -200,6 +222,7 @@
     <button class="nav-tab" onclick="showPanel('finished')">Finished Stock</button>
     <button class="nav-tab" onclick="showPanel('dies')">Die Stock</button>
     <button class="nav-tab" onclick="showPanel('produce')">Production</button>
+    <button class="nav-tab" onclick="showPanel('parties')">👥 Parties</button>
     <button class="nav-tab" onclick="showPanel('documents')">📄 Documents</button>
     <button class="nav-tab" onclick="showPanel('logs')">Logs</button>
   </div>
@@ -229,6 +252,7 @@
     <div class="quick-card" onclick="showPanel('produce')"><div class="qc-icon">🏭</div><div class="qc-title">Production Run</div><div class="qc-desc">Convert materials to finished goods</div></div>
     <div class="quick-card" onclick="showPanel('finished'); openModal('modal-finished')"><div class="qc-icon">🗃️</div><div class="qc-title">Add Finished Stock</div><div class="qc-desc">Manually add carton stock</div></div>
     <div class="quick-card" onclick="showPanel('dies'); openModal('modal-die')"><div class="qc-icon">✂️</div><div class="qc-title">Add Die</div><div class="qc-desc">Register a new die</div></div>
+    <div class="quick-card" onclick="showPanel('parties'); openModal('modal-party')"><div class="qc-icon">👥</div><div class="qc-title">Add Party</div><div class="qc-desc">Customer / Vendor details</div></div>
     <div class="quick-card" onclick="showPanel('documents')"><div class="qc-icon">📄</div><div class="qc-title">Create Document</div><div class="qc-desc">Invoice, Receipt, DC, PO</div></div>
   </div>
   <div class="section-label" style="margin-top:28px">Low Stock Alerts</div>
@@ -317,16 +341,14 @@
             <input id="prod-item-name" type="text" placeholder="e.g. Batch #B2401 — Flutiprl OX">
           </div>
           <div class="field span2">
-            <label>Machines Used <span style="color:var(--accent)">*</span> <span style="color:var(--muted);font-weight:400;font-style:italic;text-transform:none">(select one or more)</span></label>
+            <label>Machines Used <span style="color:var(--accent)">*</span></label>
             <div class="machine-check-list" id="prod-machine-list">
               <div style="color:var(--muted);font-size:12px;padding:4px">No machines loaded yet</div>
             </div>
           </div>
           <div class="field span2">
-            <label>Die Used <span style="color:var(--muted);font-weight:400;font-style:italic;text-transform:none">(optional — stock won't decrease)</span></label>
-            <select id="prod-die">
-              <option value="">— None / Select Die —</option>
-            </select>
+            <label>Die Used <span style="color:var(--muted);font-weight:400;font-style:italic;text-transform:none">(optional)</span></label>
+            <select id="prod-die"><option value="">— None / Select Die —</option></select>
           </div>
           <div class="field">
             <label>MFR Name</label>
@@ -367,11 +389,33 @@
   </div>
 </div>
 
+<!-- PARTIES -->
+<div id="panel-parties" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Parties <small id="party-count"></small></div>
+    <div class="toolbar">
+      <input class="search-input" type="text" placeholder="Search party..." oninput="filterParties(this.value)">
+      <select id="party-type-filter" onchange="filterParties('')">
+        <option value="">All Types</option>
+        <option>Customer</option><option>Vendor</option><option>Both</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal('modal-party')">+ Add Party</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Type</th><th>Party Name</th><th>Contact</th><th>GSTIN</th><th>Email</th><th>Actions</th></tr></thead>
+      <tbody id="party-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
 <!-- DOCUMENTS -->
 <div id="panel-documents" class="panel">
   <div class="sec-head">
     <div class="sec-title">Documents</div>
     <div class="toolbar">
+      <button class="btn btn-purple" onclick="openModal('modal-po-to-receipt')">🔄 PO → Receipt</button>
       <button class="btn btn-ghost" onclick="showDocHistory()">📋 View Saved</button>
     </div>
   </div>
@@ -391,9 +435,7 @@
     </div>
   </div>
 
-  <div class="doc-form-wrap" id="doc-form-area">
-    <!-- filled by JS -->
-  </div>
+  <div class="doc-form-wrap" id="doc-form-area"></div>
 
   <div class="invoice-preview-wrap" id="doc-preview-wrap" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -409,10 +451,20 @@
   <div class="doc-history" id="doc-history-wrap" style="display:none;">
     <div class="sec-head">
       <div class="sec-title" style="font-size:16px;">Saved Documents</div>
-      <button class="btn btn-ghost" onclick="document.getElementById('doc-history-wrap').style.display='none'">✕ Close</button>
+      <div style="display:flex;gap:8px;">
+        <input type="text" placeholder="Search docs..." style="min-width:180px" oninput="filterSavedDocs(this.value)">
+        <select id="saved-doc-type-filter" onchange="filterSavedDocs('')">
+          <option value="">All Types</option>
+          <option value="invoice">Invoice</option>
+          <option value="receipt">Receipt</option>
+          <option value="dc">Delivery Challan</option>
+          <option value="po">Purchase Order</option>
+        </select>
+        <button class="btn btn-ghost" onclick="document.getElementById('doc-history-wrap').style.display='none'">✕ Close</button>
+      </div>
     </div>
     <div class="table-wrap">
-      <table><thead><tr><th>#</th><th>Type</th><th>No.</th><th>Party</th><th>Date</th><th>Amount</th><th>Actions</th></tr></thead>
+      <table><thead><tr><th>#</th><th>Type</th><th>No.</th><th>Party</th><th>Date</th><th>GST Type</th><th>Amount</th><th>Actions</th></tr></thead>
       <tbody id="doc-history-tbody"></tbody></table>
     </div>
   </div>
@@ -430,6 +482,8 @@
 </main>
 
 <!-- ====== MODALS ====== -->
+
+<!-- Machine Modal -->
 <div class="modal-overlay" id="modal-machine">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-machine')">✕</button>
@@ -453,6 +507,7 @@
   </div>
 </div>
 
+<!-- Raw Material Modal -->
 <div class="modal-overlay" id="modal-rawmat">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-rawmat')">✕</button>
@@ -472,6 +527,7 @@
   </div>
 </div>
 
+<!-- Finished Stock Modal -->
 <div class="modal-overlay" id="modal-finished">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-finished')">✕</button>
@@ -490,6 +546,7 @@
   </div>
 </div>
 
+<!-- Die Modal -->
 <div class="modal-overlay" id="modal-die">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-die')">✕</button>
@@ -508,18 +565,75 @@
   </div>
 </div>
 
+<!-- Party Modal -->
+<div class="modal-overlay" id="modal-party">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('modal-party')">✕</button>
+    <div class="modal-title" id="party-modal-title">Add Party</div>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
+      <input type="hidden" id="party-edit-id">
+      <div class="field"><label>Party Type</label>
+        <select id="party-type">
+          <option>Customer</option><option>Vendor</option><option>Both</option>
+        </select>
+      </div>
+      <div class="field span2"><label>Party Name <span style="color:var(--accent)">*</span></label><input id="party-name" placeholder="M/s. Company Name"></div>
+      <div class="field span3"><label>Address</label><textarea id="party-address" placeholder="Full address..." style="height:60px"></textarea></div>
+      <div class="field"><label>Contact Person</label><input id="party-contact-person" placeholder="Person name"></div>
+      <div class="field"><label>Phone</label><input id="party-phone" placeholder="+91 99999 99999"></div>
+      <div class="field"><label>Email</label><input id="party-email" type="email" placeholder="email@example.com"></div>
+      <div class="field"><label>GSTIN</label><input id="party-gstin" placeholder="22AAAAA0000A1Z5" style="text-transform:uppercase"></div>
+      <div class="field"><label>PAN</label><input id="party-pan" placeholder="AAAAA0000A" style="text-transform:uppercase"></div>
+      <div class="field"><label>State</label><input id="party-state" placeholder="Tamil Nadu"></div>
+      <div class="field span3"><label>Notes</label><input id="party-notes" placeholder="Additional notes..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-party')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveParty()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- PO to Receipt Modal -->
+<div class="modal-overlay" id="modal-po-to-receipt">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('modal-po-to-receipt')">✕</button>
+    <div class="modal-title">Convert Purchase Order → Receipt</div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Select a Purchase Order to convert into a Receipt. Stock will be updated accordingly.</p>
+    <div class="section-label">Select Purchase Order</div>
+    <div class="po-select-list" id="po-select-list">
+      <div style="padding:20px;text-align:center;color:var(--muted)">No Purchase Orders found</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-po-to-receipt')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Document View Modal -->
+<div class="modal-overlay" id="modal-doc-view">
+  <div class="modal doc-view-modal">
+    <button class="close-btn" onclick="closeModal('modal-doc-view')">✕</button>
+    <div class="modal-title" id="doc-view-title">Document</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="btn btn-ghost" onclick="printViewedDoc()">🖨 Print</button>
+    </div>
+    <div id="doc-view-content"></div>
+  </div>
+</div>
+
 <!-- Hidden print area -->
 <div id="print-area" style="display:none;"></div>
-
 <div id="toast"></div>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxMV3UK6ywnI1QdiJPHWmueonivtmzE7T5YlJ-6j-7yKctsQTgHe7u9dwQc-zFgg5gS/exec';
 
-let DB = { machines:[], rawMaterials:[], finishedStock:[], dieStock:[], productions:[], logs:[], invoices:[] };
+let DB = { machines:[], rawMaterials:[], finishedStock:[], dieStock:[], productions:[], logs:[], invoices:[], parties:[] };
 let currentDocType = 'invoice';
 let docLineItems = [];
-let currentDocData = null; // holds last generated doc for saving
+let currentDocData = null;
+let currentGstType = 'cgst_sgst'; // 'cgst_sgst' | 'igst' | 'none'
 
 // ============================================================ GAS API
 async function gasRequest(payload) {
@@ -556,6 +670,7 @@ async function syncAll(silent=false) {
       DB.productions   = data.productions   || [];
       DB.logs          = data.logs          || [];
       DB.invoices      = data.invoices      || [];
+      DB.parties       = data.parties       || [];
       if (!silent) toast('Synced ✓');
     } else throw new Error(data?.error||'Unknown error');
   } catch(err) {
@@ -589,12 +704,13 @@ function showLoading(msg) { document.getElementById('loading-msg').textContent=m
 function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
 // ============================================================ PANELS
-const PANELS=['dashboard','machine','rawmat','finished','dies','produce','documents','logs'];
+const PANELS=['dashboard','machine','rawmat','finished','dies','produce','parties','documents','logs'];
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  document.querySelectorAll('.nav-tab')[PANELS.indexOf(id)].classList.add('active');
+  const idx=PANELS.indexOf(id);
+  if(idx>=0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
   renderPanel(id);
 }
 function renderPanel(id) {
@@ -604,13 +720,17 @@ function renderPanel(id) {
   if(id==='finished') renderFS();
   if(id==='dies') renderDies();
   if(id==='produce') renderProdForm();
+  if(id==='parties') renderParties();
   if(id==='documents') renderDocPanel();
   if(id==='logs') renderLogs();
 }
 function refreshCurrentPanel() { const a=document.querySelector('.panel.active'); if(!a) return; renderPanel(a.id.replace('panel-','')); }
 
 // ============================================================ MODALS
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if(id==='modal-po-to-receipt') populatePOList();
+}
 function closeModal(id) { document.getElementById(id).classList.remove('open'); document.getElementById(id).querySelectorAll('input,select,textarea').forEach(el=>{if(el.type!=='hidden')el.value='';}); }
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
 
@@ -626,6 +746,7 @@ function renderDash() {
     <div class="stat-card"><div class="stat-label">Finished Stock</div><div class="stat-value" style="color:var(--accent2)">${DB.finishedStock.length}</div><div class="stat-sub">Value ${fmt(fsTotal)}</div></div>
     <div class="stat-card"><div class="stat-label">Die Stock</div><div class="stat-value" style="color:var(--accent)">${DB.dieStock.length}</div><div class="stat-sub">Value ${fmt(dieTotal)}</div></div>
     <div class="stat-card"><div class="stat-label">Productions</div><div class="stat-value">${DB.productions.length}</div><div class="stat-sub">Recorded runs</div></div>
+    <div class="stat-card"><div class="stat-label">Parties</div><div class="stat-value" style="color:var(--accent2)">${DB.parties.length}</div><div class="stat-sub">Customers & Vendors</div></div>
     <div class="stat-card"><div class="stat-label">Documents</div><div class="stat-value" style="color:var(--accent3)">${DB.invoices.length}</div><div class="stat-sub">Saved docs</div></div>`;
   const lowRM=DB.rawMaterials.filter(r=>r.qty<10);
   const lowFS=DB.finishedStock.filter(r=>r.qty<500);
@@ -719,11 +840,71 @@ function saveDie() {
 function editDie(id) { const r=DB.dieStock.find(x=>x.id==id); if(!r) return; document.getElementById('die-modal-title').textContent='Edit Die'; document.getElementById('die-edit-id').value=id; document.getElementById('die-name').value=r.name; document.getElementById('die-mfr').value=r.mfr; document.getElementById('die-qty').value=r.qty; document.getElementById('die-amount').value=r.amount||0; openModal('modal-die'); }
 function deleteDie(id) { const r=DB.dieStock.find(x=>x.id==id); if(!r||!confirm('Delete die: '+r.name+'?')) return; showLoading('Deleting…'); writeToSheet({action:'deleteDie',id}).then(ok=>{if(ok)toast('Deleted');}); }
 
+// ============================================================ PARTIES
+function renderParties(filter='') {
+  let rows=DB.parties;
+  if(filter) rows=rows.filter(r=>(r.name+r.gstin+r.email+r.phone).toLowerCase().includes(filter.toLowerCase()));
+  const typeF=document.getElementById('party-type-filter')?.value||'';
+  if(typeF) rows=rows.filter(r=>r.partyType===typeF);
+  document.getElementById('party-count').textContent=rows.length+' parties';
+  document.getElementById('party-tbody').innerHTML=rows.length===0?`<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No parties yet. Add customers & vendors.</td></tr>`:rows.map((r,i)=>`<tr>
+    <td class="mono" style="color:var(--muted)">${i+1}</td>
+    <td><span class="badge ${r.partyType==='Customer'?'badge-green':r.partyType==='Vendor'?'badge-blue':'badge-orange'}">${r.partyType||'—'}</span></td>
+    <td><strong>${r.name}</strong>${r.contactPerson?`<div style="font-size:11px;color:var(--muted)">${r.contactPerson}</div>`:''}</td>
+    <td class="mono" style="font-size:12px">${r.phone||'—'}</td>
+    <td class="mono" style="font-size:11px;color:var(--muted)">${r.gstin||'—'}</td>
+    <td style="font-size:12px;color:var(--muted)">${r.email||'—'}</td>
+    <td><div class="action-cell"><button class="icon-btn" onclick="editParty(${r.id})">✏ Edit</button><button class="icon-btn del" onclick="deleteParty(${r.id})">✕</button></div></td>
+  </tr>`).join('');
+}
+function filterParties(val) { renderParties(val); }
+
+function saveParty() {
+  const name=document.getElementById('party-name').value.trim();
+  if(!name){toast('Party name required','error');return;}
+  const editId=parseInt(document.getElementById('party-edit-id').value)||0;
+  const payload={
+    action:editId?'updateParty':'addParty', id:editId,
+    partyType:document.getElementById('party-type').value,
+    name, address:document.getElementById('party-address').value.trim(),
+    contactPerson:document.getElementById('party-contact-person').value.trim(),
+    phone:document.getElementById('party-phone').value.trim(),
+    email:document.getElementById('party-email').value.trim(),
+    gstin:document.getElementById('party-gstin').value.trim().toUpperCase(),
+    pan:document.getElementById('party-pan').value.trim().toUpperCase(),
+    state:document.getElementById('party-state').value.trim(),
+    notes:document.getElementById('party-notes').value.trim()
+  };
+  showLoading(editId?'Updating…':'Saving…');
+  writeToSheet(payload).then(ok=>{if(ok){closeModal('modal-party');toast(editId?'Party updated!':'Party added!');}});
+}
+
+function editParty(id) {
+  const r=DB.parties.find(x=>x.id==id); if(!r) return;
+  document.getElementById('party-modal-title').textContent='Edit Party';
+  document.getElementById('party-edit-id').value=id;
+  document.getElementById('party-type').value=r.partyType||'Customer';
+  document.getElementById('party-name').value=r.name||'';
+  document.getElementById('party-address').value=r.address||'';
+  document.getElementById('party-contact-person').value=r.contactPerson||'';
+  document.getElementById('party-phone').value=r.phone||'';
+  document.getElementById('party-email').value=r.email||'';
+  document.getElementById('party-gstin').value=r.gstin||'';
+  document.getElementById('party-pan').value=r.pan||'';
+  document.getElementById('party-state').value=r.state||'';
+  document.getElementById('party-notes').value=r.notes||'';
+  openModal('modal-party');
+}
+
+function deleteParty(id) {
+  const r=DB.parties.find(x=>x.id==id); if(!r||!confirm('Delete party: '+r.name+'?')) return;
+  showLoading('Deleting…');
+  writeToSheet({action:'deleteParty',id}).then(ok=>{if(ok)toast('Deleted');});
+}
+
 // ============================================================ PRODUCTION
 let recipeRows=[];
-
 function renderProdForm() {
-  // Multi-machine checkboxes
   const list=document.getElementById('prod-machine-list');
   if(DB.machines.length===0) { list.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px">No machines in database yet</div>'; }
   else {
@@ -734,20 +915,14 @@ function renderProdForm() {
         <span>${m.name}${m.type?' <span style="color:var(--muted);font-size:11px">('+m.type+')</span>':''}</span>
       </label>`).join('');
   }
-  // Die dropdown
   const dieSel=document.getElementById('prod-die');
   const curDie=dieSel.value;
   dieSel.innerHTML='<option value="">— None / Select Die —</option>'+DB.dieStock.map(d=>`<option value="${d.id}" ${d.id==curDie?'selected':''}>${d.name} [${d.mfr}]</option>`).join('');
-
   if(recipeRows.length===0) addRecipeRow();
   else renderRecipeRows();
   renderProdHistory();
 }
-
-function getCheckedMachines() {
-  return [...document.querySelectorAll('#prod-machine-list input[type=checkbox]:checked')].map(el=>el.value);
-}
-
+function getCheckedMachines() { return [...document.querySelectorAll('#prod-machine-list input[type=checkbox]:checked')].map(el=>el.value); }
 function addRecipeRow() { const id=Date.now(); recipeRows.push({id,rmId:'',qty:0}); renderRecipeRows(); }
 function renderRecipeRows() {
   document.getElementById('recipe-rows').innerHTML=recipeRows.map(row=>`
@@ -763,7 +938,6 @@ function renderRecipeRows() {
 }
 function updateRecipeRow(id,field,val) { const row=recipeRows.find(r=>r.id===id); if(row){row[field]=field==='qty'?parseFloat(val)||0:parseInt(val)||'';} updateProdPreview(); }
 function removeRecipeRow(id) { recipeRows=recipeRows.filter(r=>r.id!==id); renderRecipeRows(); }
-
 function updateProdPreview() {
   const itemName=document.getElementById('prod-item-name').value;
   const checkedIds=getCheckedMachines();
@@ -792,12 +966,10 @@ function updateProdPreview() {
     </div>
     <div style="margin-top:12px"><span class="badge ${allOk&&name&&qty&&checkedIds.length?'badge-green':'badge-red'}">${allOk&&name&&qty&&checkedIds.length?'✓ Ready to produce':'⚠ Check inputs'}</span></div>`;
 }
-
 ['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate','prod-die'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',updateProdPreview);
-  document.getElementById(id).addEventListener('change',updateProdPreview);
+  const el=document.getElementById(id);
+  if(el){el.addEventListener('input',updateProdPreview);el.addEventListener('change',updateProdPreview);}
 });
-
 async function createProduction() {
   const itemName=document.getElementById('prod-item-name').value.trim();
   const checkedIds=getCheckedMachines();
@@ -818,17 +990,9 @@ async function createProduction() {
     if(mat.qty<row.qty){toast(`Insufficient: ${mat.material} (need ${row.qty}, have ${mat.qty})`,'error');return;}
   }
   showLoading('Recording production run…');
-  const ok=await writeToSheet({
-    action:'createProduction', itemName,
-    machineIds: machines.map(m=>m.id),
-    machineNames: machines.map(m=>m.name+(m.type?' ('+m.type+')':'')),
-    dieId: die?die.id:'', dieName: die?die.name:'',
-    mfr, name, qty, rate,
-    materials: usedMats.map(r=>{const mat=DB.rawMaterials.find(x=>x.id==r.rmId);return{rmId:r.rmId,material:mat.material+(mat.sizeInch?' '+mat.sizeInch:''),qty:r.qty};})
-  });
+  const ok=await writeToSheet({action:'createProduction',itemName,machineIds:machines.map(m=>m.id),machineNames:machines.map(m=>m.name+(m.type?' ('+m.type+')':'')),dieId:die?die.id:'',dieName:die?die.name:'',mfr,name,qty,rate,materials:usedMats.map(r=>{const mat=DB.rawMaterials.find(x=>x.id==r.rmId);return{rmId:r.rmId,material:mat.material+(mat.sizeInch?' '+mat.sizeInch:''),qty:r.qty};})});
   if(ok){toast('Production recorded! ✓');clearProdForm();renderProdHistory();}
 }
-
 function clearProdForm() {
   ['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('prod-die').value='';
@@ -836,7 +1000,6 @@ function clearProdForm() {
   recipeRows=[]; addRecipeRow();
   document.getElementById('prod-preview').innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div>';
 }
-
 function renderProdHistory() {
   const el=document.getElementById('prod-history');
   if(DB.productions.length===0){el.innerHTML='<div class="empty" style="padding:20px"><p>No production runs yet</p></div>';return;}
@@ -865,27 +1028,92 @@ function renderDocPanel() {
   if(docLineItems.length===0) addDocLine();
 }
 
+// Build party dropdown options
+function partyOptions(includeBlank=true) {
+  const opts=includeBlank?'<option value="">— Select Party —</option>':'';
+  return opts+DB.parties.map(p=>`<option value="${p.id}">${p.name}${p.partyType?' ('+p.partyType+')':''}</option>`).join('');
+}
+
+// Fill party fields from selected party
+function fillPartyFromDD(selectEl) {
+  const id=selectEl.value;
+  if(!id) return;
+  const p=DB.parties.find(x=>x.id==id); if(!p) return;
+  const partyInput=document.getElementById('doc-party');
+  const gstinInput=document.getElementById('doc-gstin');
+  if(partyInput) partyInput.value=[p.name, p.address].filter(Boolean).join(', ');
+  if(gstinInput) gstinInput.value=p.gstin||'';
+  // Auto-detect IGST if different state
+  if(p.state && p.state.toLowerCase() !== 'tamil nadu') {
+    setGstType('igst');
+  }
+}
+
+function setGstType(type) {
+  currentGstType=type;
+  document.querySelectorAll('.gst-tab').forEach(t=>t.classList.remove('active'));
+  const el=document.getElementById('gst-tab-'+type);
+  if(el) el.classList.add('active');
+}
+
+// Invoice / DC: show finished stock dropdown in items
+// Receipt / PO: show goods type (Raw Material / Die / Machinery / Others) + update stock
 function renderDocForm(type) {
   const labels={invoice:'Invoice',receipt:'Receipt',dc:'Delivery Challan',po:'Purchase Order'};
   const noLabel={invoice:'Bill To',receipt:'Received From',dc:'Deliver To',po:'Supplier'};
   const refLabel={invoice:'Invoice No.',receipt:'Receipt No.',dc:'DC No.',po:'PO No.'};
-  const dateLabel={invoice:'Invoice Date',receipt:'Date',dc:'DC Date',po:'PO Date'};
   const today=new Date().toISOString().split('T')[0];
   const nextNo=String((DB.invoices.filter(d=>d.docType===type).length||0)+1).padStart(3,'0');
+  const isInvoiceDC=(type==='invoice'||type==='dc');
+
   document.getElementById('doc-form-area').innerHTML=`
     <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">${labels[type]} Details</div>
     <div class="form-grid" style="margin-bottom:16px;">
       <div class="field"><label>${refLabel[type]}</label><input id="doc-ref" value="${type.toUpperCase()}-${nextNo}" placeholder="Auto-numbered"></div>
-      <div class="field"><label>${dateLabel[type]}</label><input id="doc-date" type="date" value="${today}"></div>
-      <div class="field span2"><label>${noLabel[type]}</label><input id="doc-party" placeholder="Party name, address..."></div>
+      <div class="field"><label>${labels[type]==='Delivery Challan'?'DC Date':'Date'}</label><input id="doc-date" type="date" value="${today}"></div>
+      <div class="field span2">
+        <label>${noLabel[type]} — Party</label>
+        <div style="display:flex;gap:8px;">
+          <select id="doc-party-dd" onchange="fillPartyFromDD(this)" style="flex:1">${partyOptions()}</select>
+          <button class="btn btn-ghost" style="white-space:nowrap;padding:8px 12px;font-size:12px" onclick="showPanel('parties');openModal('modal-party')">+ New</button>
+        </div>
+      </div>
+      <div class="field span2"><label>Party Name & Address (editable)</label><input id="doc-party" placeholder="Name, Address..."></div>
       <div class="field"><label>GSTIN (Party)</label><input id="doc-gstin" placeholder="Optional"></div>
-      <div class="field"><label>GST %</label><select id="doc-gst-pct"><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="0">0% (No GST)</option></select></div>
-      ${type==='invoice'||type==='receipt'?`<div class="field span2"><label>Payment Mode</label><select id="doc-pay-mode"><option>Cash</option><option>NEFT/RTGS</option><option>UPI</option><option>Cheque</option><option>Credit</option></select></div>`:''}
+      <div class="field">
+        <label>GST Classification</label>
+        <div class="gst-tabs" style="margin-top:4px;">
+          <button class="gst-tab active" id="gst-tab-cgst_sgst" onclick="setGstType('cgst_sgst')">CGST + SGST</button>
+          <button class="gst-tab" id="gst-tab-igst" onclick="setGstType('igst')">IGST</button>
+          <button class="gst-tab" id="gst-tab-none" onclick="setGstType('none')">No GST</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>GST %</label>
+        <select id="doc-gst-pct"><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option><option value="0">0%</option></select>
+      </div>
+      ${type==='invoice'||type==='receipt'?`
+      <div class="field">
+        <label>Payment Mode</label>
+        <select id="doc-pay-mode"><option>Cash</option><option>NEFT/RTGS</option><option>UPI</option><option>Cheque</option><option>Credit</option></select>
+      </div>`:``}
+      ${!isInvoiceDC?`
+      <div class="field">
+        <label>Goods Type <span style="color:var(--accent)">*</span></label>
+        <select id="doc-goods-type" onchange="onGoodsTypeChange(this.value)">
+          <option value="">— Select Type —</option>
+          <option value="rawmat">Raw Material</option>
+          <option value="die">Die Stock</option>
+          <option value="machinery">Machinery</option>
+          <option value="finished">Finished Stock</option>
+          <option value="other">Others</option>
+        </select>
+      </div>`:``}
       <div class="field span2"><label>Notes / Remarks</label><input id="doc-notes" placeholder="Optional remarks"></div>
     </div>
-    <div class="section-label">Line Items</div>
+    <div class="section-label">Line Items${isInvoiceDC?' <span style="color:var(--muted);font-weight:400;font-size:11px">(from Finished Stock)</span>':' <span style="color:var(--muted);font-weight:400;font-size:11px">(select goods type above to load stock)</span>'}</div>
     <div style="overflow-x:auto;">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:6px;padding:0 2px;">
+      <div style="display:grid;grid-template-columns:2fr 80px 90px 90px auto;gap:8px;margin-bottom:6px;padding:0 2px;">
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Particulars</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Qty</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Rate (₹)</div>
@@ -899,24 +1127,87 @@ function renderDocForm(type) {
       <button class="btn btn-ghost" onclick="clearDocForm()">Clear</button>
       <button class="btn btn-primary" onclick="generateDoc()">👁 Preview</button>
     </div>`;
+
+  // Re-apply current GST type tab
+  setGstType(currentGstType);
   renderDocLines();
 }
 
-function addDocLine() { docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0}); renderDocLines(); }
+// When goods type is selected in Receipt/PO, load matching items as line options
+function onGoodsTypeChange(type) {
+  // Clear and reload line items with appropriate desc dropdown
+  docLineItems = [];
+  addDocLine();
+}
+
+// Get stock items for a given goods type (for desc dropdown in Receipt/PO)
+function getStockOptionsForType(goodsType) {
+  if(goodsType==='rawmat') return DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`, rate:r.rate}));
+  if(goodsType==='die') return DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`, rate:r.amount||0}));
+  if(goodsType==='finished') return DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`, rate:r.rate}));
+  if(goodsType==='machinery') return DB.machines.map(r=>({label:r.name, rate:0}));
+  return [];
+}
+
+function addDocLine() {
+  docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0});
+  renderDocLines();
+}
 function removeDocLine(id) { docLineItems=docLineItems.filter(l=>l.id!==id); if(docLineItems.length===0) addDocLine(); else renderDocLines(); }
-function updateDocLine(id,field,val) { const l=docLineItems.find(x=>x.id===id); if(l){l[field]=field==='desc'?val:(parseFloat(val)||0);} renderDocLines(); }
+function updateDocLine(id,field,val) {
+  const l=docLineItems.find(x=>x.id===id);
+  if(l){
+    if(field==='desc'){
+      l[field]=val;
+      // Auto-fill rate for invoice/dc from finished stock
+      if(currentDocType==='invoice'||currentDocType==='dc') {
+        const fs=DB.finishedStock.find(f=>f.carton+' ('+f.mfr+')'===val||f.carton===val);
+        if(fs){ l.rate=fs.rate; }
+      }
+    } else {
+      l[field]=parseFloat(val)||0;
+    }
+  }
+  renderDocLines();
+}
 
 function renderDocLines() {
   const cont=document.getElementById('doc-line-items');
   if(!cont) return;
-  cont.innerHTML=docLineItems.map(l=>`
-    <div class="line-item-row">
-      <input value="${l.desc}" placeholder="Description" onchange="updateDocLine(${l.id},'desc',this.value)" oninput="updateDocLine(${l.id},'desc',this.value)">
-      <input type="number" value="${l.qty||''}" placeholder="Qty" min="0" onchange="updateDocLine(${l.id},'qty',this.value)" oninput="updateDocLine(${l.id},'qty',this.value)">
-      <input type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" onchange="updateDocLine(${l.id},'rate',this.value)" oninput="updateDocLine(${l.id},'rate',this.value)">
-      <input readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted)">
+  const isInvoiceDC=(currentDocType==='invoice'||currentDocType==='dc');
+  const goodsType=document.getElementById('doc-goods-type')?.value||'';
+  const stockOpts=isInvoiceDC? DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate})) : getStockOptionsForType(goodsType);
+
+  cont.innerHTML=docLineItems.map(l=>{
+    // Desc field: if invoice/dc or goods type selected, show dropdown + manual option
+    let descHtml='';
+    if(stockOpts.length>0) {
+      descHtml=`<select onchange="updateDocLine(${l.id},'desc',this.value);autoFillRate(${l.id},this.value,'${isInvoiceDC?'fs':goodsType}')" style="font-size:12px;padding:6px 10px;width:100%">
+        <option value="">— Select Item / Manual —</option>
+        ${stockOpts.map(o=>`<option value="${o.label}" ${l.desc===o.label?'selected':''}>${o.label}</option>`).join('')}
+        <option value="__manual__">✏ Type manually...</option>
+      </select>`;
+    } else {
+      descHtml=`<input value="${l.desc}" placeholder="Description" onchange="updateDocLine(${l.id},'desc',this.value)" oninput="updateDocLine(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;width:100%">`;
+    }
+    return `<div class="line-item-row">
+      ${descHtml}
+      <input type="number" value="${l.qty||''}" placeholder="Qty" min="0" onchange="updateDocLine(${l.id},'qty',this.value)" oninput="updateDocLine(${l.id},'qty',this.value)" style="font-size:12px;padding:6px 10px">
+      <input type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" onchange="updateDocLine(${l.id},'rate',this.value)" oninput="updateDocLine(${l.id},'rate',this.value)" style="font-size:12px;padding:6px 10px">
+      <input readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px">
       <button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+
+function autoFillRate(lineId, val, stockType) {
+  if(val==='__manual__'||!val) return;
+  let stockOpts=[];
+  if(stockType==='fs') stockOpts=DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}));
+  else if(stockType==='rawmat') stockOpts=DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate}));
+  else if(stockType==='die') stockOpts=DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0}));
+  const match=stockOpts.find(o=>o.label===val);
+  if(match) { const l=docLineItems.find(x=>x.id===lineId); if(l){ l.rate=match.rate; l.desc=val; } renderDocLines(); }
 }
 
 function clearDocForm() { docLineItems=[]; renderDocForm(currentDocType); addDocLine(); document.getElementById('doc-preview-wrap').style.display='none'; }
@@ -927,27 +1218,41 @@ function generateDoc() {
   const date=document.getElementById('doc-date')?.value;
   const gstin=document.getElementById('doc-gstin')?.value.trim();
   const gstPct=parseFloat(document.getElementById('doc-gst-pct')?.value||5);
+  const gstType=currentGstType;
   const payMode=document.getElementById('doc-pay-mode')?.value||'';
   const notes=document.getElementById('doc-notes')?.value.trim();
+  const goodsType=document.getElementById('doc-goods-type')?.value||'';
+
   if(!party){toast('Party name required','error');return;}
-  const validLines=docLineItems.filter(l=>l.desc&&l.qty&&l.rate);
-  if(!validLines.length){toast('Add at least one line item','error');return;}
+  const validLines=docLineItems.filter(l=>l.desc&&l.desc!=='__manual__'&&l.qty&&l.rate);
+  if(!validLines.length){toast('Add at least one line item with description, qty and rate','error');return;}
+
   const subTotal=validLines.reduce((s,l)=>s+l.qty*l.rate,0);
-  const cgst=gstPct>0?(subTotal*gstPct/100)/2:0;
-  const sgst=cgst;
-  const grandTotal=subTotal+cgst+sgst;
+  let taxAmount=0, taxRows='', grandTotal=subTotal;
+
+  if(gstType==='cgst_sgst' && gstPct>0) {
+    const cgst=(subTotal*gstPct/100)/2, sgst=cgst;
+    taxAmount=cgst+sgst; grandTotal=subTotal+taxAmount;
+    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst)}</td></tr>
+    <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst)}</td></tr>`;
+  } else if(gstType==='igst' && gstPct>0) {
+    taxAmount=subTotal*gstPct/100; grandTotal=subTotal+taxAmount;
+    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(taxAmount)}</td></tr>`;
+  }
+
+  const cgst_val=(gstType==='cgst_sgst'&&gstPct>0)?(subTotal*gstPct/100)/2:0;
+  const sgst_val=cgst_val;
+  const igst_val=(gstType==='igst'&&gstPct>0)?subTotal*gstPct/100:0;
+
   const docDate=date?new Date(date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';
   const typeLabels={invoice:'TAX INVOICE',receipt:'RECEIPT',dc:'DELIVERY CHALLAN',po:'PURCHASE ORDER'};
+  const gstLabel=gstType==='cgst_sgst'?'CGST+SGST':gstType==='igst'?'IGST':'NO GST';
+
   const html=`<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
-    <!-- Header -->
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;">
       <tr>
         <td style="width:60px;vertical-align:middle;padding-right:12px;">
-          <img src="https://pristineprints.in/images/ppb.png" style="width:54px;height:auto;" onerror="this.style.display='none'">
-        </td>
-        <td style="vertical-align:middle;">
-          <div style="font-size:18px;font-weight:900;color:#1a3a6e;font-family:Arial,sans-serif;">Pristine Prints</div>
-          <div style="font-size:10px;color:#555;">Complete Printing Solutions</div>
+          <img src="https://pristineprints.in/images/ppb.png" style="width:190px;height:auto;" onerror="this.style.display='none'">
         </td>
         <td style="text-align:right;vertical-align:middle;">
           <div style="font-size:15px;font-weight:700;color:#1a3a6e;">Multi Colour Digital</div>
@@ -958,14 +1263,12 @@ function generateDoc() {
     <div style="text-align:center;font-size:11px;color:#555;border-top:1px solid #1a3a6e;border-bottom:1px solid #1a3a6e;padding:4px 0;margin-bottom:10px;">
       Ground Floor, No-198, Thottasalai East, Power House Road, Perur Village, Coimbatore-641 010
     </div>
-    <!-- Doc type banner -->
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1.5px solid #1a3a6e;">
       <tr style="background:#1a3a6e;color:#fff;">
-        <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[currentDocType]} ${payMode?'/ '+payMode.toUpperCase()+' BILL':''}</td>
+        <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[currentDocType]}${payMode?' / '+payMode.toUpperCase()+' BILL':''} <span style="font-size:11px;font-weight:400;opacity:0.8">(${gstLabel})</span></td>
         <td style="padding:6px 12px;text-align:right;font-size:13px;">No <strong>${ref}</strong> &nbsp;&nbsp; Date: <strong>${docDate}</strong></td>
       </tr>
     </table>
-    <!-- To / Party -->
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1px solid #ccc;">
       <tr>
         <td style="padding:8px 12px;width:50%;">
@@ -975,18 +1278,18 @@ function generateDoc() {
         </td>
         <td style="padding:8px 12px;text-align:right;vertical-align:top;border-left:1px solid #ccc;">
           <div style="font-size:11px;color:#555;">GST No.: 33AANCP6204B1ZT</div>
+          <div style="font-size:11px;color:#555;">State: Tamil Nadu (33)</div>
         </td>
       </tr>
     </table>
-    <!-- Items table -->
     <table width="100%" style="border-collapse:collapse;border:1px solid #1a3a6e;margin-bottom:10px;font-size:12px;">
       <thead>
         <tr style="background:#1a3a6e;color:#fff;">
-          <th style="padding:7px 10px;text-align:left;width:40px;">Sl.No.</th>
-          <th style="padding:7px 10px;text-align:left;">Particulars</th>
+          <th style="padding:7px 10px;text-align:left;width:40px;">Sl.</th>
+          <th style="padding:7px 10px;text-align:left;">Particulars${goodsType&&goodsType!=='other'?' <span style="font-weight:400;font-size:10px;opacity:0.8">['+goodsType.toUpperCase()+']</span>':''}</th>
           <th style="padding:7px 10px;text-align:center;width:70px;">QTY</th>
           <th style="padding:7px 10px;text-align:center;width:80px;">RATE</th>
-          ${gstPct>0?`<th style="padding:7px 10px;text-align:center;width:60px;">GST</th>`:''}
+          ${gstType!=='none'&&gstPct>0?`<th style="padding:7px 10px;text-align:center;width:60px;">GST%</th>`:''}
           <th style="padding:7px 10px;text-align:right;width:100px;">AMOUNT</th>
         </tr>
       </thead>
@@ -996,12 +1299,11 @@ function generateDoc() {
           <td style="padding:7px 10px;">${l.desc}</td>
           <td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td>
           <td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>
-          ${gstPct>0?`<td style="padding:7px 10px;text-align:center;">${gstPct}%</td>`:''}
+          ${gstType!=='none'&&gstPct>0?`<td style="padding:7px 10px;text-align:center;">${gstPct}%</td>`:''}
           <td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td>
         </tr>`).join('')}
       </tbody>
     </table>
-    <!-- Totals -->
     <table width="100%" style="border-collapse:collapse;margin-bottom:14px;">
       <tr>
         <td style="width:55%;vertical-align:top;padding-right:20px;">
@@ -1018,8 +1320,7 @@ function generateDoc() {
         <td style="vertical-align:top;">
           <table width="100%" style="border-collapse:collapse;border:1px solid #ccc;font-size:12px;">
             <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SUB TOTAL</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;"><strong>${fmtRaw(subTotal)}</strong></td></tr>
-            ${gstPct>0?`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst)}</td></tr>
-            <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst)}</td></tr>`:''}
+            ${taxRows}
             <tr style="background:#1a3a6e;color:#fff;font-weight:700;">
               <td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(grandTotal)}</td>
             </tr>
@@ -1027,26 +1328,29 @@ function generateDoc() {
         </td>
       </tr>
     </table>
-    <!-- Footer -->
     <table width="100%" style="border-collapse:collapse;border-top:1px solid #1a3a6e;padding-top:10px;margin-top:4px;">
       <tr>
         <td style="padding:10px 0;font-size:11px;width:65%;">
           <strong>For PRISTINE PRINTS PVT. LTD.</strong><br>
           <span style="color:#555;">Rupees: ${numberToWords(grandTotal)} Only.</span>
         </td>
-        <td style="padding:10px 0;text-align:right;font-size:11px;">
-          <br><br><br>
-          <strong>Authorised Signatory</strong>
-        </td>
+        <td style="padding:10px 0;text-align:right;font-size:11px;"><br><br><br><strong>Authorised Signatory</strong></td>
       </tr>
     </table>
     <div style="font-size:10px;color:#999;text-align:center;margin-top:6px;">E. &amp; O.E.</div>
   </div>`;
+
   document.getElementById('invoice-preview').innerHTML=html;
   document.getElementById('doc-preview-wrap').style.display='block';
   document.getElementById('doc-preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
-  // Store for saving
-  currentDocData={docType:currentDocType,ref,party,date,gstin,gstPct,payMode,notes,lines:validLines,subTotal,cgst,sgst,grandTotal,html};
+
+  currentDocData={
+    docType:currentDocType, ref, party, date, gstin,
+    gstPct, gstType,
+    cgst:cgst_val, sgst:sgst_val, igst:igst_val,
+    payMode, notes, goodsType,
+    lines:validLines, subTotal, grandTotal, html
+  };
 }
 
 function numberToWords(n) {
@@ -1076,29 +1380,200 @@ async function saveDoc() {
   if(!currentDocData){toast('Generate a preview first','error');return;}
   showLoading('Saving document…');
   const ok=await writeToSheet({action:'saveDocument',...currentDocData,html:''});
-  if(ok) toast('Document saved ✓');
+  if(ok){toast('Document saved ✓');showDocHistory();}
 }
 
+// ============================================================ PO TO RECEIPT
+function populatePOList() {
+  const list=document.getElementById('po-select-list');
+  const pos=DB.invoices.filter(d=>d.docType==='po');
+  if(pos.length===0){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">No Purchase Orders found</div>';return;}
+  list.innerHTML=pos.map(p=>`
+    <div class="po-item" onclick="convertPOtoReceipt(${p.id})">
+      <div class="po-ref">${p.ref||'PO'} <span class="badge badge-blue" style="margin-left:6px">${fmt(p.grandTotal)}</span></div>
+      <div class="po-meta">${p.party||'—'} · ${p.date||''} · ${(p.lines||[]).length} items · Goods: ${p.goodsType||'—'}</div>
+    </div>`).join('');
+}
+
+async function convertPOtoReceipt(poId) {
+  const po=DB.invoices.find(d=>d.id==poId);
+  if(!po){toast('PO not found','error');return;}
+  closeModal('modal-po-to-receipt');
+  // Switch to receipt tab and pre-fill
+  selectDocType('receipt');
+  showPanel('documents');
+
+  // Wait for form render then pre-fill
+  setTimeout(()=>{
+    const today=new Date().toISOString().split('T')[0];
+    const nextNo=String((DB.invoices.filter(d=>d.docType==='receipt').length)+1).padStart(3,'0');
+    const refEl=document.getElementById('doc-ref');
+    if(refEl) refEl.value='RCPT-'+nextNo+' [PO:'+po.ref+']';
+    const dateEl=document.getElementById('doc-date');
+    if(dateEl) dateEl.value=today;
+    const partyEl=document.getElementById('doc-party');
+    if(partyEl) partyEl.value=po.party||'';
+    const gstinEl=document.getElementById('doc-gstin');
+    if(gstinEl) gstinEl.value=po.gstin||'';
+    const gstEl=document.getElementById('doc-gst-pct');
+    if(gstEl) gstEl.value=po.gstPct||5;
+    setGstType(po.gstType||'cgst_sgst');
+    const gtEl=document.getElementById('doc-goods-type');
+    if(gtEl){ gtEl.value=po.goodsType||''; onGoodsTypeChange(po.goodsType||''); }
+    const notesEl=document.getElementById('doc-notes');
+    if(notesEl) notesEl.value='Converted from PO: '+(po.ref||'');
+    // Pre-fill line items from PO
+    docLineItems=(po.lines||[]).map(l=>({id:Date.now()+Math.random(),desc:l.desc,qty:l.qty,rate:l.rate}));
+    renderDocLines();
+    toast('PO loaded into Receipt form ✓');
+  }, 200);
+}
+
+// ============================================================ SAVED DOCS
 function showDocHistory() {
   const wrap=document.getElementById('doc-history-wrap');
-  wrap.style.display=wrap.style.display==='none'?'block':'none';
-  if(wrap.style.display==='block') renderDocHistoryTable();
+  wrap.style.display='block';
+  renderDocHistoryTable();
 }
 
-function renderDocHistoryTable() {
+function filterSavedDocs(val) { renderDocHistoryTable(val); }
+
+function renderDocHistoryTable(filter='') {
   const tbody=document.getElementById('doc-history-tbody');
-  if(DB.invoices.length===0){tbody.innerHTML='<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No saved documents yet.</td></tr>';return;}
+  let docs=DB.invoices;
+  const typeF=document.getElementById('saved-doc-type-filter')?.value||'';
+  if(typeF) docs=docs.filter(d=>d.docType===typeF);
+  if(filter) docs=docs.filter(d=>(d.ref+d.party+d.date).toLowerCase().includes(filter.toLowerCase()));
+  if(docs.length===0){tbody.innerHTML='<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No saved documents yet.</td></tr>';return;}
   const typeLabels={invoice:'Invoice',receipt:'Receipt',dc:'DC',po:'PO'};
-  tbody.innerHTML=DB.invoices.map((d,i)=>`
+  const typeBadge={invoice:'badge-green',receipt:'badge-orange',dc:'badge-blue',po:'badge-purple'};
+  tbody.innerHTML=docs.map((d,i)=>`
     <tr>
       <td class="mono" style="color:var(--muted)">${i+1}</td>
-      <td><span class="badge badge-blue">${typeLabels[d.docType]||d.docType}</span></td>
+      <td><span class="badge ${typeBadge[d.docType]||'badge-blue'}">${typeLabels[d.docType]||d.docType}</span></td>
       <td class="mono">${d.ref||'—'}</td>
       <td>${d.party||'—'}</td>
       <td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td>
+      <td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':d.gstType==='cgst_sgst'?'C+S GST':'No GST'}</span></td>
       <td class="mono">${fmt(d.grandTotal)}</td>
-      <td><div class="action-cell"><button class="icon-btn" onclick="deleteDoc(${d.id})">✕ Del</button></div></td>
+      <td><div class="action-cell">
+        <button class="icon-btn view-btn" onclick="viewDoc(${d.id})">👁 View</button>
+        <button class="icon-btn print-btn" onclick="viewAndPrintDoc(${d.id})">🖨 Print</button>
+        <button class="icon-btn del" onclick="deleteDoc(${d.id})">✕</button>
+      </div></td>
     </tr>`).join('');
+}
+
+function viewDoc(id) {
+  const d=DB.invoices.find(x=>x.id==id); if(!d) return;
+  // Reconstruct the HTML from saved data
+  const html=reconstructDocHTML(d);
+  document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+(d.party||'');
+  document.getElementById('doc-view-content').innerHTML=html;
+  openModal('modal-doc-view');
+}
+
+function viewAndPrintDoc(id) {
+  const d=DB.invoices.find(x=>x.id==id); if(!d) return;
+  const html=reconstructDocHTML(d);
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=html; pa.style.display='block';
+  window.print();
+  setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
+}
+
+function printViewedDoc() {
+  const content=document.getElementById('doc-view-content').innerHTML;
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=content; pa.style.display='block';
+  closeModal('modal-doc-view');
+  window.print();
+  setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
+}
+
+function reconstructDocHTML(d) {
+  const lines=d.lines||[];
+  const subTotal=d.subTotal||0;
+  const gstType=d.gstType||'cgst_sgst';
+  const gstPct=d.gstPct||0;
+  let taxRows='';
+  if(gstType==='cgst_sgst'&&gstPct>0) {
+    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.cgst)}</td></tr>
+    <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.sgst)}</td></tr>`;
+  } else if(gstType==='igst'&&gstPct>0) {
+    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.igst)}</td></tr>`;
+  }
+  const typeLabels={invoice:'TAX INVOICE',receipt:'RECEIPT',dc:'DELIVERY CHALLAN',po:'PURCHASE ORDER'};
+  const gstLabel=gstType==='cgst_sgst'?'CGST+SGST':gstType==='igst'?'IGST':'NO GST';
+  const docDate=d.date||'';
+  return `<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
+    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;">
+      <tr>
+        <td style="width:60px;vertical-align:middle;padding-right:12px;"><img src="https://pristineprints.in/images/ppb.png" style="width:190px;height:auto;" onerror="this.style.display='none'"></td>
+        <td style="text-align:right;vertical-align:middle;"><div style="font-size:15px;font-weight:700;color:#1a3a6e;">Multi Colour Digital</div><div style="font-size:15px;font-weight:700;color:#1a3a6e;">Package &amp; Offset Printings</div></td>
+      </tr>
+    </table>
+    <div style="text-align:center;font-size:11px;color:#555;border-top:1px solid #1a3a6e;border-bottom:1px solid #1a3a6e;padding:4px 0;margin-bottom:10px;">Ground Floor, No-198, Thottasalai East, Power House Road, Perur Village, Coimbatore-641 010</div>
+    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1.5px solid #1a3a6e;">
+      <tr style="background:#1a3a6e;color:#fff;">
+        <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[d.docType]||d.docType}${d.payMode?' / '+d.payMode.toUpperCase()+' BILL':''} <span style="font-size:11px;font-weight:400;opacity:0.8">(${gstLabel})</span></td>
+        <td style="padding:6px 12px;text-align:right;font-size:13px;">No <strong>${d.ref}</strong> &nbsp;&nbsp; Date: <strong>${docDate}</strong></td>
+      </tr>
+    </table>
+    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1px solid #ccc;">
+      <tr>
+        <td style="padding:8px 12px;width:50%;"><div style="font-size:11px;color:#555;margin-bottom:2px;">To,</div><div style="font-weight:700;font-size:13px;">M/s. ${d.party}</div>${d.gstin?`<div style="font-size:11px;color:#555;margin-top:4px;">GSTIN: ${d.gstin}</div>`:''}</td>
+        <td style="padding:8px 12px;text-align:right;vertical-align:top;border-left:1px solid #ccc;"><div style="font-size:11px;color:#555;">GST No.: 33AANCP6204B1ZT</div><div style="font-size:11px;color:#555;">State: Tamil Nadu (33)</div></td>
+      </tr>
+    </table>
+    <table width="100%" style="border-collapse:collapse;border:1px solid #1a3a6e;margin-bottom:10px;font-size:12px;">
+      <thead><tr style="background:#1a3a6e;color:#fff;">
+        <th style="padding:7px 10px;text-align:left;width:40px;">Sl.</th>
+        <th style="padding:7px 10px;text-align:left;">Particulars</th>
+        <th style="padding:7px 10px;text-align:center;width:70px;">QTY</th>
+        <th style="padding:7px 10px;text-align:center;width:80px;">RATE</th>
+        ${gstType!=='none'&&gstPct>0?`<th style="padding:7px 10px;text-align:center;width:60px;">GST%</th>`:''}
+        <th style="padding:7px 10px;text-align:right;width:100px;">AMOUNT</th>
+      </tr></thead>
+      <tbody>${lines.map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}">
+        <td style="padding:7px 10px;text-align:center;">${i+1}.</td>
+        <td style="padding:7px 10px;">${l.desc}</td>
+        <td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td>
+        <td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>
+        ${gstType!=='none'&&gstPct>0?`<td style="padding:7px 10px;text-align:center;">${gstPct}%</td>`:''}
+        <td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    <table width="100%" style="border-collapse:collapse;margin-bottom:14px;">
+      <tr>
+        <td style="width:55%;vertical-align:top;padding-right:20px;">
+          <div style="background:#f5f5f5;border:1px solid #ddd;border-radius:4px;padding:10px 14px;font-size:11px;">
+            <div style="font-weight:700;margin-bottom:6px;">BANK DETAILS:</div>
+            <div>Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>PRISTINE PRINTS PRIVATE LIMITED</strong></div>
+            <div>Bank Name &nbsp;&nbsp;: HDFC BANK</div>
+            <div>Acc. No. &nbsp;&nbsp;&nbsp;&nbsp;: 99999790958200</div>
+            <div>IFSC &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: HDFC0001588</div>
+            <div>Branch &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Gandhipuram</div>
+          </div>
+          ${d.notes?`<div style="margin-top:8px;font-size:11px;color:#555;border:1px solid #ddd;padding:8px;border-radius:4px;">${d.notes}</div>`:''}
+        </td>
+        <td style="vertical-align:top;">
+          <table width="100%" style="border-collapse:collapse;border:1px solid #ccc;font-size:12px;">
+            <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SUB TOTAL</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;"><strong>${fmtRaw(subTotal)}</strong></td></tr>
+            ${taxRows}
+            <tr style="background:#1a3a6e;color:#fff;font-weight:700;"><td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(d.grandTotal)}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <table width="100%" style="border-collapse:collapse;border-top:1px solid #1a3a6e;padding-top:10px;margin-top:4px;">
+      <tr>
+        <td style="padding:10px 0;font-size:11px;width:65%;"><strong>For PRISTINE PRINTS PVT. LTD.</strong><br><span style="color:#555;">Rupees: ${numberToWords(d.grandTotal)} Only.</span></td>
+        <td style="padding:10px 0;text-align:right;font-size:11px;"><br><br><br><strong>Authorised Signatory</strong></td>
+      </tr>
+    </table>
+    <div style="font-size:10px;color:#999;text-align:center;margin-top:6px;">E. &amp; O.E.</div>
+  </div>`;
 }
 
 async function deleteDoc(id) {
@@ -1112,7 +1587,7 @@ async function deleteDoc(id) {
 function renderLogs() {
   const el=document.getElementById('logs-list');
   if(DB.logs.length===0){el.innerHTML='<div class="empty"><div class="empty-icon">📄</div><p>No logs yet</p></div>';return;}
-  const colors={'PRODUCTION':'var(--accent3)','RAW MATERIAL':'var(--accent2)','FINISHED STOCK':'var(--accent)','MACHINE':'var(--accent3)','DIE STOCK':'var(--accent)','DOCUMENT':'var(--accent3)','EDIT':'var(--muted)'};
+  const colors={'PRODUCTION':'var(--accent3)','RAW MATERIAL':'var(--accent2)','FINISHED STOCK':'var(--accent)','MACHINE':'var(--accent3)','DIE STOCK':'var(--accent)','DOCUMENT':'var(--accent3)','EDIT':'var(--muted)','PARTY':'var(--accent2)'};
   el.innerHTML=DB.logs.map(l=>`<div class="log-item"><div class="log-type" style="background:${colors[l.type]||'var(--muted)'}"></div><div class="log-time">${l.time||l.date||''}</div><div class="log-msg">${l.action||l.msg||''}${l.details?`<span style="color:var(--muted);font-size:11px"> — ${l.details}</span>`:''}</div></div>`).join('');
 }
 async function clearLogs() {
@@ -1129,8 +1604,9 @@ function exportToCSV() {
     {title:'RAW MATERIALS',headers:['Material','Size Inch','Size CM','Qty','Rate','Amount'],rows:DB.rawMaterials.map(r=>[r.material,r.sizeInch,r.sizeCm,r.qty,r.rate,r.qty*r.rate])},
     {title:'FINISHED STOCK',headers:['MFR','Carton','Qty','Rate','Value'],rows:DB.finishedStock.map(r=>[r.mfr,r.carton,r.qty,r.rate,r.qty*r.rate])},
     {title:'DIE STOCK',headers:['Die Name','MFR','Qty','Amount'],rows:DB.dieStock.map(r=>[r.name,r.mfr,r.qty,r.amount])},
+    {title:'PARTIES',headers:['Type','Name','Contact','Phone','Email','GSTIN','State'],rows:DB.parties.map(r=>[r.partyType,r.name,r.contactPerson,r.phone,r.email,r.gstin,r.state])},
     {title:'PRODUCTIONS',headers:['Item','Machines','Die','MFR','Product','Qty','Rate','Date'],rows:DB.productions.map(r=>[r.itemName,r.machineNames||'',r.dieName||'',r.mfr,r.name,r.qty,r.rate,r.date])},
-    {title:'DOCUMENTS',headers:['Type','Ref','Party','Date','Total'],rows:DB.invoices.map(r=>[r.docType,r.ref,r.party,r.date,r.grandTotal])},
+    {title:'DOCUMENTS',headers:['Type','Ref','Party','Date','GST Type','GST%','Total'],rows:DB.invoices.map(r=>[r.docType,r.ref,r.party,r.date,r.gstType||'',r.gstPct,r.grandTotal])},
   ];
   let csv='';
   for(const s of sections){csv+=`\n${s.title}\n`;csv+=s.headers.join(',')+'\n';csv+=s.rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');csv+='\n';}
