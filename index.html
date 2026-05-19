@@ -2,39 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/png" href="https://pristineprints.in/images/ppb.png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="https://pristineprints.in/images/ppb.png">
 <title>PRINTS — Stock Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0e0f11;
-    --surface: #16181c;
-    --card: #1d2026;
-    --border: #2a2d35;
-    --accent: #f5a623;
-    --accent2: #3ecf8e;
-    --accent3: #4f9cf9;
-    --danger: #f05252;
-    --text: #e8eaf0;
-    --muted: #6b7280;
-    --tag-bg: #252830;
+    --bg: #0e0f11; --surface: #16181c; --card: #1d2026; --border: #2a2d35;
+    --accent: #f5a623; --accent2: #3ecf8e; --accent3: #4f9cf9;
+    --danger: #f05252; --text: #e8eaf0; --muted: #6b7280; --tag-bg: #252830;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
-  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
-  .logo span { color: var(--accent); }
-  .nav-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-  .nav-tab { padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; border: none; background: none; color: var(--muted); transition: all 0.15s; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .logo img { height: 36px; width: auto; }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+  .logo-text span { color: var(--accent); }
+  .nav-tabs { display: flex; gap: 2px; flex-wrap: wrap; flex: 1; justify-content: center; }
+  .nav-tab { padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; border: none; background: none; color: var(--muted); transition: all 0.15s; white-space: nowrap; }
   .nav-tab:hover { color: var(--text); background: var(--card); }
   .nav-tab.active { color: var(--accent); background: rgba(245,166,35,0.1); }
-  .nav-right { display: flex; gap: 8px; align-items: center; }
-  .sync-btn { background: var(--accent); color: #000; border: none; padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.15s; font-family: 'DM Sans', sans-serif; }
+  .nav-right { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .sync-btn { background: var(--accent); color: #000; border: none; padding: 6px 13px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: opacity 0.15s; font-family: 'DM Sans', sans-serif; }
   .sync-btn:hover { opacity: 0.85; }
-  .sync-btn:disabled { opacity: 0.5; cursor: default; }
-
   .conn-status { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); }
   .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
   .conn-dot.online { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
@@ -42,8 +34,7 @@
   .conn-dot.syncing { background: var(--accent); animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  main { padding: 28px 24px; max-width: 1400px; margin: 0 auto; }
-
+  main { padding: 24px 20px; max-width: 1400px; margin: 0 auto; }
   .panel { display: none; animation: fadeIn 0.2s ease; }
   .panel.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -53,14 +44,10 @@
   .sec-title small { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 10px; }
   .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  input, select, textarea {
-    background: var(--card); border: 1px solid var(--border); color: var(--text);
-    padding: 8px 12px; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif;
-    outline: none; transition: border-color 0.15s;
-  }
+  input, select, textarea { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s; }
   input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   select option { background: var(--card); }
-  .search-input { min-width: 220px; }
+  .search-input { min-width: 200px; }
   .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
   .btn-primary { background: var(--accent); color: #000; }
   .btn-primary:hover { opacity: 0.85; }
@@ -70,6 +57,8 @@
   .btn-danger:hover { background: rgba(240,82,82,0.1); }
   .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-blue { background: var(--accent3); color: #fff; }
+  .btn-blue:hover { opacity: 0.85; }
 
   .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -83,37 +72,45 @@
   .badge-orange { background: rgba(245,166,35,0.15); color: var(--accent); }
   .badge-red { background: rgba(240,82,82,0.15); color: var(--danger); }
   .badge-blue { background: rgba(79,156,249,0.15); color: var(--accent3); }
-  .badge-gray { background: var(--tag-bg); color: var(--muted); }
   .action-cell { display: flex; gap: 6px; }
   .icon-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.15s; }
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
   .icon-btn.del:hover { border-color: var(--danger); color: var(--danger); }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
   .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
   .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
   .stat-value { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; }
   .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; position: relative; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 620px; max-width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
   .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .field { display: flex; flex-direction: column; gap: 5px; }
   .field label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; }
   .field input, .field select, .field textarea { width: 100%; }
-  .field textarea { height: 80px; resize: vertical; }
+  .field textarea { height: 70px; resize: vertical; }
   .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
   .close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; }
   .close-btn:hover { color: var(--text); }
   .span2 { grid-column: span 2; }
 
+  .section-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; font-family: 'DM Mono', monospace; margin: 16px 0 8px; }
   .recipe-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
   .recipe-row select, .recipe-row input { font-size: 12px; padding: 7px 10px; }
   .add-row-btn { background: none; border: 1px dashed var(--border); color: var(--muted); padding: 8px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; transition: all 0.15s; }
   .add-row-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .section-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; font-family: 'DM Mono', monospace; margin: 16px 0 8px; }
+
+  /* Multi-machine checkbox list */
+  .machine-check-list { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px; max-height: 130px; overflow-y: auto; }
+  .machine-check-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .machine-check-item:hover { background: rgba(255,255,255,0.04); }
+  .machine-check-item input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; }
+
+  /* Die select */
+  .die-select-wrap { position: relative; }
 
   #toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface); border: 1px solid var(--border); padding: 12px 20px; border-radius: 8px; font-size: 13px; display: none; z-index: 999; border-left: 3px solid var(--accent2); max-width: 320px; }
   #toast.error { border-left-color: var(--danger); }
@@ -130,7 +127,7 @@
   .rm-preview-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); }
   .rm-preview-row:last-child { border: none; }
 
-  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty { text-align: center; padding: 50px 20px; color: var(--muted); }
   .empty-icon { font-size: 40px; margin-bottom: 12px; }
   .empty p { font-size: 14px; }
 
@@ -144,11 +141,11 @@
   .qty-ctrl button { background: var(--surface); border: 1px solid var(--border); color: var(--text); width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; }
   .qty-ctrl button:hover { border-color: var(--accent); color: var(--accent); }
 
-  .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+  .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
   .quick-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; transition: all 0.2s; }
   .quick-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .qc-icon { font-size: 28px; margin-bottom: 10px; }
-  .qc-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .qc-icon { font-size: 26px; margin-bottom: 8px; }
+  .qc-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
   .qc-desc { font-size: 12px; color: var(--muted); }
 
   .type-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: rgba(79,156,249,0.15); color: var(--accent3); }
@@ -159,8 +156,29 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-msg { font-size: 14px; color: var(--muted); }
 
-  /* avail hint in recipe row */
-  .avail-hint { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); padding: 0 4px; white-space: nowrap; }
+  /* Documents panel */
+  .doc-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .doc-type-card { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .doc-type-card:hover, .doc-type-card.selected { border-color: var(--accent); background: rgba(245,166,35,0.05); }
+  .doc-type-card .dt-icon { font-size: 30px; margin-bottom: 8px; }
+  .doc-type-card .dt-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+  .doc-type-card .dt-desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .doc-form-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+  .line-item-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .line-item-row input, .line-item-row select { font-size: 12px; padding: 6px 10px; }
+
+  /* Invoice print area */
+  .invoice-preview-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 20px; }
+  #invoice-preview { background: #fff; color: #000; padding: 0; border-radius: 6px; overflow: hidden; }
+
+  /* Saved docs table */
+  .doc-history { margin-top: 24px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { position: fixed; inset: 0; background: #fff; padding: 20px; }
+  }
 </style>
 </head>
 <body>
@@ -171,7 +189,10 @@
 </div>
 
 <nav>
-  <div class="logo">PRINTS <span>DB</span></div>
+  <div class="logo">
+    <img src="https://pristineprints.in/images/ppb.png" alt="Pristine Prints" onerror="this.style.display='none'">
+    <div class="logo-text">PRINTS <span>DB</span></div>
+  </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPanel('dashboard')">Dashboard</button>
     <button class="nav-tab" onclick="showPanel('machine')">Machines</button>
@@ -179,6 +200,7 @@
     <button class="nav-tab" onclick="showPanel('finished')">Finished Stock</button>
     <button class="nav-tab" onclick="showPanel('dies')">Die Stock</button>
     <button class="nav-tab" onclick="showPanel('produce')">Production</button>
+    <button class="nav-tab" onclick="showPanel('documents')">📄 Documents</button>
     <button class="nav-tab" onclick="showPanel('logs')">Logs</button>
   </div>
   <div class="nav-right">
@@ -202,31 +224,12 @@
   <div class="stats-grid" id="dash-stats"></div>
   <div class="section-label">Quick Actions</div>
   <div class="quick-grid">
-    <div class="quick-card" onclick="showPanel('machine'); openModal('modal-machine')">
-      <div class="qc-icon">⚙️</div>
-      <div class="qc-title">Add Machine</div>
-      <div class="qc-desc">Register a printing or finishing machine</div>
-    </div>
-    <div class="quick-card" onclick="showPanel('rawmat'); openModal('modal-rawmat')">
-      <div class="qc-icon">📦</div>
-      <div class="qc-title">Add Raw Material</div>
-      <div class="qc-desc">Add paper, ink, chemicals to raw stock</div>
-    </div>
-    <div class="quick-card" onclick="showPanel('produce')">
-      <div class="qc-icon">🏭</div>
-      <div class="qc-title">Create Production Run</div>
-      <div class="qc-desc">Convert raw materials into finished goods</div>
-    </div>
-    <div class="quick-card" onclick="showPanel('finished'); openModal('modal-finished')">
-      <div class="qc-icon">🗃️</div>
-      <div class="qc-title">Add Finished Stock</div>
-      <div class="qc-desc">Manually add finished carton stock</div>
-    </div>
-    <div class="quick-card" onclick="showPanel('dies'); openModal('modal-die')">
-      <div class="qc-icon">✂️</div>
-      <div class="qc-title">Add Die</div>
-      <div class="qc-desc">Register a new die into stock</div>
-    </div>
+    <div class="quick-card" onclick="showPanel('machine'); openModal('modal-machine')"><div class="qc-icon">⚙️</div><div class="qc-title">Add Machine</div><div class="qc-desc">Register a machine</div></div>
+    <div class="quick-card" onclick="showPanel('rawmat'); openModal('modal-rawmat')"><div class="qc-icon">📦</div><div class="qc-title">Add Raw Material</div><div class="qc-desc">Paper, ink, chemicals</div></div>
+    <div class="quick-card" onclick="showPanel('produce')"><div class="qc-icon">🏭</div><div class="qc-title">Production Run</div><div class="qc-desc">Convert materials to finished goods</div></div>
+    <div class="quick-card" onclick="showPanel('finished'); openModal('modal-finished')"><div class="qc-icon">🗃️</div><div class="qc-title">Add Finished Stock</div><div class="qc-desc">Manually add carton stock</div></div>
+    <div class="quick-card" onclick="showPanel('dies'); openModal('modal-die')"><div class="qc-icon">✂️</div><div class="qc-title">Add Die</div><div class="qc-desc">Register a new die</div></div>
+    <div class="quick-card" onclick="showPanel('documents')"><div class="qc-icon">📄</div><div class="qc-title">Create Document</div><div class="qc-desc">Invoice, Receipt, DC, PO</div></div>
   </div>
   <div class="section-label" style="margin-top:28px">Low Stock Alerts</div>
   <div id="low-stock-list"></div>
@@ -240,25 +243,16 @@
       <input class="search-input" type="text" placeholder="Search machine..." oninput="filterTable('machine', this.value)">
       <select id="machine-type-filter" onchange="filterTable('machine','')">
         <option value="">All Types</option>
-        <option>offset</option>
-<option>Digital</option>
-        <option>Printing</option>
-        <option>Cutting</option>
-        <option>Lamination</option>
-        <option>Binding</option>
-        <option>Finishing</option>
-        <option>Other</option>
+        <option>Offset</option><option>Digital</option><option>Printing</option>
+        <option>Cutting</option><option>Lamination</option><option>Binding</option>
+        <option>Finishing</option><option>Other</option>
       </select>
       <button class="btn btn-primary" onclick="openModal('modal-machine')">+ Add Machine</button>
     </div>
   </div>
   <div class="table-wrap">
-    <table id="machine-table">
-      <thead><tr>
-        <th>#</th><th>Type</th><th>Machine Name</th><th>Purpose / Notes</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="machine-tbody"></tbody>
-    </table>
+    <table><thead><tr><th>#</th><th>Type</th><th>Machine Name</th><th>Purpose / Notes</th><th>Actions</th></tr></thead>
+    <tbody id="machine-tbody"></tbody></table>
   </div>
 </div>
 
@@ -272,13 +266,8 @@
     </div>
   </div>
   <div class="table-wrap">
-    <table id="rm-table">
-      <thead><tr>
-        <th>#</th><th>Material</th><th>Size (inch)</th><th>Size (cm)</th>
-        <th>Qty</th><th>Rate (₹)</th><th>Amount (₹)</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="rm-tbody"></tbody>
-    </table>
+    <table><thead><tr><th>#</th><th>Material</th><th>Size (inch)</th><th>Size (cm)</th><th>Qty</th><th>Rate (₹)</th><th>Amount (₹)</th><th>Actions</th></tr></thead>
+    <tbody id="rm-tbody"></tbody></table>
   </div>
 </div>
 
@@ -288,20 +277,13 @@
     <div class="sec-title">Finished Stock <small id="fs-count"></small></div>
     <div class="toolbar">
       <input class="search-input" type="text" placeholder="Search carton / MFR..." oninput="filterTable('fs', this.value)">
-      <select id="fs-mfr-filter" onchange="filterTable('fs','')">
-        <option value="">All MFRs</option>
-      </select>
+      <select id="fs-mfr-filter" onchange="filterTable('fs','')"><option value="">All MFRs</option></select>
       <button class="btn btn-primary" onclick="openModal('modal-finished')">+ Add Stock</button>
     </div>
   </div>
   <div class="table-wrap">
-    <table id="fs-table">
-      <thead><tr>
-        <th>#</th><th>MFR Name</th><th>Carton Name</th>
-        <th>Stock Qty</th><th>Rate (₹)</th><th>Value (₹)</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="fs-tbody"></tbody>
-    </table>
+    <table><thead><tr><th>#</th><th>MFR Name</th><th>Carton Name</th><th>Stock Qty</th><th>Rate (₹)</th><th>Value (₹)</th><th>Actions</th></tr></thead>
+    <tbody id="fs-tbody"></tbody></table>
   </div>
 </div>
 
@@ -311,32 +293,23 @@
     <div class="sec-title">Die Stock <small id="die-count"></small></div>
     <div class="toolbar">
       <input class="search-input" type="text" placeholder="Search die / MFR..." oninput="filterTable('die', this.value)">
-      <select id="die-mfr-filter" onchange="filterTable('die','')">
-        <option value="">All MFRs</option>
-      </select>
+      <select id="die-mfr-filter" onchange="filterTable('die','')"><option value="">All MFRs</option></select>
       <button class="btn btn-primary" onclick="openModal('modal-die')">+ Add Die</button>
     </div>
   </div>
   <div class="table-wrap">
-    <table id="die-table">
-      <thead><tr>
-        <th>#</th><th>Die Name</th><th>MFR</th><th>Qty</th><th>Amount (₹)</th><th>Actions</th>
-      </tr></thead>
-      <tbody id="die-tbody"></tbody>
-    </table>
+    <table><thead><tr><th>#</th><th>Die Name</th><th>MFR</th><th>Qty</th><th>Amount (₹)</th><th>Actions</th></tr></thead>
+    <tbody id="die-tbody"></tbody></table>
   </div>
 </div>
 
 <!-- PRODUCTION -->
 <div id="panel-produce" class="panel">
-  <div class="sec-head">
-    <div class="sec-title">Production Run</div>
-  </div>
+  <div class="sec-head"><div class="sec-title">Production Run</div></div>
   <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start;">
     <div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">
         <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">New Production Entry</div>
-
         <div class="section-label">Production Details</div>
         <div class="form-grid">
           <div class="field span2">
@@ -344,9 +317,15 @@
             <input id="prod-item-name" type="text" placeholder="e.g. Batch #B2401 — Flutiprl OX">
           </div>
           <div class="field span2">
-            <label>Machine Used <span style="color:var(--accent)">*</span></label>
-            <select id="prod-machine">
-              <option value="">— Select Machine —</option>
+            <label>Machines Used <span style="color:var(--accent)">*</span> <span style="color:var(--muted);font-weight:400;font-style:italic;text-transform:none">(select one or more)</span></label>
+            <div class="machine-check-list" id="prod-machine-list">
+              <div style="color:var(--muted);font-size:12px;padding:4px">No machines loaded yet</div>
+            </div>
+          </div>
+          <div class="field span2">
+            <label>Die Used <span style="color:var(--muted);font-weight:400;font-style:italic;text-transform:none">(optional — stock won't decrease)</span></label>
+            <select id="prod-die">
+              <option value="">— None / Select Die —</option>
             </select>
           </div>
           <div class="field">
@@ -359,31 +338,26 @@
           </div>
           <div class="field">
             <label>Qty Produced</label>
-            <input id="prod-qty" type="number" placeholder="e.g. 5000">
+            <input id="prod-qty" type="number" placeholder="e.g. 5000" oninput="updateProdPreview()">
           </div>
           <div class="field">
             <label>Rate per unit (₹)</label>
-            <input id="prod-rate" type="number" step="0.01" placeholder="e.g. 1.55">
+            <input id="prod-rate" type="number" step="0.01" placeholder="e.g. 1.55" oninput="updateProdPreview()">
           </div>
         </div>
-
         <div class="section-label">Raw Materials Used</div>
         <div id="recipe-rows"></div>
         <button class="add-row-btn" onclick="addRecipeRow()">+ Add Raw Material</button>
-
         <div style="margin-top:20px; display:flex; gap:8px; justify-content:flex-end;">
           <button class="btn btn-ghost" onclick="clearProdForm()">Clear</button>
           <button class="btn btn-success" onclick="createProduction()">✓ Confirm Production</button>
         </div>
       </div>
     </div>
-
     <div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">
         <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">Production Summary</div>
-        <div id="prod-preview">
-          <div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div>
-        </div>
+        <div id="prod-preview"><div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div></div>
       </div>
       <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">
         <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;">Recent Productions</div>
@@ -393,48 +367,84 @@
   </div>
 </div>
 
+<!-- DOCUMENTS -->
+<div id="panel-documents" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">Documents</div>
+    <div class="toolbar">
+      <button class="btn btn-ghost" onclick="showDocHistory()">📋 View Saved</button>
+    </div>
+  </div>
+
+  <div class="doc-type-grid">
+    <div class="doc-type-card selected" id="dt-invoice" onclick="selectDocType('invoice')">
+      <div class="dt-icon">🧾</div><div class="dt-title">Invoice</div><div class="dt-desc">Tax invoice with GST</div>
+    </div>
+    <div class="doc-type-card" id="dt-receipt" onclick="selectDocType('receipt')">
+      <div class="dt-icon">✅</div><div class="dt-title">Receipt</div><div class="dt-desc">Payment receipt</div>
+    </div>
+    <div class="doc-type-card" id="dt-dc" onclick="selectDocType('dc')">
+      <div class="dt-icon">🚚</div><div class="dt-title">Delivery Challan</div><div class="dt-desc">Goods dispatch note</div>
+    </div>
+    <div class="doc-type-card" id="dt-po" onclick="selectDocType('po')">
+      <div class="dt-icon">📋</div><div class="dt-title">Purchase Order</div><div class="dt-desc">Vendor purchase order</div>
+    </div>
+  </div>
+
+  <div class="doc-form-wrap" id="doc-form-area">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="invoice-preview-wrap" id="doc-preview-wrap" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;">Preview</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="printDoc()">🖨 Print</button>
+        <button class="btn btn-success" onclick="saveDoc()">💾 Save</button>
+      </div>
+    </div>
+    <div id="invoice-preview"></div>
+  </div>
+
+  <div class="doc-history" id="doc-history-wrap" style="display:none;">
+    <div class="sec-head">
+      <div class="sec-title" style="font-size:16px;">Saved Documents</div>
+      <button class="btn btn-ghost" onclick="document.getElementById('doc-history-wrap').style.display='none'">✕ Close</button>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr><th>#</th><th>Type</th><th>No.</th><th>Party</th><th>Date</th><th>Amount</th><th>Actions</th></tr></thead>
+      <tbody id="doc-history-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
 <!-- LOGS -->
 <div id="panel-logs" class="panel">
   <div class="sec-head">
     <div class="sec-title">Activity Logs</div>
-    <div class="toolbar">
-      <button class="btn btn-danger" onclick="clearLogs()">Clear Logs</button>
-    </div>
+    <div class="toolbar"><button class="btn btn-danger" onclick="clearLogs()">Clear Logs</button></div>
   </div>
   <div id="logs-list"></div>
 </div>
 
 </main>
 
-<!-- MODALS -->
-
-<!-- Machine Modal -->
+<!-- ====== MODALS ====== -->
 <div class="modal-overlay" id="modal-machine">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-machine')">✕</button>
     <div class="modal-title" id="machine-modal-title">Add Machine</div>
     <div class="form-grid">
       <input type="hidden" id="machine-edit-id">
-      <div class="field">
-        <label>Machine Type</label>
+      <div class="field"><label>Machine Type</label>
         <select id="machine-type">
           <option value="">— Select Type —</option>
-          <option>Printing</option>
-          <option>Cutting</option>
-          <option>Lamination</option>
-          <option>Binding</option>
-          <option>Finishing</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Machine Name</label>
-        <input id="machine-name" placeholder="e.g. Heidelberg SM 52">
-      </div>
-      <div class="field span2">
-        <label>Purpose / Notes</label>
-        <textarea id="machine-purpose" placeholder="e.g. 4-colour offset printing, A3 max sheet size"></textarea>
-      </div>
+          <option>Offset</option><option>Digital</option><option>Printing</option>
+          <option>Cutting</option><option>Lamination</option><option>Binding</option>
+          <option>Finishing</option><option>Other</option>
+        </select></div>
+      <div class="field"><label>Machine Name</label><input id="machine-name" placeholder="e.g. Heidelberg SM 52"></div>
+      <div class="field span2"><label>Purpose / Notes</label><textarea id="machine-purpose" placeholder="e.g. 4-colour offset printing, A3 max sheet size"></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-machine')">Cancel</button>
@@ -443,7 +453,6 @@
   </div>
 </div>
 
-<!-- Raw Material Modal -->
 <div class="modal-overlay" id="modal-rawmat">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-rawmat')">✕</button>
@@ -463,7 +472,6 @@
   </div>
 </div>
 
-<!-- Finished Stock Modal -->
 <div class="modal-overlay" id="modal-finished">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-finished')">✕</button>
@@ -482,7 +490,6 @@
   </div>
 </div>
 
-<!-- Die Modal -->
 <div class="modal-overlay" id="modal-die">
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-die')">✕</button>
@@ -501,63 +508,46 @@
   </div>
 </div>
 
+<!-- Hidden print area -->
+<div id="print-area" style="display:none;"></div>
+
 <div id="toast"></div>
 
 <script>
-// ============================================================
-//  CONFIG — replace with your deployed Apps Script URL
-// ============================================================
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxMV3UK6ywnI1QdiJPHWmueonivtmzE7T5YlJ-6j-7yKctsQTgHe7u9dwQc-zFgg5gS/exec';
 
-// ============================================================
-//  DATA STORE — no seed data; always fetched from GAS
-// ============================================================
-let DB = {
-  machines: [],
-  rawMaterials: [],
-  finishedStock: [],
-  dieStock: [],
-  productions: [],
-  logs: []
-};
+let DB = { machines:[], rawMaterials:[], finishedStock:[], dieStock:[], productions:[], logs:[], invoices:[] };
+let currentDocType = 'invoice';
+let docLineItems = [];
+let currentDocData = null; // holds last generated doc for saving
 
-// ============================================================
-//  GAS API
-// ============================================================
+// ============================================================ GAS API
 async function gasRequest(payload) {
   try {
-    setConnStatus('syncing', 'Syncing…');
+    setConnStatus('syncing','Syncing…');
     const url = new URL(GAS_URL);
     if (payload.action === 'getAll') {
-      url.searchParams.set('action', 'getAll');
-      const resp = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
+      url.searchParams.set('action','getAll');
+      const resp = await fetch(url.toString(),{method:'GET',redirect:'follow'});
       const data = await resp.json();
-      setConnStatus('online', 'Connected');
+      setConnStatus('online','Connected');
       return data;
     }
-    const resp = await fetch(url.toString(), {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
-    });
+    const resp = await fetch(url.toString(),{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
     const data = await resp.json();
-    setConnStatus('online', 'Connected');
+    setConnStatus('online','Connected');
     return data;
-  } catch (err) {
-    console.error('GAS error:', err);
-    setConnStatus('offline', 'Offline');
+  } catch(err) {
+    console.error('GAS error:',err);
+    setConnStatus('offline','Offline');
     throw err;
   }
 }
 
-// ============================================================
-//  SYNC — fetch all data from Google Sheets (no local seed fallback)
-// ============================================================
-async function syncAll(silent = false) {
+async function syncAll(silent=false) {
   if (!silent) showLoading('Fetching data…');
   try {
-    const data = await gasRequest({ action: 'getAll' });
+    const data = await gasRequest({action:'getAll'});
     if (data && data.success) {
       DB.machines      = data.machines      || [];
       DB.rawMaterials  = data.rawMaterials  || [];
@@ -565,13 +555,12 @@ async function syncAll(silent = false) {
       DB.dieStock      = data.dieStock      || [];
       DB.productions   = data.productions   || [];
       DB.logs          = data.logs          || [];
-      if (!silent) toast('Synced from Database ✓');
-    } else {
-      throw new Error(data?.error || 'Unknown error from server');
-    }
-  } catch (err) {
-    toast('Sync failed: ' + err.message, 'error');
-    setConnStatus('offline', 'Offline');
+      DB.invoices      = data.invoices      || [];
+      if (!silent) toast('Synced ✓');
+    } else throw new Error(data?.error||'Unknown error');
+  } catch(err) {
+    toast('Sync failed: '+err.message,'error');
+    setConnStatus('offline','Offline');
   } finally {
     hideLoading();
     refreshCurrentPanel();
@@ -581,606 +570,579 @@ async function syncAll(silent = false) {
 async function writeToSheet(payload) {
   try {
     const result = await gasRequest(payload);
-    if (!result?.success) throw new Error(result?.error || 'Write failed');
+    if (!result?.success) throw new Error(result?.error||'Write failed');
     await syncAll(true);
     return true;
-  } catch (err) {
-    toast('Save failed: ' + err.message, 'error');
+  } catch(err) {
+    toast('Save failed: '+err.message,'error');
     return false;
   }
 }
 
-// ============================================================
-//  UTILS
-// ============================================================
-function fmt(n) { return (isNaN(n)||n===''||n===null) ? '—' : '₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2}); }
-function fmtN(n) { return isNaN(n) ? '—' : Number(n).toLocaleString('en-IN'); }
+// ============================================================ UTILS
+function fmt(n) { return (isNaN(n)||n===''||n===null)?'—':'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2}); }
+function fmtN(n) { return isNaN(n)?'—':Number(n).toLocaleString('en-IN'); }
+function fmtRaw(n) { return isNaN(n)||n===null?0:parseFloat(Number(n).toFixed(2)); }
+function toast(msg,type='') { const el=document.getElementById('toast'); el.textContent=msg; el.className='show '+type; setTimeout(()=>el.className='',3500); }
+function setConnStatus(state,text) { document.getElementById('conn-dot').className='conn-dot '+state; document.getElementById('conn-text').textContent=text; }
+function showLoading(msg) { document.getElementById('loading-msg').textContent=msg||'Loading…'; document.getElementById('loading-overlay').classList.remove('hidden'); }
+function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
-function toast(msg, type='') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show ' + type;
-  setTimeout(() => el.className = '', 3500);
-}
-
-function setConnStatus(state, text) {
-  document.getElementById('conn-dot').className = 'conn-dot ' + state;
-  document.getElementById('conn-text').textContent = text;
-}
-
-function showLoading(msg) {
-  document.getElementById('loading-msg').textContent = msg || 'Loading…';
-  document.getElementById('loading-overlay').classList.remove('hidden');
-}
-
-function hideLoading() {
-  document.getElementById('loading-overlay').classList.add('hidden');
-}
-
-// ============================================================
-//  PANEL NAVIGATION
-// ============================================================
-const PANELS = ['dashboard','machine','rawmat','finished','dies','produce','logs'];
-
+// ============================================================ PANELS
+const PANELS=['dashboard','machine','rawmat','finished','dies','produce','documents','logs'];
 function showPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
   document.querySelectorAll('.nav-tab')[PANELS.indexOf(id)].classList.add('active');
   renderPanel(id);
 }
-
 function renderPanel(id) {
-  if (id === 'dashboard') renderDash();
-  if (id === 'machine')   renderMachines();
-  if (id === 'rawmat')    renderRM();
-  if (id === 'finished')  renderFS();
-  if (id === 'dies')      renderDies();
-  if (id === 'produce')   renderProdForm();
-  if (id === 'logs')      renderLogs();
+  if(id==='dashboard') renderDash();
+  if(id==='machine') renderMachines();
+  if(id==='rawmat') renderRM();
+  if(id==='finished') renderFS();
+  if(id==='dies') renderDies();
+  if(id==='produce') renderProdForm();
+  if(id==='documents') renderDocPanel();
+  if(id==='logs') renderLogs();
 }
+function refreshCurrentPanel() { const a=document.querySelector('.panel.active'); if(!a) return; renderPanel(a.id.replace('panel-','')); }
 
-function refreshCurrentPanel() {
-  const active = document.querySelector('.panel.active');
-  if (!active) return;
-  renderPanel(active.id.replace('panel-', ''));
-}
-
-// ============================================================
-//  MODALS
-// ============================================================
+// ============================================================ MODALS
 function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  document.getElementById(id).querySelectorAll('input,select,textarea').forEach(el => { if (el.type !== 'hidden') el.value = ''; });
-}
-document.querySelectorAll('.modal-overlay').forEach(o =>
-  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); })
-);
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.getElementById(id).querySelectorAll('input,select,textarea').forEach(el=>{if(el.type!=='hidden')el.value='';}); }
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
 
-// ============================================================
-//  DASHBOARD
-// ============================================================
+// ============================================================ DASHBOARD
 function renderDash() {
-  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
-  const rmTotal  = DB.rawMaterials.reduce((s,r) => s + (r.qty * r.rate), 0);
-  const fsTotal  = DB.finishedStock.reduce((s,r) => s + (r.qty * r.rate), 0);
-  const dieTotal = DB.dieStock.reduce((s,r) => s + (r.amount || 0), 0);
-
-  document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Machines</div><div class="stat-value" style="color:var(--accent3)">${DB.machines.length}</div><div class="stat-sub">Registered machines</div></div>
-    <div class="stat-card"><div class="stat-label">Raw Materials</div><div class="stat-value" style="color:var(--accent3)">${DB.rawMaterials.length}</div><div class="stat-sub">Total value ${fmt(rmTotal)}</div></div>
-    <div class="stat-card"><div class="stat-label">Finished Stock</div><div class="stat-value" style="color:var(--accent2)">${DB.finishedStock.length}</div><div class="stat-sub">Total value ${fmt(fsTotal)}</div></div>
-    <div class="stat-card"><div class="stat-label">Die Stock</div><div class="stat-value" style="color:var(--accent)">${DB.dieStock.length}</div><div class="stat-sub">Total value ${fmt(dieTotal)}</div></div>
-    <div class="stat-card"><div class="stat-label">Production Runs</div><div class="stat-value">${DB.productions.length}</div><div class="stat-sub">Recorded sessions</div></div>
-  `;
-
-  const lowRM = DB.rawMaterials.filter(r => r.qty < 10);
-  const lowFS = DB.finishedStock.filter(r => r.qty < 500);
-  const allLow = [
-    ...lowRM.map(r => ({name: r.material + (r.sizeInch ? ' ' + r.sizeInch : ''), qty: r.qty, type: 'Raw Material'})),
-    ...lowFS.map(r => ({name: r.carton + ' (' + r.mfr + ')', qty: r.qty, type: 'Finished Stock'}))
-  ];
-  document.getElementById('low-stock-list').innerHTML = allLow.length === 0
-    ? '<div class="empty"><div class="empty-icon">✅</div><p>No low stock alerts</p></div>'
-    : allLow.map(a => `<div class="log-item">
-        <div class="log-type" style="background:var(--danger)"></div>
-        <div class="log-time">${a.type}</div>
-        <div class="log-msg"><strong>${a.name}</strong> — Only <span style="color:var(--danger)">${fmtN(a.qty)}</span> units remaining</div>
-      </div>`).join('');
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const rmTotal=DB.rawMaterials.reduce((s,r)=>s+(r.qty*r.rate),0);
+  const fsTotal=DB.finishedStock.reduce((s,r)=>s+(r.qty*r.rate),0);
+  const dieTotal=DB.dieStock.reduce((s,r)=>s+(r.amount||0),0);
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Machines</div><div class="stat-value" style="color:var(--accent3)">${DB.machines.length}</div><div class="stat-sub">Registered</div></div>
+    <div class="stat-card"><div class="stat-label">Raw Materials</div><div class="stat-value" style="color:var(--accent3)">${DB.rawMaterials.length}</div><div class="stat-sub">Value ${fmt(rmTotal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Finished Stock</div><div class="stat-value" style="color:var(--accent2)">${DB.finishedStock.length}</div><div class="stat-sub">Value ${fmt(fsTotal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Die Stock</div><div class="stat-value" style="color:var(--accent)">${DB.dieStock.length}</div><div class="stat-sub">Value ${fmt(dieTotal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Productions</div><div class="stat-value">${DB.productions.length}</div><div class="stat-sub">Recorded runs</div></div>
+    <div class="stat-card"><div class="stat-label">Documents</div><div class="stat-value" style="color:var(--accent3)">${DB.invoices.length}</div><div class="stat-sub">Saved docs</div></div>`;
+  const lowRM=DB.rawMaterials.filter(r=>r.qty<10);
+  const lowFS=DB.finishedStock.filter(r=>r.qty<500);
+  const allLow=[...lowRM.map(r=>({name:r.material+(r.sizeInch?' '+r.sizeInch:''),qty:r.qty,type:'Raw Material'})),...lowFS.map(r=>({name:r.carton+' ('+r.mfr+')',qty:r.qty,type:'Finished Stock'}))];
+  document.getElementById('low-stock-list').innerHTML=allLow.length===0?'<div class="empty"><div class="empty-icon">✅</div><p>No low stock alerts</p></div>':allLow.map(a=>`<div class="log-item"><div class="log-type" style="background:var(--danger)"></div><div class="log-time">${a.type}</div><div class="log-msg"><strong>${a.name}</strong> — Only <span style="color:var(--danger)">${fmtN(a.qty)}</span> remaining</div></div>`).join('');
 }
 
-// ============================================================
-//  MACHINES
-// ============================================================
-function renderMachines(filter = '') {
-  let rows = DB.machines;
-  if (filter) rows = rows.filter(r => (r.name + r.type + r.purpose).toLowerCase().includes(filter.toLowerCase()));
-  const selType = document.getElementById('machine-type-filter').value;
-  if (selType) rows = rows.filter(r => r.type === selType);
-  document.getElementById('machine-count').textContent = rows.length + ' machines';
-  document.getElementById('machine-tbody').innerHTML = rows.length === 0
-    ? `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">No machines added yet.</td></tr>`
-    : rows.map((r, i) => `
-    <tr>
-      <td class="mono" style="color:var(--muted)">${i+1}</td>
-      <td><span class="type-tag">${r.type || '—'}</span></td>
-      <td><strong>${r.name}</strong></td>
-      <td style="color:var(--muted);font-size:12px">${r.purpose || '—'}</td>
-      <td><div class="action-cell">
-        <button class="icon-btn" onclick="editMachine(${r.id})">✏ Edit</button>
-        <button class="icon-btn del" onclick="deleteMachine(${r.id})">✕</button>
-      </div></td>
-    </tr>`).join('');
+// ============================================================ MACHINES
+function renderMachines(filter='') {
+  let rows=DB.machines;
+  if(filter) rows=rows.filter(r=>(r.name+r.type+r.purpose).toLowerCase().includes(filter.toLowerCase()));
+  const selType=document.getElementById('machine-type-filter').value;
+  if(selType) rows=rows.filter(r=>r.type===selType);
+  document.getElementById('machine-count').textContent=rows.length+' machines';
+  document.getElementById('machine-tbody').innerHTML=rows.length===0?`<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">No machines yet.</td></tr>`:rows.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="type-tag">${r.type||'—'}</span></td><td><strong>${r.name}</strong></td><td style="color:var(--muted);font-size:12px">${r.purpose||'—'}</td><td><div class="action-cell"><button class="icon-btn" onclick="editMachine(${r.id})">✏ Edit</button><button class="icon-btn del" onclick="deleteMachine(${r.id})">✕</button></div></td></tr>`).join('');
 }
-
 function saveMachine() {
-  const type    = document.getElementById('machine-type').value;
-  const name    = document.getElementById('machine-name').value.trim();
-  const purpose = document.getElementById('machine-purpose').value.trim();
-  if (!name) { toast('Machine name required', 'error'); return; }
-  const editId = parseInt(document.getElementById('machine-edit-id').value) || 0;
-  showLoading(editId ? 'Updating machine…' : 'Saving machine…');
-  writeToSheet({ action: editId ? 'updateMachine' : 'addMachine', id: editId, type, name, purpose })
-    .then(ok => { if (ok) { closeModal('modal-machine'); toast(editId ? 'Machine updated!' : 'Machine added!'); } });
+  const type=document.getElementById('machine-type').value, name=document.getElementById('machine-name').value.trim(), purpose=document.getElementById('machine-purpose').value.trim();
+  if(!name){toast('Machine name required','error');return;}
+  const editId=parseInt(document.getElementById('machine-edit-id').value)||0;
+  showLoading(editId?'Updating…':'Saving…');
+  writeToSheet({action:editId?'updateMachine':'addMachine',id:editId,type,name,purpose}).then(ok=>{if(ok){closeModal('modal-machine');toast(editId?'Updated!':'Added!');}});
+}
+function editMachine(id) { const r=DB.machines.find(x=>x.id==id); if(!r) return; document.getElementById('machine-modal-title').textContent='Edit Machine'; document.getElementById('machine-edit-id').value=r.id; document.getElementById('machine-type').value=r.type||''; document.getElementById('machine-name').value=r.name; document.getElementById('machine-purpose').value=r.purpose||''; openModal('modal-machine'); }
+function deleteMachine(id) { const r=DB.machines.find(x=>x.id==id); if(!r||!confirm('Delete machine: '+r.name+'?')) return; showLoading('Deleting…'); writeToSheet({action:'deleteMachine',id:r.id}).then(ok=>{if(ok)toast('Deleted');}); }
+function filterTable(type,val) {
+  if(type==='machine') renderMachines(val);
+  if(type==='rm') renderRM(val);
+  if(type==='fs') renderFS(val, document.getElementById('fs-mfr-filter').value);
+  if(type==='die') renderDies(val, document.getElementById('die-mfr-filter').value);
 }
 
-function editMachine(id) {
-  const r = DB.machines.find(x => x.id == id);
-  if (!r) return;
-  document.getElementById('machine-modal-title').textContent = 'Edit Machine';
-  document.getElementById('machine-edit-id').value = r.id;
-  document.getElementById('machine-type').value = r.type || '';
-  document.getElementById('machine-name').value = r.name;
-  document.getElementById('machine-purpose').value = r.purpose || '';
-  openModal('modal-machine');
+// ============================================================ RAW MATERIALS
+function renderRM(filter='') {
+  let rows=DB.rawMaterials;
+  if(filter) rows=rows.filter(r=>(r.material+r.sizeInch).toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('rm-count').textContent=rows.length+' items';
+  document.getElementById('rm-tbody').innerHTML=rows.length===0?`<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No materials.</td></tr>`:rows.map((r,i)=>`<tr class="${r.qty<10?'low-stock':''}"><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${r.material}</strong></td><td class="mono">${r.sizeInch||'—'}</td><td class="mono" style="color:var(--muted);font-size:11px">${r.sizeCm||'—'}</td><td><span class="badge ${r.qty<10?'badge-red':r.qty<50?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td><td class="mono">${fmt(r.rate)}</td><td class="mono">${fmt(r.qty*r.rate)}</td><td><div class="action-cell"><button class="icon-btn" onclick="editRM(${r.id})">✏ Edit</button><button class="icon-btn del" onclick="deleteRM(${r.id})">✕</button></div></td></tr>`).join('');
 }
-
-function deleteMachine(id) {
-  const r = DB.machines.find(x => x.id == id);
-  if (!r || !confirm('Delete machine: ' + r.name + '?')) return;
-  showLoading('Deleting machine…');
-  writeToSheet({ action: 'deleteMachine', id: r.id }).then(ok => { if (ok) toast('Deleted'); });
-}
-
-function filterTable(type, val) {
-  if (type === 'machine') renderMachines(val);
-  if (type === 'rm')      renderRM(val);
-  if (type === 'fs')      renderFS(val, document.getElementById('fs-mfr-filter').value);
-  if (type === 'die')     renderDies(val, document.getElementById('die-mfr-filter').value);
-}
-
-// ============================================================
-//  RAW MATERIALS
-// ============================================================
-function renderRM(filter = '') {
-  let rows = DB.rawMaterials;
-  if (filter) rows = rows.filter(r => (r.material + r.sizeInch).toLowerCase().includes(filter.toLowerCase()));
-  document.getElementById('rm-count').textContent = rows.length + ' items';
-  document.getElementById('rm-tbody').innerHTML = rows.length === 0
-    ? `<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No materials found.</td></tr>`
-    : rows.map((r, i) => `
-    <tr class="${r.qty < 10 ? 'low-stock' : ''}">
-      <td class="mono" style="color:var(--muted)">${i+1}</td>
-      <td><strong>${r.material}</strong></td>
-      <td class="mono">${r.sizeInch || '—'}</td>
-      <td class="mono" style="color:var(--muted);font-size:11px">${r.sizeCm || '—'}</td>
-      <td><span class="badge ${r.qty<10?'badge-red':r.qty<50?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td>
-      <td class="mono">${fmt(r.rate)}</td>
-      <td class="mono">${fmt(r.qty * r.rate)}</td>
-      <td><div class="action-cell">
-        <button class="icon-btn" onclick="editRM(${r.id})">✏ Edit</button>
-        <button class="icon-btn del" onclick="deleteRM(${r.id})">✕</button>
-      </div></td>
-    </tr>`).join('');
-}
-
 function saveRawMaterial() {
-  const mat  = document.getElementById('rm-material').value.trim();
-  const qty  = parseFloat(document.getElementById('rm-qty').value) || 0;
-  const rate = parseFloat(document.getElementById('rm-rate').value) || 0;
-  if (!mat) { toast('Material name required', 'error'); return; }
-  const editId = parseInt(document.getElementById('rm-edit-id').value) || 0;
-  showLoading(editId ? 'Updating material…' : 'Saving material…');
-  writeToSheet({
-    action: editId ? 'updateRawMaterial' : 'addRawMaterial',
-    id: editId,
-    material: mat,
-    sizeInch: document.getElementById('rm-size-inch').value,
-    sizeCm: document.getElementById('rm-size-cm').value,
-    qty, rate
-  }).then(ok => { if (ok) { closeModal('modal-rawmat'); toast(editId ? 'Updated!' : 'Added!'); } });
+  const mat=document.getElementById('rm-material').value.trim(), qty=parseFloat(document.getElementById('rm-qty').value)||0, rate=parseFloat(document.getElementById('rm-rate').value)||0;
+  if(!mat){toast('Material name required','error');return;}
+  const editId=parseInt(document.getElementById('rm-edit-id').value)||0;
+  showLoading(editId?'Updating…':'Saving…');
+  writeToSheet({action:editId?'updateRawMaterial':'addRawMaterial',id:editId,material:mat,sizeInch:document.getElementById('rm-size-inch').value,sizeCm:document.getElementById('rm-size-cm').value,qty,rate}).then(ok=>{if(ok){closeModal('modal-rawmat');toast(editId?'Updated!':'Added!');}});
 }
+function editRM(id) { const r=DB.rawMaterials.find(x=>x.id==id); if(!r) return; document.getElementById('rawmat-modal-title').textContent='Edit Raw Material'; document.getElementById('rm-edit-id').value=id; document.getElementById('rm-material').value=r.material; document.getElementById('rm-size-inch').value=r.sizeInch||''; document.getElementById('rm-size-cm').value=r.sizeCm||''; document.getElementById('rm-qty').value=r.qty; document.getElementById('rm-rate').value=r.rate; openModal('modal-rawmat'); }
+function deleteRM(id) { const r=DB.rawMaterials.find(x=>x.id==id); if(!r||!confirm('Delete '+r.material+'?')) return; showLoading('Deleting…'); writeToSheet({action:'deleteRawMaterial',id}).then(ok=>{if(ok)toast('Deleted');}); }
 
-function editRM(id) {
-  const r = DB.rawMaterials.find(x => x.id == id);
-  if (!r) return;
-  document.getElementById('rawmat-modal-title').textContent = 'Edit Raw Material';
-  document.getElementById('rm-edit-id').value = id;
-  document.getElementById('rm-material').value = r.material;
-  document.getElementById('rm-size-inch').value = r.sizeInch || '';
-  document.getElementById('rm-size-cm').value = r.sizeCm || '';
-  document.getElementById('rm-qty').value = r.qty;
-  document.getElementById('rm-rate').value = r.rate;
-  openModal('modal-rawmat');
+// ============================================================ FINISHED STOCK
+function renderFS(filter='',mfrFilter='') {
+  let rows=DB.finishedStock;
+  if(filter) rows=rows.filter(r=>(r.carton+r.mfr).toLowerCase().includes(filter.toLowerCase()));
+  if(mfrFilter) rows=rows.filter(r=>r.mfr===mfrFilter);
+  const mfrs=[...new Set(DB.finishedStock.map(r=>r.mfr))].sort();
+  const sel=document.getElementById('fs-mfr-filter'); const cur=sel.value;
+  sel.innerHTML='<option value="">All MFRs</option>'+mfrs.map(m=>`<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
+  document.getElementById('fs-count').textContent=rows.length+' items';
+  document.getElementById('fs-tbody').innerHTML=rows.length===0?`<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No items.</td></tr>`:rows.map((r,i)=>`<tr class="${r.qty<500?'low-stock':''}"><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="mfr-tag">${r.mfr}</span></td><td><strong>${r.carton}</strong></td><td><span class="badge ${r.qty<500?'badge-red':r.qty<5000?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td><td class="mono">${fmt(r.rate)}</td><td class="mono">${fmt(r.qty*r.rate)}</td><td><div class="action-cell"><button class="icon-btn" onclick="editFS(${r.id})">✏ Edit</button><button class="icon-btn del" onclick="deleteFS(${r.id})">✕</button></div></td></tr>`).join('');
 }
-
-function deleteRM(id) {
-  const r = DB.rawMaterials.find(x => x.id == id);
-  if (!r || !confirm('Delete ' + r.material + '?')) return;
-  showLoading('Deleting material…');
-  writeToSheet({ action: 'deleteRawMaterial', id }).then(ok => { if (ok) toast('Deleted'); });
-}
-
-// ============================================================
-//  FINISHED STOCK
-// ============================================================
-function renderFS(filter = '', mfrFilter = '') {
-  let rows = DB.finishedStock;
-  if (filter) rows = rows.filter(r => (r.carton + r.mfr).toLowerCase().includes(filter.toLowerCase()));
-  if (mfrFilter) rows = rows.filter(r => r.mfr === mfrFilter);
-  const mfrs = [...new Set(DB.finishedStock.map(r => r.mfr))].sort();
-  const sel = document.getElementById('fs-mfr-filter');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">All MFRs</option>' + mfrs.map(m => `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
-  document.getElementById('fs-count').textContent = rows.length + ' items';
-  document.getElementById('fs-tbody').innerHTML = rows.length === 0
-    ? `<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No items found.</td></tr>`
-    : rows.map((r, i) => `
-    <tr class="${r.qty < 500 ? 'low-stock' : ''}">
-      <td class="mono" style="color:var(--muted)">${i+1}</td>
-      <td><span class="mfr-tag">${r.mfr}</span></td>
-      <td><strong>${r.carton}</strong></td>
-      <td><span class="badge ${r.qty<500?'badge-red':r.qty<5000?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td>
-      <td class="mono">${fmt(r.rate)}</td>
-      <td class="mono">${fmt(r.qty * r.rate)}</td>
-      <td><div class="action-cell">
-        <button class="icon-btn" onclick="editFS(${r.id})">✏ Edit</button>
-        <button class="icon-btn del" onclick="deleteFS(${r.id})">✕</button>
-      </div></td>
-    </tr>`).join('');
-}
-
 function saveFinished() {
-  const mfr    = document.getElementById('fs-mfr').value.trim();
-  const carton = document.getElementById('fs-carton').value.trim();
-  const qty    = parseInt(document.getElementById('fs-qty').value) || 0;
-  const rate   = parseFloat(document.getElementById('fs-rate').value) || 0;
-  if (!mfr || !carton) { toast('MFR and carton name required', 'error'); return; }
-  const editId = parseInt(document.getElementById('fs-edit-id').value) || 0;
-  showLoading(editId ? 'Updating stock…' : 'Saving stock…');
-  writeToSheet({ action: editId ? 'updateFinishedStock' : 'addFinishedStock', id: editId, mfr, carton, qty, rate })
-    .then(ok => { if (ok) { closeModal('modal-finished'); toast(editId ? 'Updated!' : 'Added!'); } });
+  const mfr=document.getElementById('fs-mfr').value.trim(), carton=document.getElementById('fs-carton').value.trim(), qty=parseInt(document.getElementById('fs-qty').value)||0, rate=parseFloat(document.getElementById('fs-rate').value)||0;
+  if(!mfr||!carton){toast('MFR and carton required','error');return;}
+  const editId=parseInt(document.getElementById('fs-edit-id').value)||0;
+  showLoading(editId?'Updating…':'Saving…');
+  writeToSheet({action:editId?'updateFinishedStock':'addFinishedStock',id:editId,mfr,carton,qty,rate}).then(ok=>{if(ok){closeModal('modal-finished');toast(editId?'Updated!':'Added!');}});
 }
+function editFS(id) { const r=DB.finishedStock.find(x=>x.id==id); if(!r) return; document.getElementById('finished-modal-title').textContent='Edit Finished Stock'; document.getElementById('fs-edit-id').value=id; document.getElementById('fs-mfr').value=r.mfr; document.getElementById('fs-carton').value=r.carton; document.getElementById('fs-qty').value=r.qty; document.getElementById('fs-rate').value=r.rate; openModal('modal-finished'); }
+function deleteFS(id) { const r=DB.finishedStock.find(x=>x.id==id); if(!r||!confirm('Delete '+r.carton+'?')) return; showLoading('Deleting…'); writeToSheet({action:'deleteFinishedStock',id}).then(ok=>{if(ok)toast('Deleted');}); }
 
-function editFS(id) {
-  const r = DB.finishedStock.find(x => x.id == id);
-  if (!r) return;
-  document.getElementById('finished-modal-title').textContent = 'Edit Finished Stock';
-  document.getElementById('fs-edit-id').value = id;
-  document.getElementById('fs-mfr').value = r.mfr;
-  document.getElementById('fs-carton').value = r.carton;
-  document.getElementById('fs-qty').value = r.qty;
-  document.getElementById('fs-rate').value = r.rate;
-  openModal('modal-finished');
+// ============================================================ DIE STOCK
+function renderDies(filter='',mfrFilter='') {
+  let rows=DB.dieStock;
+  if(filter) rows=rows.filter(r=>(r.name+r.mfr).toLowerCase().includes(filter.toLowerCase()));
+  const selMfr=mfrFilter||document.getElementById('die-mfr-filter').value;
+  if(selMfr) rows=rows.filter(r=>r.mfr===selMfr);
+  const mfrs=[...new Set(DB.dieStock.map(r=>r.mfr))].sort();
+  const sel=document.getElementById('die-mfr-filter'); const cur=sel.value;
+  sel.innerHTML='<option value="">All MFRs</option>'+mfrs.map(m=>`<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
+  document.getElementById('die-count').textContent=rows.length+' dies';
+  document.getElementById('die-tbody').innerHTML=rows.length===0?`<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted)">No dies.</td></tr>`:rows.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${r.name}</strong></td><td><span class="mfr-tag">${r.mfr}</span></td><td><div class="qty-ctrl"><button onclick="changeDieQty(${r.id},-1)">−</button><span class="mono">${r.qty}</span><button onclick="changeDieQty(${r.id},1)">+</button></div></td><td class="mono">${r.amount?fmt(r.amount):'—'}</td><td><div class="action-cell"><button class="icon-btn" onclick="editDie(${r.id})">✏ Edit</button><button class="icon-btn del" onclick="deleteDie(${r.id})">✕</button></div></td></tr>`).join('');
 }
-
-function deleteFS(id) {
-  const r = DB.finishedStock.find(x => x.id == id);
-  if (!r || !confirm('Delete ' + r.carton + '?')) return;
-  showLoading('Deleting…');
-  writeToSheet({ action: 'deleteFinishedStock', id }).then(ok => { if (ok) toast('Deleted'); });
-}
-
-// ============================================================
-//  DIE STOCK
-// ============================================================
-function renderDies(filter = '', mfrFilter = '') {
-  let rows = DB.dieStock;
-  if (filter) rows = rows.filter(r => (r.name + r.mfr).toLowerCase().includes(filter.toLowerCase()));
-  const selMfr = mfrFilter || document.getElementById('die-mfr-filter').value;
-  if (selMfr) rows = rows.filter(r => r.mfr === selMfr);
-  const mfrs = [...new Set(DB.dieStock.map(r => r.mfr))].sort();
-  const sel = document.getElementById('die-mfr-filter');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">All MFRs</option>' + mfrs.map(m => `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
-  document.getElementById('die-count').textContent = rows.length + ' dies';
-  document.getElementById('die-tbody').innerHTML = rows.length === 0
-    ? `<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted)">No dies found.</td></tr>`
-    : rows.map((r, i) => `
-    <tr>
-      <td class="mono" style="color:var(--muted)">${i+1}</td>
-      <td><strong>${r.name}</strong></td>
-      <td><span class="mfr-tag">${r.mfr}</span></td>
-      <td>
-        <div class="qty-ctrl">
-          <button onclick="changeDieQty(${r.id},-1)">−</button>
-          <span class="mono">${r.qty}</span>
-          <button onclick="changeDieQty(${r.id},1)">+</button>
-        </div>
-      </td>
-      <td class="mono">${r.amount ? fmt(r.amount) : '—'}</td>
-      <td><div class="action-cell">
-        <button class="icon-btn" onclick="editDie(${r.id})">✏ Edit</button>
-        <button class="icon-btn del" onclick="deleteDie(${r.id})">✕</button>
-      </div></td>
-    </tr>`).join('');
-}
-
-function changeDieQty(id, delta) {
-  const r = DB.dieStock.find(x => x.id == id);
-  if (!r) return;
-  const newQty = Math.max(0, (r.qty || 0) + delta);
-  writeToSheet({ action: 'updateDieQty', id, qty: newQty })
-    .then(ok => { if (!ok) toast('Update failed', 'error'); });
-}
-
+function changeDieQty(id,delta) { const r=DB.dieStock.find(x=>x.id==id); if(!r) return; writeToSheet({action:'updateDieQty',id,qty:Math.max(0,(r.qty||0)+delta)}).then(ok=>{if(!ok)toast('Update failed','error');}); }
 function saveDie() {
-  const name   = document.getElementById('die-name').value.trim();
-  const mfr    = document.getElementById('die-mfr').value.trim();
-  const qty    = parseInt(document.getElementById('die-qty').value) || 1;
-  const amount = parseFloat(document.getElementById('die-amount').value) || 0;
-  if (!name || !mfr) { toast('Die name and MFR required', 'error'); return; }
-  const editId = parseInt(document.getElementById('die-edit-id').value) || 0;
-  showLoading(editId ? 'Updating die…' : 'Saving die…');
-  writeToSheet({ action: editId ? 'updateDie' : 'addDie', id: editId, name, mfr, qty, amount })
-    .then(ok => { if (ok) { closeModal('modal-die'); toast(editId ? 'Updated!' : 'Added!'); } });
+  const name=document.getElementById('die-name').value.trim(), mfr=document.getElementById('die-mfr').value.trim(), qty=parseInt(document.getElementById('die-qty').value)||1, amount=parseFloat(document.getElementById('die-amount').value)||0;
+  if(!name||!mfr){toast('Die name and MFR required','error');return;}
+  const editId=parseInt(document.getElementById('die-edit-id').value)||0;
+  showLoading(editId?'Updating…':'Saving…');
+  writeToSheet({action:editId?'updateDie':'addDie',id:editId,name,mfr,qty,amount}).then(ok=>{if(ok){closeModal('modal-die');toast(editId?'Updated!':'Added!');}});
 }
+function editDie(id) { const r=DB.dieStock.find(x=>x.id==id); if(!r) return; document.getElementById('die-modal-title').textContent='Edit Die'; document.getElementById('die-edit-id').value=id; document.getElementById('die-name').value=r.name; document.getElementById('die-mfr').value=r.mfr; document.getElementById('die-qty').value=r.qty; document.getElementById('die-amount').value=r.amount||0; openModal('modal-die'); }
+function deleteDie(id) { const r=DB.dieStock.find(x=>x.id==id); if(!r||!confirm('Delete die: '+r.name+'?')) return; showLoading('Deleting…'); writeToSheet({action:'deleteDie',id}).then(ok=>{if(ok)toast('Deleted');}); }
 
-function editDie(id) {
-  const r = DB.dieStock.find(x => x.id == id);
-  if (!r) return;
-  document.getElementById('die-modal-title').textContent = 'Edit Die';
-  document.getElementById('die-edit-id').value = id;
-  document.getElementById('die-name').value = r.name;
-  document.getElementById('die-mfr').value = r.mfr;
-  document.getElementById('die-qty').value = r.qty;
-  document.getElementById('die-amount').value = r.amount || 0;
-  openModal('modal-die');
-}
-
-function deleteDie(id) {
-  const r = DB.dieStock.find(x => x.id == id);
-  if (!r || !confirm('Delete die: ' + r.name + '?')) return;
-  showLoading('Deleting die…');
-  writeToSheet({ action: 'deleteDie', id }).then(ok => { if (ok) toast('Deleted'); });
-}
-
-// ============================================================
-//  PRODUCTION
-// ============================================================
-let recipeRows = [];
+// ============================================================ PRODUCTION
+let recipeRows=[];
 
 function renderProdForm() {
-  // Populate machine dropdown
-  const sel = document.getElementById('prod-machine');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— Select Machine —</option>' +
-    DB.machines.map(m => `<option value="${m.id}" ${m.id==cur?'selected':''}>${m.name}${m.type?' ('+m.type+')':''}</option>`).join('');
+  // Multi-machine checkboxes
+  const list=document.getElementById('prod-machine-list');
+  if(DB.machines.length===0) { list.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px">No machines in database yet</div>'; }
+  else {
+    const checked=getCheckedMachines();
+    list.innerHTML=DB.machines.map(m=>`
+      <label class="machine-check-item">
+        <input type="checkbox" value="${m.id}" ${checked.includes(String(m.id))?'checked':''} onchange="updateProdPreview()">
+        <span>${m.name}${m.type?' <span style="color:var(--muted);font-size:11px">('+m.type+')</span>':''}</span>
+      </label>`).join('');
+  }
+  // Die dropdown
+  const dieSel=document.getElementById('prod-die');
+  const curDie=dieSel.value;
+  dieSel.innerHTML='<option value="">— None / Select Die —</option>'+DB.dieStock.map(d=>`<option value="${d.id}" ${d.id==curDie?'selected':''}>${d.name} [${d.mfr}]</option>`).join('');
 
-  if (recipeRows.length === 0) addRecipeRow();
+  if(recipeRows.length===0) addRecipeRow();
+  else renderRecipeRows();
   renderProdHistory();
 }
 
-function addRecipeRow() {
-  const id = Date.now();
-  recipeRows.push({ id, rmId: '', qty: 0 });
-  renderRecipeRows();
+function getCheckedMachines() {
+  return [...document.querySelectorAll('#prod-machine-list input[type=checkbox]:checked')].map(el=>el.value);
 }
 
+function addRecipeRow() { const id=Date.now(); recipeRows.push({id,rmId:'',qty:0}); renderRecipeRows(); }
 function renderRecipeRows() {
-  document.getElementById('recipe-rows').innerHTML = recipeRows.map(row => `
+  document.getElementById('recipe-rows').innerHTML=recipeRows.map(row=>`
     <div class="recipe-row" id="rrow-${row.id}">
       <select onchange="updateRecipeRow(${row.id},'rmId',this.value)">
         <option value="">— Select Material —</option>
-        ${DB.rawMaterials.map(r => `<option value="${r.id}" ${r.id==row.rmId?'selected':''}>${r.material}${r.sizeInch?' ('+r.sizeInch+')':''} [${fmtN(r.qty)} avail]</option>`).join('')}
+        ${DB.rawMaterials.map(r=>`<option value="${r.id}" ${r.id==row.rmId?'selected':''}>${r.material}${r.sizeInch?' ('+r.sizeInch+')':''} [${fmtN(r.qty)} avail]</option>`).join('')}
       </select>
-      <input type="number" placeholder="Qty used" value="${row.qty || ''}" onchange="updateRecipeRow(${row.id},'qty',this.value)">
+      <input type="number" placeholder="Qty used" value="${row.qty||''}" onchange="updateRecipeRow(${row.id},'qty',this.value)">
       <button class="icon-btn del" onclick="removeRecipeRow(${row.id})">✕</button>
     </div>`).join('');
   updateProdPreview();
 }
-
-function updateRecipeRow(id, field, val) {
-  const row = recipeRows.find(r => r.id === id);
-  if (row) { row[field] = field === 'qty' ? parseFloat(val) || 0 : parseInt(val) || ''; }
-  updateProdPreview();
-}
-
-function removeRecipeRow(id) {
-  recipeRows = recipeRows.filter(r => r.id !== id);
-  renderRecipeRows();
-}
+function updateRecipeRow(id,field,val) { const row=recipeRows.find(r=>r.id===id); if(row){row[field]=field==='qty'?parseFloat(val)||0:parseInt(val)||'';} updateProdPreview(); }
+function removeRecipeRow(id) { recipeRows=recipeRows.filter(r=>r.id!==id); renderRecipeRows(); }
 
 function updateProdPreview() {
-  const itemName = document.getElementById('prod-item-name').value;
-  const machineId = document.getElementById('prod-machine').value;
-  const machineName = machineId
-    ? (DB.machines.find(m => m.id == machineId) || {}).name || '—'
-    : '—';
-  const mfr  = document.getElementById('prod-mfr').value;
-  const name = document.getElementById('prod-name').value;
-  const qty  = parseInt(document.getElementById('prod-qty').value) || 0;
-  const rate = parseFloat(document.getElementById('prod-rate').value) || 0;
-
-  const usedMats = recipeRows.filter(r => r.rmId && r.qty > 0).map(r => {
-    const mat = DB.rawMaterials.find(x => x.id == r.rmId);
-    return { mat, qty: r.qty, ok: mat && mat.qty >= r.qty };
-  });
-  const allOk = usedMats.every(u => u.ok);
-
-  document.getElementById('prod-preview').innerHTML = `
+  const itemName=document.getElementById('prod-item-name').value;
+  const checkedIds=getCheckedMachines();
+  const machines=DB.machines.filter(m=>checkedIds.includes(String(m.id)));
+  const machineStr=machines.length?machines.map(m=>m.name).join(', '):'— None selected —';
+  const dieId=document.getElementById('prod-die').value;
+  const die=dieId?DB.dieStock.find(d=>d.id==dieId):null;
+  const mfr=document.getElementById('prod-mfr').value;
+  const name=document.getElementById('prod-name').value;
+  const qty=parseInt(document.getElementById('prod-qty').value)||0;
+  const rate=parseFloat(document.getElementById('prod-rate').value)||0;
+  const usedMats=recipeRows.filter(r=>r.rmId&&r.qty>0).map(r=>{const mat=DB.rawMaterials.find(x=>x.id==r.rmId);return{mat,qty:r.qty,ok:mat&&mat.qty>=r.qty};});
+  const allOk=usedMats.every(u=>u.ok);
+  document.getElementById('prod-preview').innerHTML=`
     <div style="margin-bottom:12px">
-      ${itemName ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.05em">Production Name</div>
-      <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px">${itemName}</div>` : ''}
-      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
-        🖨 Machine: <strong style="color:var(--accent3)">${machineName}</strong>
-      </div>
+      ${itemName?`<div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Production Name</div><div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px">${itemName}</div>`:''}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">🖨 Machines: <strong style="color:var(--accent3)">${machineStr}</strong></div>
+      ${die?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">✂️ Die: <strong style="color:var(--accent)">${die.name}</strong></div>`:''}
       <div style="font-size:13px;color:var(--muted)">Finished Product</div>
-      <div style="font-size:16px;font-weight:700;margin-top:4px">${name || '—'} <span class="mfr-tag" style="font-size:12px">${mfr || '—'}</span></div>
-      <div style="margin-top:6px;font-family:'DM Mono',monospace;font-size:13px">
-        Qty: <strong>${fmtN(qty)}</strong> &nbsp; Rate: <strong>${fmt(rate)}</strong> &nbsp; Value: <strong style="color:var(--accent2)">${fmt(qty*rate)}</strong>
-      </div>
+      <div style="font-size:16px;font-weight:700;margin-top:4px">${name||'—'} <span class="mfr-tag">${mfr||'—'}</span></div>
+      <div style="margin-top:6px;font-family:'DM Mono',monospace;font-size:13px">Qty: <strong>${fmtN(qty)}</strong> &nbsp; Rate: <strong>${fmt(rate)}</strong> &nbsp; Value: <strong style="color:var(--accent2)">${fmt(qty*rate)}</strong></div>
     </div>
     <div class="rm-preview">
       <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">Raw Materials Used</div>
-      ${usedMats.length === 0
-        ? '<div style="color:var(--muted);font-size:12px">No materials added</div>'
-        : usedMats.map(u => `<div class="rm-preview-row">
-            <span>${u.mat.material}${u.mat.sizeInch ? ' ('+u.mat.sizeInch+')' : ''}</span>
-            <span style="color:${u.ok ? 'var(--accent2)' : 'var(--danger)'}">Use ${fmtN(u.qty)} / ${fmtN(u.mat.qty)} avail</span>
-          </div>`).join('')}
+      ${usedMats.length===0?'<div style="color:var(--muted);font-size:12px">No materials added</div>':usedMats.map(u=>`<div class="rm-preview-row"><span>${u.mat.material}${u.mat.sizeInch?' ('+u.mat.sizeInch+')':''}</span><span style="color:${u.ok?'var(--accent2)':'var(--danger)'}">Use ${fmtN(u.qty)} / ${fmtN(u.mat.qty)} avail</span></div>`).join('')}
     </div>
-    <div style="margin-top:12px">
-      <span class="badge ${allOk && name && qty && machineId ? 'badge-green' : 'badge-red'}">
-        ${allOk && name && qty && machineId ? '✓ Ready to produce' : '⚠ Check inputs'}
-      </span>
-    </div>`;
+    <div style="margin-top:12px"><span class="badge ${allOk&&name&&qty&&checkedIds.length?'badge-green':'badge-red'}">${allOk&&name&&qty&&checkedIds.length?'✓ Ready to produce':'⚠ Check inputs'}</span></div>`;
 }
 
-['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate','prod-machine'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateProdPreview);
-  document.getElementById(id).addEventListener('change', updateProdPreview);
+['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate','prod-die'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',updateProdPreview);
+  document.getElementById(id).addEventListener('change',updateProdPreview);
 });
 
 async function createProduction() {
-  const itemName  = document.getElementById('prod-item-name').value.trim();
-  const machineId = document.getElementById('prod-machine').value;
-  const mfr       = document.getElementById('prod-mfr').value.trim();
-  const name      = document.getElementById('prod-name').value.trim();
-  const qty       = parseInt(document.getElementById('prod-qty').value) || 0;
-  const rate      = parseFloat(document.getElementById('prod-rate').value) || 0;
-
-  if (!itemName)   { toast('Production item name required', 'error'); return; }
-  if (!machineId)  { toast('Please select a machine', 'error'); return; }
-  if (!mfr || !name || !qty) { toast('Fill MFR, product name, and qty', 'error'); return; }
-
-  const usedMats = recipeRows.filter(r => r.rmId && r.qty > 0);
-  for (const row of usedMats) {
-    const mat = DB.rawMaterials.find(x => x.id == row.rmId);
-    if (!mat) { toast('Invalid material selected', 'error'); return; }
-    if (mat.qty < row.qty) { toast(`Insufficient: ${mat.material} (need ${row.qty}, have ${mat.qty})`, 'error'); return; }
+  const itemName=document.getElementById('prod-item-name').value.trim();
+  const checkedIds=getCheckedMachines();
+  const machines=DB.machines.filter(m=>checkedIds.includes(String(m.id)));
+  const dieId=document.getElementById('prod-die').value;
+  const die=dieId?DB.dieStock.find(d=>d.id==dieId):null;
+  const mfr=document.getElementById('prod-mfr').value.trim();
+  const name=document.getElementById('prod-name').value.trim();
+  const qty=parseInt(document.getElementById('prod-qty').value)||0;
+  const rate=parseFloat(document.getElementById('prod-rate').value)||0;
+  if(!itemName){toast('Production item name required','error');return;}
+  if(checkedIds.length===0){toast('Select at least one machine','error');return;}
+  if(!mfr||!name||!qty){toast('Fill MFR, product name, and qty','error');return;}
+  const usedMats=recipeRows.filter(r=>r.rmId&&r.qty>0);
+  for(const row of usedMats){
+    const mat=DB.rawMaterials.find(x=>x.id==row.rmId);
+    if(!mat){toast('Invalid material selected','error');return;}
+    if(mat.qty<row.qty){toast(`Insufficient: ${mat.material} (need ${row.qty}, have ${mat.qty})`,'error');return;}
   }
-
-  const machine = DB.machines.find(m => m.id == machineId);
-  const machineName = machine ? machine.name + (machine.type ? ' (' + machine.type + ')' : '') : machineId;
-
   showLoading('Recording production run…');
-  const ok = await writeToSheet({
-    action: 'createProduction',
-    itemName, machineId, machineName, mfr, name, qty, rate,
-    materials: usedMats.map(r => {
-      const mat = DB.rawMaterials.find(x => x.id == r.rmId);
-      return { rmId: r.rmId, material: mat.material + (mat.sizeInch ? ' ' + mat.sizeInch : ''), qty: r.qty };
-    })
+  const ok=await writeToSheet({
+    action:'createProduction', itemName,
+    machineIds: machines.map(m=>m.id),
+    machineNames: machines.map(m=>m.name+(m.type?' ('+m.type+')':'')),
+    dieId: die?die.id:'', dieName: die?die.name:'',
+    mfr, name, qty, rate,
+    materials: usedMats.map(r=>{const mat=DB.rawMaterials.find(x=>x.id==r.rmId);return{rmId:r.rmId,material:mat.material+(mat.sizeInch?' '+mat.sizeInch:''),qty:r.qty};})
   });
-  if (ok) {
-    toast('Production recorded! ✓');
-    clearProdForm();
-    renderProdHistory();
-  }
+  if(ok){toast('Production recorded! ✓');clearProdForm();renderProdHistory();}
 }
 
 function clearProdForm() {
-  ['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('prod-machine').value = '';
-  recipeRows = [];
-  addRecipeRow();
-  document.getElementById('prod-preview').innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div>';
+  ['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('prod-die').value='';
+  document.querySelectorAll('#prod-machine-list input[type=checkbox]').forEach(cb=>cb.checked=false);
+  recipeRows=[]; addRecipeRow();
+  document.getElementById('prod-preview').innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div>';
 }
 
 function renderProdHistory() {
-  const el = document.getElementById('prod-history');
-  if (DB.productions.length === 0) {
-    el.innerHTML = '<div class="empty" style="padding:20px"><p>No production runs yet</p></div>';
-    return;
-  }
-  el.innerHTML = DB.productions.slice(0, 8).map(p => `
+  const el=document.getElementById('prod-history');
+  if(DB.productions.length===0){el.innerHTML='<div class="empty" style="padding:20px"><p>No production runs yet</p></div>';return;}
+  el.innerHTML=DB.productions.slice(0,8).map(p=>`
     <div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          ${p.itemName ? `<div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:2px">${p.itemName}</div>` : ''}
-          <strong>${p.name}</strong>
-        </div>
+        <div>${p.itemName?`<div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:2px">${p.itemName}</div>`:''}<strong>${p.name}</strong></div>
         <span class="badge badge-green">${fmtN(p.qty)} units</span>
       </div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px">
-        ${p.mfr} · ${p.machineName || ''} · ${p.date || ''}
-      </div>
-      ${p.materials && p.materials.length
-        ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${p.materials.map(m => (m.material || m.name || '') + ' (' + fmtN(m.qty) + ')').join(', ')}</div>`
-        : ''}
+      <div style="color:var(--muted);font-size:11px;margin-top:4px">${p.mfr} · ${p.machineNames||''} ${p.dieName?'· Die: '+p.dieName:''} · ${p.date||''}</div>
+      ${p.materials&&p.materials.length?`<div style="font-size:11px;color:var(--muted);margin-top:4px">${p.materials.map(m=>(m.material||m.name||'')+'('+fmtN(m.qty)+')').join(', ')}</div>`:''}
     </div>`).join('');
 }
 
-// ============================================================
-//  LOGS
-// ============================================================
+// ============================================================ DOCUMENTS
+function selectDocType(type) {
+  currentDocType=type;
+  document.querySelectorAll('.doc-type-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('dt-'+type).classList.add('selected');
+  renderDocForm(type);
+  document.getElementById('doc-preview-wrap').style.display='none';
+}
+
+function renderDocPanel() {
+  renderDocForm(currentDocType);
+  if(docLineItems.length===0) addDocLine();
+}
+
+function renderDocForm(type) {
+  const labels={invoice:'Invoice',receipt:'Receipt',dc:'Delivery Challan',po:'Purchase Order'};
+  const noLabel={invoice:'Bill To',receipt:'Received From',dc:'Deliver To',po:'Supplier'};
+  const refLabel={invoice:'Invoice No.',receipt:'Receipt No.',dc:'DC No.',po:'PO No.'};
+  const dateLabel={invoice:'Invoice Date',receipt:'Date',dc:'DC Date',po:'PO Date'};
+  const today=new Date().toISOString().split('T')[0];
+  const nextNo=String((DB.invoices.filter(d=>d.docType===type).length||0)+1).padStart(3,'0');
+  document.getElementById('doc-form-area').innerHTML=`
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">${labels[type]} Details</div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="field"><label>${refLabel[type]}</label><input id="doc-ref" value="${type.toUpperCase()}-${nextNo}" placeholder="Auto-numbered"></div>
+      <div class="field"><label>${dateLabel[type]}</label><input id="doc-date" type="date" value="${today}"></div>
+      <div class="field span2"><label>${noLabel[type]}</label><input id="doc-party" placeholder="Party name, address..."></div>
+      <div class="field"><label>GSTIN (Party)</label><input id="doc-gstin" placeholder="Optional"></div>
+      <div class="field"><label>GST %</label><select id="doc-gst-pct"><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="0">0% (No GST)</option></select></div>
+      ${type==='invoice'||type==='receipt'?`<div class="field span2"><label>Payment Mode</label><select id="doc-pay-mode"><option>Cash</option><option>NEFT/RTGS</option><option>UPI</option><option>Cheque</option><option>Credit</option></select></div>`:''}
+      <div class="field span2"><label>Notes / Remarks</label><input id="doc-notes" placeholder="Optional remarks"></div>
+    </div>
+    <div class="section-label">Line Items</div>
+    <div style="overflow-x:auto;">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:6px;padding:0 2px;">
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Particulars</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Qty</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Rate (₹)</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Amount (₹)</div>
+        <div></div>
+      </div>
+      <div id="doc-line-items"></div>
+    </div>
+    <button class="add-row-btn" onclick="addDocLine()" style="margin-top:8px;">+ Add Line</button>
+    <div style="margin-top:20px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="clearDocForm()">Clear</button>
+      <button class="btn btn-primary" onclick="generateDoc()">👁 Preview</button>
+    </div>`;
+  renderDocLines();
+}
+
+function addDocLine() { docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0}); renderDocLines(); }
+function removeDocLine(id) { docLineItems=docLineItems.filter(l=>l.id!==id); if(docLineItems.length===0) addDocLine(); else renderDocLines(); }
+function updateDocLine(id,field,val) { const l=docLineItems.find(x=>x.id===id); if(l){l[field]=field==='desc'?val:(parseFloat(val)||0);} renderDocLines(); }
+
+function renderDocLines() {
+  const cont=document.getElementById('doc-line-items');
+  if(!cont) return;
+  cont.innerHTML=docLineItems.map(l=>`
+    <div class="line-item-row">
+      <input value="${l.desc}" placeholder="Description" onchange="updateDocLine(${l.id},'desc',this.value)" oninput="updateDocLine(${l.id},'desc',this.value)">
+      <input type="number" value="${l.qty||''}" placeholder="Qty" min="0" onchange="updateDocLine(${l.id},'qty',this.value)" oninput="updateDocLine(${l.id},'qty',this.value)">
+      <input type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" onchange="updateDocLine(${l.id},'rate',this.value)" oninput="updateDocLine(${l.id},'rate',this.value)">
+      <input readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted)">
+      <button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button>
+    </div>`).join('');
+}
+
+function clearDocForm() { docLineItems=[]; renderDocForm(currentDocType); addDocLine(); document.getElementById('doc-preview-wrap').style.display='none'; }
+
+function generateDoc() {
+  const ref=document.getElementById('doc-ref')?.value.trim();
+  const party=document.getElementById('doc-party')?.value.trim();
+  const date=document.getElementById('doc-date')?.value;
+  const gstin=document.getElementById('doc-gstin')?.value.trim();
+  const gstPct=parseFloat(document.getElementById('doc-gst-pct')?.value||5);
+  const payMode=document.getElementById('doc-pay-mode')?.value||'';
+  const notes=document.getElementById('doc-notes')?.value.trim();
+  if(!party){toast('Party name required','error');return;}
+  const validLines=docLineItems.filter(l=>l.desc&&l.qty&&l.rate);
+  if(!validLines.length){toast('Add at least one line item','error');return;}
+  const subTotal=validLines.reduce((s,l)=>s+l.qty*l.rate,0);
+  const cgst=gstPct>0?(subTotal*gstPct/100)/2:0;
+  const sgst=cgst;
+  const grandTotal=subTotal+cgst+sgst;
+  const docDate=date?new Date(date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';
+  const typeLabels={invoice:'TAX INVOICE',receipt:'RECEIPT',dc:'DELIVERY CHALLAN',po:'PURCHASE ORDER'};
+  const html=`<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
+    <!-- Header -->
+    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;">
+      <tr>
+        <td style="width:60px;vertical-align:middle;padding-right:12px;">
+          <img src="https://pristineprints.in/images/ppb.png" style="width:54px;height:auto;" onerror="this.style.display='none'">
+        </td>
+        <td style="vertical-align:middle;">
+          <div style="font-size:18px;font-weight:900;color:#1a3a6e;font-family:Arial,sans-serif;">Pristine Prints</div>
+          <div style="font-size:10px;color:#555;">Complete Printing Solutions</div>
+        </td>
+        <td style="text-align:right;vertical-align:middle;">
+          <div style="font-size:15px;font-weight:700;color:#1a3a6e;">Multi Colour Digital</div>
+          <div style="font-size:15px;font-weight:700;color:#1a3a6e;">Package &amp; Offset Printings</div>
+        </td>
+      </tr>
+    </table>
+    <div style="text-align:center;font-size:11px;color:#555;border-top:1px solid #1a3a6e;border-bottom:1px solid #1a3a6e;padding:4px 0;margin-bottom:10px;">
+      Ground Floor, No-198, Thottasalai East, Power House Road, Perur Village, Coimbatore-641 010
+    </div>
+    <!-- Doc type banner -->
+    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1.5px solid #1a3a6e;">
+      <tr style="background:#1a3a6e;color:#fff;">
+        <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[currentDocType]} ${payMode?'/ '+payMode.toUpperCase()+' BILL':''}</td>
+        <td style="padding:6px 12px;text-align:right;font-size:13px;">No <strong>${ref}</strong> &nbsp;&nbsp; Date: <strong>${docDate}</strong></td>
+      </tr>
+    </table>
+    <!-- To / Party -->
+    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1px solid #ccc;">
+      <tr>
+        <td style="padding:8px 12px;width:50%;">
+          <div style="font-size:11px;color:#555;margin-bottom:2px;">To,</div>
+          <div style="font-weight:700;font-size:13px;">M/s. ${party}</div>
+          ${gstin?`<div style="font-size:11px;color:#555;margin-top:4px;">GSTIN: ${gstin}</div>`:''}
+        </td>
+        <td style="padding:8px 12px;text-align:right;vertical-align:top;border-left:1px solid #ccc;">
+          <div style="font-size:11px;color:#555;">GST No.: 33AANCP6204B1ZT</div>
+        </td>
+      </tr>
+    </table>
+    <!-- Items table -->
+    <table width="100%" style="border-collapse:collapse;border:1px solid #1a3a6e;margin-bottom:10px;font-size:12px;">
+      <thead>
+        <tr style="background:#1a3a6e;color:#fff;">
+          <th style="padding:7px 10px;text-align:left;width:40px;">Sl.No.</th>
+          <th style="padding:7px 10px;text-align:left;">Particulars</th>
+          <th style="padding:7px 10px;text-align:center;width:70px;">QTY</th>
+          <th style="padding:7px 10px;text-align:center;width:80px;">RATE</th>
+          ${gstPct>0?`<th style="padding:7px 10px;text-align:center;width:60px;">GST</th>`:''}
+          <th style="padding:7px 10px;text-align:right;width:100px;">AMOUNT</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${validLines.map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}">
+          <td style="padding:7px 10px;text-align:center;">${i+1}.</td>
+          <td style="padding:7px 10px;">${l.desc}</td>
+          <td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td>
+          <td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>
+          ${gstPct>0?`<td style="padding:7px 10px;text-align:center;">${gstPct}%</td>`:''}
+          <td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <!-- Totals -->
+    <table width="100%" style="border-collapse:collapse;margin-bottom:14px;">
+      <tr>
+        <td style="width:55%;vertical-align:top;padding-right:20px;">
+          <div style="background:#f5f5f5;border:1px solid #ddd;border-radius:4px;padding:10px 14px;font-size:11px;">
+            <div style="font-weight:700;margin-bottom:6px;">BANK DETAILS:</div>
+            <div>Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>PRISTINE PRINTS PRIVATE LIMITED</strong></div>
+            <div>Bank Name &nbsp;&nbsp;: HDFC BANK</div>
+            <div>Acc. No. &nbsp;&nbsp;&nbsp;&nbsp;: 99999790958200</div>
+            <div>IFSC &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: HDFC0001588</div>
+            <div>Branch &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Gandhipuram</div>
+          </div>
+          ${notes?`<div style="margin-top:8px;font-size:11px;color:#555;border:1px solid #ddd;padding:8px;border-radius:4px;">${notes}</div>`:''}
+        </td>
+        <td style="vertical-align:top;">
+          <table width="100%" style="border-collapse:collapse;border:1px solid #ccc;font-size:12px;">
+            <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SUB TOTAL</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;"><strong>${fmtRaw(subTotal)}</strong></td></tr>
+            ${gstPct>0?`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst)}</td></tr>
+            <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst)}</td></tr>`:''}
+            <tr style="background:#1a3a6e;color:#fff;font-weight:700;">
+              <td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(grandTotal)}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <!-- Footer -->
+    <table width="100%" style="border-collapse:collapse;border-top:1px solid #1a3a6e;padding-top:10px;margin-top:4px;">
+      <tr>
+        <td style="padding:10px 0;font-size:11px;width:65%;">
+          <strong>For PRISTINE PRINTS PVT. LTD.</strong><br>
+          <span style="color:#555;">Rupees: ${numberToWords(grandTotal)} Only.</span>
+        </td>
+        <td style="padding:10px 0;text-align:right;font-size:11px;">
+          <br><br><br>
+          <strong>Authorised Signatory</strong>
+        </td>
+      </tr>
+    </table>
+    <div style="font-size:10px;color:#999;text-align:center;margin-top:6px;">E. &amp; O.E.</div>
+  </div>`;
+  document.getElementById('invoice-preview').innerHTML=html;
+  document.getElementById('doc-preview-wrap').style.display='block';
+  document.getElementById('doc-preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+  // Store for saving
+  currentDocData={docType:currentDocType,ref,party,date,gstin,gstPct,payMode,notes,lines:validLines,subTotal,cgst,sgst,grandTotal,html};
+}
+
+function numberToWords(n) {
+  const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function convert(num) {
+    if(num===0) return '';
+    if(num<20) return a[num]+' ';
+    if(num<100) return b[Math.floor(num/10)]+' '+(num%10?a[num%10]+' ':'');
+    if(num<1000) return a[Math.floor(num/100)]+' Hundred '+(num%100?convert(num%100):'');
+    if(num<100000) return convert(Math.floor(num/1000))+' Thousand '+(num%1000?convert(num%1000):'');
+    if(num<10000000) return convert(Math.floor(num/100000))+' Lakh '+(num%100000?convert(num%100000):'');
+    return convert(Math.floor(num/10000000))+' Crore '+(num%10000000?convert(num%10000000):'');
+  }
+  return convert(Math.round(n)).trim()||'Zero';
+}
+
+function printDoc() {
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=document.getElementById('invoice-preview').innerHTML;
+  pa.style.display='block';
+  window.print();
+  setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
+}
+
+async function saveDoc() {
+  if(!currentDocData){toast('Generate a preview first','error');return;}
+  showLoading('Saving document…');
+  const ok=await writeToSheet({action:'saveDocument',...currentDocData,html:''});
+  if(ok) toast('Document saved ✓');
+}
+
+function showDocHistory() {
+  const wrap=document.getElementById('doc-history-wrap');
+  wrap.style.display=wrap.style.display==='none'?'block':'none';
+  if(wrap.style.display==='block') renderDocHistoryTable();
+}
+
+function renderDocHistoryTable() {
+  const tbody=document.getElementById('doc-history-tbody');
+  if(DB.invoices.length===0){tbody.innerHTML='<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No saved documents yet.</td></tr>';return;}
+  const typeLabels={invoice:'Invoice',receipt:'Receipt',dc:'DC',po:'PO'};
+  tbody.innerHTML=DB.invoices.map((d,i)=>`
+    <tr>
+      <td class="mono" style="color:var(--muted)">${i+1}</td>
+      <td><span class="badge badge-blue">${typeLabels[d.docType]||d.docType}</span></td>
+      <td class="mono">${d.ref||'—'}</td>
+      <td>${d.party||'—'}</td>
+      <td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td>
+      <td class="mono">${fmt(d.grandTotal)}</td>
+      <td><div class="action-cell"><button class="icon-btn" onclick="deleteDoc(${d.id})">✕ Del</button></div></td>
+    </tr>`).join('');
+}
+
+async function deleteDoc(id) {
+  if(!confirm('Delete this document?')) return;
+  showLoading('Deleting…');
+  const ok=await writeToSheet({action:'deleteDocument',id});
+  if(ok){toast('Deleted');renderDocHistoryTable();}
+}
+
+// ============================================================ LOGS
 function renderLogs() {
-  const el = document.getElementById('logs-list');
-  if (DB.logs.length === 0) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">📄</div><p>No activity logged yet</p></div>';
-    return;
-  }
-  const colors = {
-    'PRODUCTION':     'var(--accent3)',
-    'RAW MATERIAL':   'var(--accent2)',
-    'FINISHED STOCK': 'var(--accent)',
-    'MACHINE':        'var(--accent3)',
-    'DIE STOCK':      'var(--accent)',
-    'EDIT':           'var(--muted)'
-  };
-  el.innerHTML = DB.logs.map(l => `
-    <div class="log-item">
-      <div class="log-type" style="background:${colors[l.type] || 'var(--muted)'}"></div>
-      <div class="log-time">${l.time || l.date || ''}</div>
-      <div class="log-msg">
-        ${l.action || l.msg || ''}
-        ${l.details ? `<span style="color:var(--muted);font-size:11px"> — ${l.details}</span>` : ''}
-      </div>
-    </div>`).join('');
+  const el=document.getElementById('logs-list');
+  if(DB.logs.length===0){el.innerHTML='<div class="empty"><div class="empty-icon">📄</div><p>No logs yet</p></div>';return;}
+  const colors={'PRODUCTION':'var(--accent3)','RAW MATERIAL':'var(--accent2)','FINISHED STOCK':'var(--accent)','MACHINE':'var(--accent3)','DIE STOCK':'var(--accent)','DOCUMENT':'var(--accent3)','EDIT':'var(--muted)'};
+  el.innerHTML=DB.logs.map(l=>`<div class="log-item"><div class="log-type" style="background:${colors[l.type]||'var(--muted)'}"></div><div class="log-time">${l.time||l.date||''}</div><div class="log-msg">${l.action||l.msg||''}${l.details?`<span style="color:var(--muted);font-size:11px"> — ${l.details}</span>`:''}</div></div>`).join('');
 }
-
 async function clearLogs() {
-  if (!confirm('Clear all logs?')) return;
-  showLoading('Clearing logs…');
-  const ok = await writeToSheet({ action: 'clearLogs' });
-  if (ok) toast('Logs cleared');
+  if(!confirm('Clear all logs?')) return;
+  showLoading('Clearing…');
+  const ok=await writeToSheet({action:'clearLogs'});
+  if(ok) toast('Logs cleared');
 }
 
-// ============================================================
-//  EXPORT CSV
-// ============================================================
+// ============================================================ CSV EXPORT
 function exportToCSV() {
-  const sections = [
-    { title: 'MACHINES', headers: ['Type','Name','Purpose'], rows: DB.machines.map(r => [r.type, r.name, r.purpose]) },
-    { title: 'RAW MATERIALS', headers: ['Material','Size Inch','Size CM','Qty','Rate','Amount'], rows: DB.rawMaterials.map(r => [r.material, r.sizeInch, r.sizeCm, r.qty, r.rate, r.qty*r.rate]) },
-    { title: 'FINISHED STOCK', headers: ['MFR','Carton','Qty','Rate','Value'], rows: DB.finishedStock.map(r => [r.mfr, r.carton, r.qty, r.rate, r.qty*r.rate]) },
-    { title: 'DIE STOCK', headers: ['Die Name','MFR','Qty','Amount'], rows: DB.dieStock.map(r => [r.name, r.mfr, r.qty, r.amount]) },
-    { title: 'PRODUCTIONS', headers: ['Item Name','Machine','MFR','Product','Qty','Rate','Date'], rows: DB.productions.map(r => [r.itemName, r.machineName||'', r.mfr, r.name, r.qty, r.rate, r.date]) },
+  const sections=[
+    {title:'MACHINES',headers:['Type','Name','Purpose'],rows:DB.machines.map(r=>[r.type,r.name,r.purpose])},
+    {title:'RAW MATERIALS',headers:['Material','Size Inch','Size CM','Qty','Rate','Amount'],rows:DB.rawMaterials.map(r=>[r.material,r.sizeInch,r.sizeCm,r.qty,r.rate,r.qty*r.rate])},
+    {title:'FINISHED STOCK',headers:['MFR','Carton','Qty','Rate','Value'],rows:DB.finishedStock.map(r=>[r.mfr,r.carton,r.qty,r.rate,r.qty*r.rate])},
+    {title:'DIE STOCK',headers:['Die Name','MFR','Qty','Amount'],rows:DB.dieStock.map(r=>[r.name,r.mfr,r.qty,r.amount])},
+    {title:'PRODUCTIONS',headers:['Item','Machines','Die','MFR','Product','Qty','Rate','Date'],rows:DB.productions.map(r=>[r.itemName,r.machineNames||'',r.dieName||'',r.mfr,r.name,r.qty,r.rate,r.date])},
+    {title:'DOCUMENTS',headers:['Type','Ref','Party','Date','Total'],rows:DB.invoices.map(r=>[r.docType,r.ref,r.party,r.date,r.grandTotal])},
   ];
-  let csv = '';
-  for (const s of sections) {
-    csv += `\n${s.title}\n`;
-    csv += s.headers.join(',') + '\n';
-    csv += s.rows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
-    csv += '\n';
-  }
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'prints_db_export.csv'; a.click();
+  let csv='';
+  for(const s of sections){csv+=`\n${s.title}\n`;csv+=s.headers.join(',')+'\n';csv+=s.rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');csv+='\n';}
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='prints_db_export.csv';a.click();
   URL.revokeObjectURL(url);
-  toast('Exported to CSV!');
+  toast('Exported!');
 }
 
-// ============================================================
-//  BOOT — fetch from server, no seed data
-// ============================================================
-document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', {
-  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-});
+// ============================================================ BOOT
+document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 syncAll();
 </script>
 </body>
