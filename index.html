@@ -158,7 +158,6 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-msg { font-size: 14px; color: var(--muted); }
 
-  /* Documents */
   .doc-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
   .doc-type-card { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; text-align: center; }
   .doc-type-card:hover, .doc-type-card.selected { border-color: var(--accent); background: rgba(245,166,35,0.05); }
@@ -166,26 +165,24 @@
   .doc-type-card .dt-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
   .doc-type-card .dt-desc { font-size: 10px; color: var(--muted); margin-top: 4px; }
   .doc-form-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
-  .line-item-row { display: grid; grid-template-columns: 2fr 80px 90px 90px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .line-item-row input, .line-item-row select { font-size: 12px; padding: 6px 10px; }
+
+  /* FIX: line item row - use flex so inputs don't get squashed */
+  .line-item-row { display: grid; grid-template-columns: 1fr 80px 100px 100px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .line-item-row input, .line-item-row select { font-size: 12px; padding: 6px 10px; width: 100%; }
 
   .invoice-preview-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 20px; }
 
-  /* GST type tabs */
   .gst-tabs { display: flex; gap: 4px; }
   .gst-tab { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
   .gst-tab.active { background: rgba(245,166,35,0.15); border-color: var(--accent); color: var(--accent); }
 
-  /* Party panel */
   .party-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; }
   .party-card-info .party-name { font-weight: 700; font-size: 14px; }
   .party-card-info .party-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  /* Doc view modal */
-  .doc-view-modal { width: 850px; }
+  .doc-view-modal { width: 900px; }
   #doc-view-content { background: #fff; color: #000; border-radius: 6px; overflow: hidden; padding: 0; }
 
-  /* PO to Receipt */
   .po-select-list { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 200px; overflow-y: auto; }
   .po-item { padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
   .po-item:hover { background: rgba(255,255,255,0.04); }
@@ -193,8 +190,13 @@
   .po-item .po-ref { font-weight: 700; font-size: 13px; }
   .po-item .po-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  /* Saved docs table */
   .doc-history { margin-top: 24px; }
+
+  /* Manual desc input inside line-item row */
+  .manual-desc-wrap { display: flex; gap: 4px; align-items: center; width: 100%; }
+  .manual-desc-wrap input { flex: 1; }
+  .manual-desc-wrap button { white-space: nowrap; padding: 6px 8px; font-size: 11px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 4px; cursor: pointer; }
+  .manual-desc-wrap button:hover { border-color: var(--accent); color: var(--accent); }
 
   @media print {
     body * { visibility: hidden; }
@@ -622,7 +624,6 @@
   </div>
 </div>
 
-<!-- Hidden print area -->
 <div id="print-area" style="display:none;"></div>
 <div id="toast"></div>
 
@@ -633,7 +634,7 @@ let DB = { machines:[], rawMaterials:[], finishedStock:[], dieStock:[], producti
 let currentDocType = 'invoice';
 let docLineItems = [];
 let currentDocData = null;
-let currentGstType = 'cgst_sgst'; // 'cgst_sgst' | 'igst' | 'none'
+let currentGstType = 'cgst_sgst';
 
 // ============================================================ GAS API
 async function gasRequest(payload) {
@@ -1014,11 +1015,15 @@ function renderProdHistory() {
     </div>`).join('');
 }
 
-// ============================================================ DOCUMENTS
+// ============================================================
+// DOCUMENTS — FIXED VERSION
+// ============================================================
+
 function selectDocType(type) {
-  currentDocType=type;
+  currentDocType = type;
   document.querySelectorAll('.doc-type-card').forEach(c=>c.classList.remove('selected'));
   document.getElementById('dt-'+type).classList.add('selected');
+  docLineItems = [];
   renderDocForm(type);
   document.getElementById('doc-preview-wrap').style.display='none';
 }
@@ -1028,13 +1033,11 @@ function renderDocPanel() {
   if(docLineItems.length===0) addDocLine();
 }
 
-// Build party dropdown options
 function partyOptions(includeBlank=true) {
   const opts=includeBlank?'<option value="">— Select Party —</option>':'';
   return opts+DB.parties.map(p=>`<option value="${p.id}">${p.name}${p.partyType?' ('+p.partyType+')':''}</option>`).join('');
 }
 
-// Fill party fields from selected party
 function fillPartyFromDD(selectEl) {
   const id=selectEl.value;
   if(!id) return;
@@ -1043,21 +1046,19 @@ function fillPartyFromDD(selectEl) {
   const gstinInput=document.getElementById('doc-gstin');
   if(partyInput) partyInput.value=[p.name, p.address].filter(Boolean).join(', ');
   if(gstinInput) gstinInput.value=p.gstin||'';
-  // Auto-detect IGST if different state
-  if(p.state && p.state.toLowerCase() !== 'tamil nadu') {
+  if(p.state && p.state.toLowerCase().trim() !== 'tamil nadu') {
     setGstType('igst');
   }
 }
 
+// FIX: setGstType — properly applies active class without re-rendering the form
 function setGstType(type) {
-  currentGstType=type;
+  currentGstType = type;
   document.querySelectorAll('.gst-tab').forEach(t=>t.classList.remove('active'));
   const el=document.getElementById('gst-tab-'+type);
   if(el) el.classList.add('active');
 }
 
-// Invoice / DC: show finished stock dropdown in items
-// Receipt / PO: show goods type (Raw Material / Die / Machinery / Others) + update stock
 function renderDocForm(type) {
   const labels={invoice:'Invoice',receipt:'Receipt',dc:'Delivery Challan',po:'Purchase Order'};
   const noLabel={invoice:'Bill To',receipt:'Received From',dc:'Deliver To',po:'Supplier'};
@@ -1070,7 +1071,7 @@ function renderDocForm(type) {
     <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">${labels[type]} Details</div>
     <div class="form-grid" style="margin-bottom:16px;">
       <div class="field"><label>${refLabel[type]}</label><input id="doc-ref" value="${type.toUpperCase()}-${nextNo}" placeholder="Auto-numbered"></div>
-      <div class="field"><label>${labels[type]==='Delivery Challan'?'DC Date':'Date'}</label><input id="doc-date" type="date" value="${today}"></div>
+      <div class="field"><label>Date</label><input id="doc-date" type="date" value="${today}"></div>
       <div class="field span2">
         <label>${noLabel[type]} — Party</label>
         <div style="display:flex;gap:8px;">
@@ -1083,9 +1084,9 @@ function renderDocForm(type) {
       <div class="field">
         <label>GST Classification</label>
         <div class="gst-tabs" style="margin-top:4px;">
-          <button class="gst-tab active" id="gst-tab-cgst_sgst" onclick="setGstType('cgst_sgst')">CGST + SGST</button>
-          <button class="gst-tab" id="gst-tab-igst" onclick="setGstType('igst')">IGST</button>
-          <button class="gst-tab" id="gst-tab-none" onclick="setGstType('none')">No GST</button>
+          <button class="gst-tab ${currentGstType==='cgst_sgst'?'active':''}" id="gst-tab-cgst_sgst" onclick="setGstType('cgst_sgst')">CGST + SGST</button>
+          <button class="gst-tab ${currentGstType==='igst'?'active':''}" id="gst-tab-igst" onclick="setGstType('igst')">IGST</button>
+          <button class="gst-tab ${currentGstType==='none'?'active':''}" id="gst-tab-none" onclick="setGstType('none')">No GST</button>
         </div>
       </div>
       <div class="field">
@@ -1113,7 +1114,7 @@ function renderDocForm(type) {
     </div>
     <div class="section-label">Line Items${isInvoiceDC?' <span style="color:var(--muted);font-weight:400;font-size:11px">(from Finished Stock)</span>':' <span style="color:var(--muted);font-weight:400;font-size:11px">(select goods type above to load stock)</span>'}</div>
     <div style="overflow-x:auto;">
-      <div style="display:grid;grid-template-columns:2fr 80px 90px 90px auto;gap:8px;margin-bottom:6px;padding:0 2px;">
+      <div style="display:grid;grid-template-columns:1fr 80px 100px 100px auto;gap:8px;margin-bottom:6px;padding:0 2px;">
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Particulars</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Qty</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Rate (₹)</div>
@@ -1128,19 +1129,14 @@ function renderDocForm(type) {
       <button class="btn btn-primary" onclick="generateDoc()">👁 Preview</button>
     </div>`;
 
-  // Re-apply current GST type tab
-  setGstType(currentGstType);
   renderDocLines();
 }
 
-// When goods type is selected in Receipt/PO, load matching items as line options
 function onGoodsTypeChange(type) {
-  // Clear and reload line items with appropriate desc dropdown
-  docLineItems = [];
-  addDocLine();
+  // Don't clear existing lines — just refresh their dropdowns
+  renderDocLines();
 }
 
-// Get stock items for a given goods type (for desc dropdown in Receipt/PO)
 function getStockOptionsForType(goodsType) {
   if(goodsType==='rawmat') return DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`, rate:r.rate}));
   if(goodsType==='die') return DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`, rate:r.amount||0}));
@@ -1150,69 +1146,160 @@ function getStockOptionsForType(goodsType) {
 }
 
 function addDocLine() {
-  docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0});
+  docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0,isManual:false});
   renderDocLines();
+  // Focus the last desc field
+  setTimeout(()=>{
+    const cont=document.getElementById('doc-line-items');
+    if(!cont) return;
+    const inputs=cont.querySelectorAll('input[data-desc]');
+    if(inputs.length) inputs[inputs.length-1].focus();
+  },50);
 }
-function removeDocLine(id) { docLineItems=docLineItems.filter(l=>l.id!==id); if(docLineItems.length===0) addDocLine(); else renderDocLines(); }
-function updateDocLine(id,field,val) {
+
+function removeDocLine(id) {
+  docLineItems=docLineItems.filter(l=>l.id!==id);
+  if(docLineItems.length===0) addDocLine();
+  else renderDocLines();
+}
+
+// FIX: Update line data WITHOUT re-rendering the whole list (to avoid losing focus mid-type)
+function updateDocLineField(id, field, val) {
   const l=docLineItems.find(x=>x.id===id);
-  if(l){
-    if(field==='desc'){
-      l[field]=val;
-      // Auto-fill rate for invoice/dc from finished stock
-      if(currentDocType==='invoice'||currentDocType==='dc') {
-        const fs=DB.finishedStock.find(f=>f.carton+' ('+f.mfr+')'===val||f.carton===val);
-        if(fs){ l.rate=fs.rate; }
-      }
-    } else {
-      l[field]=parseFloat(val)||0;
+  if(!l) return;
+  if(field==='qty') l.qty=parseFloat(val)||0;
+  else if(field==='rate') l.rate=parseFloat(val)||0;
+  else if(field==='desc') l.desc=val;
+  // Update the readonly amount cell only
+  const amtCell=document.getElementById('amt-'+id);
+  if(amtCell) amtCell.value=fmtRaw(l.qty*l.rate);
+}
+
+// Called when dropdown selects a stock item — needs full re-render of that row to fill rate
+function selectStockItem(id, val, stockType) {
+  const l=docLineItems.find(x=>x.id===id);
+  if(!l) return;
+
+  if(val==='__manual__') {
+    l.isManual=true;
+    l.desc='';
+    // Replace just this row's desc cell with an input
+    const ddCell=document.getElementById('dd-'+id);
+    if(ddCell) {
+      ddCell.innerHTML=`<div class="manual-desc-wrap">
+        <input data-desc="1" type="text" value="" placeholder="Type description..." 
+          oninput="updateDocLineField(${id},'desc',this.value)"
+          onblur="updateDocLineField(${id},'desc',this.value)"
+          style="font-size:12px;padding:6px 10px;">
+        <button onclick="switchToDropdown(${id})">↩ Pick</button>
+      </div>`;
+      ddCell.querySelector('input').focus();
     }
+    return;
   }
-  renderDocLines();
-}
 
-function renderDocLines() {
-  const cont=document.getElementById('doc-line-items');
-  if(!cont) return;
-  const isInvoiceDC=(currentDocType==='invoice'||currentDocType==='dc');
-  const goodsType=document.getElementById('doc-goods-type')?.value||'';
-  const stockOpts=isInvoiceDC? DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate})) : getStockOptionsForType(goodsType);
+  l.desc=val;
+  l.isManual=false;
 
-  cont.innerHTML=docLineItems.map(l=>{
-    // Desc field: if invoice/dc or goods type selected, show dropdown + manual option
-    let descHtml='';
-    if(stockOpts.length>0) {
-      descHtml=`<select onchange="updateDocLine(${l.id},'desc',this.value);autoFillRate(${l.id},this.value,'${isInvoiceDC?'fs':goodsType}')" style="font-size:12px;padding:6px 10px;width:100%">
-        <option value="">— Select Item / Manual —</option>
-        ${stockOpts.map(o=>`<option value="${o.label}" ${l.desc===o.label?'selected':''}>${o.label}</option>`).join('')}
-        <option value="__manual__">✏ Type manually...</option>
-      </select>`;
-    } else {
-      descHtml=`<input value="${l.desc}" placeholder="Description" onchange="updateDocLine(${l.id},'desc',this.value)" oninput="updateDocLine(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;width:100%">`;
-    }
-    return `<div class="line-item-row">
-      ${descHtml}
-      <input type="number" value="${l.qty||''}" placeholder="Qty" min="0" onchange="updateDocLine(${l.id},'qty',this.value)" oninput="updateDocLine(${l.id},'qty',this.value)" style="font-size:12px;padding:6px 10px">
-      <input type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" onchange="updateDocLine(${l.id},'rate',this.value)" oninput="updateDocLine(${l.id},'rate',this.value)" style="font-size:12px;padding:6px 10px">
-      <input readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px">
-      <button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button>
-    </div>`;
-  }).join('');
-}
-
-function autoFillRate(lineId, val, stockType) {
-  if(val==='__manual__'||!val) return;
+  // Auto-fill rate
   let stockOpts=[];
   if(stockType==='fs') stockOpts=DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}));
   else if(stockType==='rawmat') stockOpts=DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate}));
   else if(stockType==='die') stockOpts=DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0}));
   const match=stockOpts.find(o=>o.label===val);
-  if(match) { const l=docLineItems.find(x=>x.id===lineId); if(l){ l.rate=match.rate; l.desc=val; } renderDocLines(); }
+  if(match) l.rate=match.rate;
+
+  // Update rate input and amount for this row without full re-render
+  const rateInput=document.getElementById('rate-'+id);
+  if(rateInput) rateInput.value=l.rate;
+  const amtCell=document.getElementById('amt-'+id);
+  if(amtCell) amtCell.value=fmtRaw(l.qty*l.rate);
 }
 
-function clearDocForm() { docLineItems=[]; renderDocForm(currentDocType); addDocLine(); document.getElementById('doc-preview-wrap').style.display='none'; }
+function switchToDropdown(id) {
+  const l=docLineItems.find(x=>x.id===id);
+  if(!l) return;
+  l.isManual=false;
+  l.desc='';
+  renderDocLines();
+}
 
+// FIX: renderDocLines — each row uses stable IDs for cells so we don't re-render on input
+function renderDocLines() {
+  const cont=document.getElementById('doc-line-items');
+  if(!cont) return;
+  const isInvoiceDC=(currentDocType==='invoice'||currentDocType==='dc');
+  const goodsType=document.getElementById('doc-goods-type')?.value||'';
+  const stockType=isInvoiceDC?'fs':goodsType;
+  const stockOpts=isInvoiceDC
+    ? DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}))
+    : getStockOptionsForType(goodsType);
+
+  const hasDropdown=stockOpts.length>0;
+
+  cont.innerHTML=docLineItems.map(l=>{
+    let descHtml='';
+    if(l.isManual) {
+      descHtml=`<div class="manual-desc-wrap">
+        <input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Type description..."
+          oninput="updateDocLineField(${l.id},'desc',this.value)"
+          onblur="updateDocLineField(${l.id},'desc',this.value)"
+          style="font-size:12px;padding:6px 10px;">
+        <button onclick="switchToDropdown(${l.id})">↩ Pick</button>
+      </div>`;
+    } else if(hasDropdown) {
+      descHtml=`<select onchange="selectStockItem(${l.id},this.value,'${stockType}')" style="font-size:12px;padding:6px 10px;width:100%">
+        <option value="">— Select Item —</option>
+        ${stockOpts.map(o=>`<option value="${escAttr(o.label)}" ${l.desc===o.label?'selected':''}>${o.label}</option>`).join('')}
+        <option value="__manual__">✏ Type manually...</option>
+      </select>`;
+    } else {
+      // No stock options (goods type not selected or 'other') — show plain text input
+      descHtml=`<input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Description"
+        oninput="updateDocLineField(${l.id},'desc',this.value)"
+        onblur="updateDocLineField(${l.id},'desc',this.value)"
+        style="font-size:12px;padding:6px 10px;width:100%">`;
+    }
+
+    return `<div class="line-item-row" id="row-${l.id}">
+      <div id="dd-${l.id}">${descHtml}</div>
+      <input id="qty-${l.id}" type="number" value="${l.qty||''}" placeholder="Qty" min="0"
+        oninput="updateDocLineField(${l.id},'qty',this.value)"
+        onblur="updateDocLineField(${l.id},'qty',this.value)"
+        style="font-size:12px;padding:6px 10px">
+      <input id="rate-${l.id}" type="number" value="${l.rate||''}" placeholder="Rate" step="0.01"
+        oninput="updateDocLineField(${l.id},'rate',this.value)"
+        onblur="updateDocLineField(${l.id},'rate',this.value)"
+        style="font-size:12px;padding:6px 10px">
+      <input id="amt-${l.id}" readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px">
+      <button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+function clearDocForm() {
+  docLineItems=[];
+  currentGstType='cgst_sgst';
+  renderDocForm(currentDocType);
+  addDocLine();
+  document.getElementById('doc-preview-wrap').style.display='none';
+}
+
+// FIX: generateDoc — reads current values from DOM inputs since we stopped re-rendering on every keystroke
 function generateDoc() {
+  // Sync any active input values into docLineItems before generating
+  docLineItems.forEach(l=>{
+    const qtyEl=document.getElementById('qty-'+l.id);
+    const rateEl=document.getElementById('rate-'+l.id);
+    const descEl=document.querySelector(`#dd-${l.id} input[data-desc]`);
+    if(qtyEl) l.qty=parseFloat(qtyEl.value)||0;
+    if(rateEl) l.rate=parseFloat(rateEl.value)||0;
+    if(descEl) l.desc=descEl.value;
+  });
+
   const ref=document.getElementById('doc-ref')?.value.trim();
   const party=document.getElementById('doc-party')?.value.trim();
   const date=document.getElementById('doc-date')?.value;
@@ -1224,34 +1311,67 @@ function generateDoc() {
   const goodsType=document.getElementById('doc-goods-type')?.value||'';
 
   if(!party){toast('Party name required','error');return;}
-  const validLines=docLineItems.filter(l=>l.desc&&l.desc!=='__manual__'&&l.qty&&l.rate);
+  const validLines=docLineItems.filter(l=>l.desc&&l.qty&&l.rate);
   if(!validLines.length){toast('Add at least one line item with description, qty and rate','error');return;}
 
   const subTotal=validLines.reduce((s,l)=>s+l.qty*l.rate,0);
   let taxAmount=0, taxRows='', grandTotal=subTotal;
+  let cgst_val=0, sgst_val=0, igst_val=0;
 
   if(gstType==='cgst_sgst' && gstPct>0) {
-    const cgst=(subTotal*gstPct/100)/2, sgst=cgst;
-    taxAmount=cgst+sgst; grandTotal=subTotal+taxAmount;
-    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst)}</td></tr>
-    <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst)}</td></tr>`;
+    cgst_val=(subTotal*gstPct/100)/2; sgst_val=cgst_val;
+    taxAmount=cgst_val+sgst_val; grandTotal=subTotal+taxAmount;
+    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst_val)}</td></tr>
+    <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst_val)}</td></tr>`;
   } else if(gstType==='igst' && gstPct>0) {
-    taxAmount=subTotal*gstPct/100; grandTotal=subTotal+taxAmount;
-    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(taxAmount)}</td></tr>`;
+    igst_val=subTotal*gstPct/100; taxAmount=igst_val; grandTotal=subTotal+taxAmount;
+    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(igst_val)}</td></tr>`;
   }
 
-  const cgst_val=(gstType==='cgst_sgst'&&gstPct>0)?(subTotal*gstPct/100)/2:0;
-  const sgst_val=cgst_val;
-  const igst_val=(gstType==='igst'&&gstPct>0)?subTotal*gstPct/100:0;
+  const html=buildDocHTML({
+    docType:currentDocType, ref, party, date, gstin,
+    gstPct, gstType, payMode, notes, goodsType,
+    lines:validLines, subTotal, grandTotal,
+    cgst:cgst_val, sgst:sgst_val, igst:igst_val,
+    taxRows
+  });
 
-  const docDate=date?new Date(date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';
+  document.getElementById('invoice-preview').innerHTML=html;
+  document.getElementById('doc-preview-wrap').style.display='block';
+  document.getElementById('doc-preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+
+  currentDocData={
+    docType:currentDocType, ref, party, date, gstin,
+    gstPct, gstType,
+    cgst:cgst_val, sgst:sgst_val, igst:igst_val,
+    payMode, notes, goodsType,
+    lines:validLines, subTotal, grandTotal
+  };
+}
+
+// Centralised HTML builder — used by both generateDoc() and reconstructDocHTML()
+function buildDocHTML(d) {
   const typeLabels={invoice:'TAX INVOICE',receipt:'RECEIPT',dc:'DELIVERY CHALLAN',po:'PURCHASE ORDER'};
-  const gstLabel=gstType==='cgst_sgst'?'CGST+SGST':gstType==='igst'?'IGST':'NO GST';
+  const gstLabel=d.gstType==='cgst_sgst'?'CGST+SGST':d.gstType==='igst'?'IGST':'NO GST';
+  const docDate=d.date?(typeof d.date==='string'&&d.date.includes('-')?new Date(d.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):d.date):'';
 
-  const html=`<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
+  // Recompute taxRows if not passed in (for reconstruct)
+  let taxRows=d.taxRows||'';
+  if(!taxRows) {
+    if(d.gstType==='cgst_sgst'&&d.gstPct>0) {
+      taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.cgst)}</td></tr>
+      <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.sgst)}</td></tr>`;
+    } else if(d.gstType==='igst'&&d.gstPct>0) {
+      taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${d.gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.igst)}</td></tr>`;
+    }
+  }
+
+  const showGstCol=d.gstType!=='none'&&d.gstPct>0;
+
+  return `<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;">
       <tr>
-        <td style="width:60px;vertical-align:middle;padding-right:12px;">
+        <td style="width:200px;vertical-align:middle;padding-right:12px;">
           <img src="https://pristineprints.in/images/ppb.png" style="width:190px;height:auto;" onerror="this.style.display='none'">
         </td>
         <td style="text-align:right;vertical-align:middle;">
@@ -1265,16 +1385,16 @@ function generateDoc() {
     </div>
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1.5px solid #1a3a6e;">
       <tr style="background:#1a3a6e;color:#fff;">
-        <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[currentDocType]}${payMode?' / '+payMode.toUpperCase()+' BILL':''} <span style="font-size:11px;font-weight:400;opacity:0.8">(${gstLabel})</span></td>
-        <td style="padding:6px 12px;text-align:right;font-size:13px;">No <strong>${ref}</strong> &nbsp;&nbsp; Date: <strong>${docDate}</strong></td>
+        <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[d.docType]||d.docType}${d.payMode?' / '+d.payMode.toUpperCase()+' BILL':''} <span style="font-size:11px;font-weight:400;opacity:0.8">(${gstLabel})</span></td>
+        <td style="padding:6px 12px;text-align:right;font-size:13px;">No <strong>${d.ref}</strong> &nbsp;&nbsp; Date: <strong>${docDate}</strong></td>
       </tr>
     </table>
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1px solid #ccc;">
       <tr>
         <td style="padding:8px 12px;width:50%;">
           <div style="font-size:11px;color:#555;margin-bottom:2px;">To,</div>
-          <div style="font-weight:700;font-size:13px;">M/s. ${party}</div>
-          ${gstin?`<div style="font-size:11px;color:#555;margin-top:4px;">GSTIN: ${gstin}</div>`:''}
+          <div style="font-weight:700;font-size:13px;">M/s. ${d.party}</div>
+          ${d.gstin?`<div style="font-size:11px;color:#555;margin-top:4px;">GSTIN: ${d.gstin}</div>`:''}
         </td>
         <td style="padding:8px 12px;text-align:right;vertical-align:top;border-left:1px solid #ccc;">
           <div style="font-size:11px;color:#555;">GST No.: 33AANCP6204B1ZT</div>
@@ -1286,20 +1406,20 @@ function generateDoc() {
       <thead>
         <tr style="background:#1a3a6e;color:#fff;">
           <th style="padding:7px 10px;text-align:left;width:40px;">Sl.</th>
-          <th style="padding:7px 10px;text-align:left;">Particulars${goodsType&&goodsType!=='other'?' <span style="font-weight:400;font-size:10px;opacity:0.8">['+goodsType.toUpperCase()+']</span>':''}</th>
+          <th style="padding:7px 10px;text-align:left;">Particulars${d.goodsType&&d.goodsType!=='other'?' <span style="font-weight:400;font-size:10px;opacity:0.8">['+d.goodsType.toUpperCase()+']</span>':''}</th>
           <th style="padding:7px 10px;text-align:center;width:70px;">QTY</th>
           <th style="padding:7px 10px;text-align:center;width:80px;">RATE</th>
-          ${gstType!=='none'&&gstPct>0?`<th style="padding:7px 10px;text-align:center;width:60px;">GST%</th>`:''}
+          ${showGstCol?`<th style="padding:7px 10px;text-align:center;width:60px;">GST%</th>`:''}
           <th style="padding:7px 10px;text-align:right;width:100px;">AMOUNT</th>
         </tr>
       </thead>
       <tbody>
-        ${validLines.map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}">
+        ${(d.lines||[]).map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}">
           <td style="padding:7px 10px;text-align:center;">${i+1}.</td>
           <td style="padding:7px 10px;">${l.desc}</td>
           <td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td>
           <td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>
-          ${gstType!=='none'&&gstPct>0?`<td style="padding:7px 10px;text-align:center;">${gstPct}%</td>`:''}
+          ${showGstCol?`<td style="padding:7px 10px;text-align:center;">${d.gstPct}%</td>`:''}
           <td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td>
         </tr>`).join('')}
       </tbody>
@@ -1315,14 +1435,14 @@ function generateDoc() {
             <div>IFSC &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: HDFC0001588</div>
             <div>Branch &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Gandhipuram</div>
           </div>
-          ${notes?`<div style="margin-top:8px;font-size:11px;color:#555;border:1px solid #ddd;padding:8px;border-radius:4px;">${notes}</div>`:''}
+          ${d.notes?`<div style="margin-top:8px;font-size:11px;color:#555;border:1px solid #ddd;padding:8px;border-radius:4px;">${d.notes}</div>`:''}
         </td>
         <td style="vertical-align:top;">
           <table width="100%" style="border-collapse:collapse;border:1px solid #ccc;font-size:12px;">
-            <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SUB TOTAL</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;"><strong>${fmtRaw(subTotal)}</strong></td></tr>
+            <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SUB TOTAL</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;"><strong>${fmtRaw(d.subTotal)}</strong></td></tr>
             ${taxRows}
             <tr style="background:#1a3a6e;color:#fff;font-weight:700;">
-              <td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(grandTotal)}</td>
+              <td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(d.grandTotal)}</td>
             </tr>
           </table>
         </td>
@@ -1332,25 +1452,13 @@ function generateDoc() {
       <tr>
         <td style="padding:10px 0;font-size:11px;width:65%;">
           <strong>For PRISTINE PRINTS PVT. LTD.</strong><br>
-          <span style="color:#555;">Rupees: ${numberToWords(grandTotal)} Only.</span>
+          <span style="color:#555;">Rupees: ${numberToWords(d.grandTotal)} Only.</span>
         </td>
         <td style="padding:10px 0;text-align:right;font-size:11px;"><br><br><br><strong>Authorised Signatory</strong></td>
       </tr>
     </table>
     <div style="font-size:10px;color:#999;text-align:center;margin-top:6px;">E. &amp; O.E.</div>
   </div>`;
-
-  document.getElementById('invoice-preview').innerHTML=html;
-  document.getElementById('doc-preview-wrap').style.display='block';
-  document.getElementById('doc-preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
-
-  currentDocData={
-    docType:currentDocType, ref, party, date, gstin,
-    gstPct, gstType,
-    cgst:cgst_val, sgst:sgst_val, igst:igst_val,
-    payMode, notes, goodsType,
-    lines:validLines, subTotal, grandTotal, html
-  };
 }
 
 function numberToWords(n) {
@@ -1399,11 +1507,9 @@ async function convertPOtoReceipt(poId) {
   const po=DB.invoices.find(d=>d.id==poId);
   if(!po){toast('PO not found','error');return;}
   closeModal('modal-po-to-receipt');
-  // Switch to receipt tab and pre-fill
   selectDocType('receipt');
   showPanel('documents');
 
-  // Wait for form render then pre-fill
   setTimeout(()=>{
     const today=new Date().toISOString().split('T')[0];
     const nextNo=String((DB.invoices.filter(d=>d.docType==='receipt').length)+1).padStart(3,'0');
@@ -1419,11 +1525,10 @@ async function convertPOtoReceipt(poId) {
     if(gstEl) gstEl.value=po.gstPct||5;
     setGstType(po.gstType||'cgst_sgst');
     const gtEl=document.getElementById('doc-goods-type');
-    if(gtEl){ gtEl.value=po.goodsType||''; onGoodsTypeChange(po.goodsType||''); }
+    if(gtEl){ gtEl.value=po.goodsType||''; }
     const notesEl=document.getElementById('doc-notes');
     if(notesEl) notesEl.value='Converted from PO: '+(po.ref||'');
-    // Pre-fill line items from PO
-    docLineItems=(po.lines||[]).map(l=>({id:Date.now()+Math.random(),desc:l.desc,qty:l.qty,rate:l.rate}));
+    docLineItems=(po.lines||[]).map(l=>({id:Date.now()+Math.random(),desc:l.desc,qty:l.qty,rate:l.rate,isManual:true}));
     renderDocLines();
     toast('PO loaded into Receipt form ✓');
   }, 200);
@@ -1464,10 +1569,10 @@ function renderDocHistoryTable(filter='') {
     </tr>`).join('');
 }
 
+// FIX: viewDoc now uses buildDocHTML (same as live preview) instead of raw data
 function viewDoc(id) {
   const d=DB.invoices.find(x=>x.id==id); if(!d) return;
-  // Reconstruct the HTML from saved data
-  const html=reconstructDocHTML(d);
+  const html=buildDocHTML(d);
   document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+(d.party||'');
   document.getElementById('doc-view-content').innerHTML=html;
   openModal('modal-doc-view');
@@ -1475,7 +1580,7 @@ function viewDoc(id) {
 
 function viewAndPrintDoc(id) {
   const d=DB.invoices.find(x=>x.id==id); if(!d) return;
-  const html=reconstructDocHTML(d);
+  const html=buildDocHTML(d);
   const pa=document.getElementById('print-area');
   pa.innerHTML=html; pa.style.display='block';
   window.print();
@@ -1489,91 +1594,6 @@ function printViewedDoc() {
   closeModal('modal-doc-view');
   window.print();
   setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
-}
-
-function reconstructDocHTML(d) {
-  const lines=d.lines||[];
-  const subTotal=d.subTotal||0;
-  const gstType=d.gstType||'cgst_sgst';
-  const gstPct=d.gstPct||0;
-  let taxRows='';
-  if(gstType==='cgst_sgst'&&gstPct>0) {
-    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.cgst)}</td></tr>
-    <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.sgst)}</td></tr>`;
-  } else if(gstType==='igst'&&gstPct>0) {
-    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.igst)}</td></tr>`;
-  }
-  const typeLabels={invoice:'TAX INVOICE',receipt:'RECEIPT',dc:'DELIVERY CHALLAN',po:'PURCHASE ORDER'};
-  const gstLabel=gstType==='cgst_sgst'?'CGST+SGST':gstType==='igst'?'IGST':'NO GST';
-  const docDate=d.date||'';
-  return `<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
-    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;">
-      <tr>
-        <td style="width:60px;vertical-align:middle;padding-right:12px;"><img src="https://pristineprints.in/images/ppb.png" style="width:190px;height:auto;" onerror="this.style.display='none'"></td>
-        <td style="text-align:right;vertical-align:middle;"><div style="font-size:15px;font-weight:700;color:#1a3a6e;">Multi Colour Digital</div><div style="font-size:15px;font-weight:700;color:#1a3a6e;">Package &amp; Offset Printings</div></td>
-      </tr>
-    </table>
-    <div style="text-align:center;font-size:11px;color:#555;border-top:1px solid #1a3a6e;border-bottom:1px solid #1a3a6e;padding:4px 0;margin-bottom:10px;">Ground Floor, No-198, Thottasalai East, Power House Road, Perur Village, Coimbatore-641 010</div>
-    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1.5px solid #1a3a6e;">
-      <tr style="background:#1a3a6e;color:#fff;">
-        <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[d.docType]||d.docType}${d.payMode?' / '+d.payMode.toUpperCase()+' BILL':''} <span style="font-size:11px;font-weight:400;opacity:0.8">(${gstLabel})</span></td>
-        <td style="padding:6px 12px;text-align:right;font-size:13px;">No <strong>${d.ref}</strong> &nbsp;&nbsp; Date: <strong>${docDate}</strong></td>
-      </tr>
-    </table>
-    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1px solid #ccc;">
-      <tr>
-        <td style="padding:8px 12px;width:50%;"><div style="font-size:11px;color:#555;margin-bottom:2px;">To,</div><div style="font-weight:700;font-size:13px;">M/s. ${d.party}</div>${d.gstin?`<div style="font-size:11px;color:#555;margin-top:4px;">GSTIN: ${d.gstin}</div>`:''}</td>
-        <td style="padding:8px 12px;text-align:right;vertical-align:top;border-left:1px solid #ccc;"><div style="font-size:11px;color:#555;">GST No.: 33AANCP6204B1ZT</div><div style="font-size:11px;color:#555;">State: Tamil Nadu (33)</div></td>
-      </tr>
-    </table>
-    <table width="100%" style="border-collapse:collapse;border:1px solid #1a3a6e;margin-bottom:10px;font-size:12px;">
-      <thead><tr style="background:#1a3a6e;color:#fff;">
-        <th style="padding:7px 10px;text-align:left;width:40px;">Sl.</th>
-        <th style="padding:7px 10px;text-align:left;">Particulars</th>
-        <th style="padding:7px 10px;text-align:center;width:70px;">QTY</th>
-        <th style="padding:7px 10px;text-align:center;width:80px;">RATE</th>
-        ${gstType!=='none'&&gstPct>0?`<th style="padding:7px 10px;text-align:center;width:60px;">GST%</th>`:''}
-        <th style="padding:7px 10px;text-align:right;width:100px;">AMOUNT</th>
-      </tr></thead>
-      <tbody>${lines.map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}">
-        <td style="padding:7px 10px;text-align:center;">${i+1}.</td>
-        <td style="padding:7px 10px;">${l.desc}</td>
-        <td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td>
-        <td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>
-        ${gstType!=='none'&&gstPct>0?`<td style="padding:7px 10px;text-align:center;">${gstPct}%</td>`:''}
-        <td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td>
-      </tr>`).join('')}</tbody>
-    </table>
-    <table width="100%" style="border-collapse:collapse;margin-bottom:14px;">
-      <tr>
-        <td style="width:55%;vertical-align:top;padding-right:20px;">
-          <div style="background:#f5f5f5;border:1px solid #ddd;border-radius:4px;padding:10px 14px;font-size:11px;">
-            <div style="font-weight:700;margin-bottom:6px;">BANK DETAILS:</div>
-            <div>Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>PRISTINE PRINTS PRIVATE LIMITED</strong></div>
-            <div>Bank Name &nbsp;&nbsp;: HDFC BANK</div>
-            <div>Acc. No. &nbsp;&nbsp;&nbsp;&nbsp;: 99999790958200</div>
-            <div>IFSC &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: HDFC0001588</div>
-            <div>Branch &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Gandhipuram</div>
-          </div>
-          ${d.notes?`<div style="margin-top:8px;font-size:11px;color:#555;border:1px solid #ddd;padding:8px;border-radius:4px;">${d.notes}</div>`:''}
-        </td>
-        <td style="vertical-align:top;">
-          <table width="100%" style="border-collapse:collapse;border:1px solid #ccc;font-size:12px;">
-            <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SUB TOTAL</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;"><strong>${fmtRaw(subTotal)}</strong></td></tr>
-            ${taxRows}
-            <tr style="background:#1a3a6e;color:#fff;font-weight:700;"><td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(d.grandTotal)}</td></tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-    <table width="100%" style="border-collapse:collapse;border-top:1px solid #1a3a6e;padding-top:10px;margin-top:4px;">
-      <tr>
-        <td style="padding:10px 0;font-size:11px;width:65%;"><strong>For PRISTINE PRINTS PVT. LTD.</strong><br><span style="color:#555;">Rupees: ${numberToWords(d.grandTotal)} Only.</span></td>
-        <td style="padding:10px 0;text-align:right;font-size:11px;"><br><br><br><strong>Authorised Signatory</strong></td>
-      </tr>
-    </table>
-    <div style="font-size:10px;color:#999;text-align:center;margin-top:6px;">E. &amp; O.E.</div>
-  </div>`;
 }
 
 async function deleteDoc(id) {
