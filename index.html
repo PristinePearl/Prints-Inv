@@ -166,7 +166,6 @@
   .doc-type-card .dt-desc { font-size: 10px; color: var(--muted); margin-top: 4px; }
   .doc-form-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
 
-  /* FIX: line item row - use flex so inputs don't get squashed */
   .line-item-row { display: grid; grid-template-columns: 1fr 80px 100px 100px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
   .line-item-row input, .line-item-row select { font-size: 12px; padding: 6px 10px; width: 100%; }
 
@@ -192,11 +191,36 @@
 
   .doc-history { margin-top: 24px; }
 
-  /* Manual desc input inside line-item row */
   .manual-desc-wrap { display: flex; gap: 4px; align-items: center; width: 100%; }
   .manual-desc-wrap input { flex: 1; }
   .manual-desc-wrap button { white-space: nowrap; padding: 6px 8px; font-size: 11px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 4px; cursor: pointer; }
   .manual-desc-wrap button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ===== REPORTS PANEL ===== */
+  .report-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .report-type-card { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.2s; }
+  .report-type-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .report-type-card.active { border-color: var(--accent); background: rgba(245,166,35,0.07); }
+  .report-type-card .rt-icon { font-size: 26px; margin-bottom: 8px; }
+  .report-type-card .rt-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .report-type-card .rt-desc { font-size: 11px; color: var(--muted); }
+
+  .report-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+  .report-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .report-filter-bar label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; }
+  .report-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .report-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .report-kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+  .report-kpi-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  .report-kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; }
+  .chart-bar-label { width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); text-align: right; flex-shrink: 0; }
+  .chart-bar-track { flex: 1; background: var(--surface); border-radius: 4px; height: 20px; overflow: hidden; }
+  .chart-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #000; white-space: nowrap; transition: width 0.6s ease; }
+  .chart-bar-val { width: 90px; text-align: right; color: var(--muted); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+
+  .report-print-wrap { background: #fff; color: #000; border-radius: 8px; padding: 0; margin-top: 16px; overflow: hidden; display: none; }
 
   @media print {
     body * { visibility: hidden; }
@@ -214,7 +238,7 @@
 
 <nav>
   <div class="logo">
-    <img src="https://pristineprints.in/images/ppb.png" style="width:150px;height:auto; alt="Pristine Prints" onerror="this.style.display='none'">
+    <img src="https://pristineprints.in/images/ppb.png" style="width:150px;height:auto;" alt="Pristine Prints" onerror="this.style.display='none'">
   </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPanel('dashboard')">Dashboard</button>
@@ -225,6 +249,7 @@
     <button class="nav-tab" onclick="showPanel('produce')">Production</button>
     <button class="nav-tab" onclick="showPanel('parties')">👥 Parties</button>
     <button class="nav-tab" onclick="showPanel('documents')">📄 Documents</button>
+    <button class="nav-tab" onclick="showPanel('reports')">📊 Reports</button>
     <button class="nav-tab" onclick="showPanel('logs')">Logs</button>
   </div>
   <div class="nav-right">
@@ -255,6 +280,7 @@
     <div class="quick-card" onclick="showPanel('dies'); openModal('modal-die')"><div class="qc-icon">✂️</div><div class="qc-title">Add Die</div><div class="qc-desc">Register a new die</div></div>
     <div class="quick-card" onclick="showPanel('parties'); openModal('modal-party')"><div class="qc-icon">👥</div><div class="qc-title">Add Party</div><div class="qc-desc">Customer / Vendor details</div></div>
     <div class="quick-card" onclick="showPanel('documents')"><div class="qc-icon">📄</div><div class="qc-title">Create Document</div><div class="qc-desc">Invoice, Receipt, DC, PO</div></div>
+    <div class="quick-card" onclick="showPanel('reports')"><div class="qc-icon">📊</div><div class="qc-title">Reports</div><div class="qc-desc">Stock, sales & production analytics</div></div>
   </div>
   <div class="section-label" style="margin-top:28px">Low Stock Alerts</div>
   <div id="low-stock-list"></div>
@@ -471,6 +497,88 @@
   </div>
 </div>
 
+<!-- ======================================================= -->
+<!-- REPORTS PANEL -->
+<!-- ======================================================= -->
+<div id="panel-reports" class="panel">
+  <div class="sec-head">
+    <div class="sec-title">📊 Reports</div>
+    <div class="toolbar">
+      <button class="btn btn-ghost" onclick="printReport()">🖨 Print Report</button>
+      <button class="btn btn-ghost" onclick="exportReportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-primary" onclick="generateCurrentReport()">⟳ Generate</button>
+    </div>
+  </div>
+
+  <div class="report-type-grid">
+    <div class="report-type-card active" id="rt-stock-summary" onclick="selectReport('stock-summary')">
+      <div class="rt-icon">📦</div>
+      <div class="rt-title">Stock Summary</div>
+      <div class="rt-desc">Raw, finished & die stock overview</div>
+    </div>
+    <div class="report-type-card" id="rt-inventory-valuation" onclick="selectReport('inventory-valuation')">
+      <div class="rt-icon">💰</div>
+      <div class="rt-title">Inventory Valuation</div>
+      <div class="rt-desc">Total value by category</div>
+    </div>
+    <div class="report-type-card" id="rt-low-stock" onclick="selectReport('low-stock')">
+      <div class="rt-icon">⚠️</div>
+      <div class="rt-title">Low Stock Alert</div>
+      <div class="rt-desc">Items below threshold levels</div>
+    </div>
+    <div class="report-type-card" id="rt-production-summary" onclick="selectReport('production-summary')">
+      <div class="rt-icon">🏭</div>
+      <div class="rt-title">Production Summary</div>
+      <div class="rt-desc">Production history & output</div>
+    </div>
+    <div class="report-type-card" id="rt-mfr-wise" onclick="selectReport('mfr-wise')">
+      <div class="rt-icon">🏷️</div>
+      <div class="rt-title">MFR-wise Stock</div>
+      <div class="rt-desc">Stock grouped by manufacturer</div>
+    </div>
+    <div class="report-type-card" id="rt-sales-summary" onclick="selectReport('sales-summary')">
+      <div class="rt-icon">🧾</div>
+      <div class="rt-title">Sales Summary</div>
+      <div class="rt-desc">Invoice totals & GST breakdown</div>
+    </div>
+    <div class="report-type-card" id="rt-party-wise" onclick="selectReport('party-wise')">
+      <div class="rt-icon">👥</div>
+      <div class="rt-title">Party-wise Sales</div>
+      <div class="rt-desc">Revenue by customer</div>
+    </div>
+    <div class="report-type-card" id="rt-gst-report" onclick="selectReport('gst-report')">
+      <div class="rt-icon">🏛️</div>
+      <div class="rt-title">GST Report</div>
+      <div class="rt-desc">CGST / SGST / IGST totals</div>
+    </div>
+    <div class="report-type-card" id="rt-die-register" onclick="selectReport('die-register')">
+      <div class="rt-icon">✂️</div>
+      <div class="rt-title">Die Register</div>
+      <div class="rt-desc">Complete die stock by MFR</div>
+    </div>
+    <div class="report-type-card" id="rt-machine-utilization" onclick="selectReport('machine-utilization')">
+      <div class="rt-icon">⚙️</div>
+      <div class="rt-title">Machine Utilization</div>
+      <div class="rt-desc">Usage count per machine</div>
+    </div>
+  </div>
+
+  <!-- Report date filter -->
+  <div class="report-wrap" id="report-filter-bar-wrap" style="padding:14px 20px;margin-bottom:14px;">
+    <div class="report-filter-bar" style="margin-bottom:0;padding-bottom:0;border:none;">
+      <label>From:</label>
+      <input type="date" id="rpt-from" style="padding:6px 10px;font-size:12px;">
+      <label>To:</label>
+      <input type="date" id="rpt-to" style="padding:6px 10px;font-size:12px;">
+      <select id="rpt-mfr-filter" style="padding:6px 10px;font-size:12px;"><option value="">All MFRs</option></select>
+      <select id="rpt-party-filter" style="padding:6px 10px;font-size:12px;"><option value="">All Parties</option></select>
+      <button class="btn btn-primary" style="padding:6px 14px;font-size:12px;" onclick="generateCurrentReport()">Apply</button>
+    </div>
+  </div>
+
+  <div id="report-output"></div>
+</div>
+
 <!-- LOGS -->
 <div id="panel-logs" class="panel">
   <div class="sec-head">
@@ -483,7 +591,6 @@
 </main>
 
 <!-- ====== MODALS ====== -->
-
 <!-- Machine Modal -->
 <div class="modal-overlay" id="modal-machine">
   <div class="modal">
@@ -600,7 +707,7 @@
   <div class="modal">
     <button class="close-btn" onclick="closeModal('modal-po-to-receipt')">✕</button>
     <div class="modal-title">Convert Purchase Order → Receipt</div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Select a Purchase Order to convert into a Receipt. Stock will be updated accordingly.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Select a Purchase Order to convert into a Receipt.</p>
     <div class="section-label">Select Purchase Order</div>
     <div class="po-select-list" id="po-select-list">
       <div style="padding:20px;text-align:center;color:var(--muted)">No Purchase Orders found</div>
@@ -629,11 +736,29 @@
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxMV3UK6ywnI1QdiJPHWmueonivtmzE7T5YlJ-6j-7yKctsQTgHe7u9dwQc-zFgg5gS/exec';
 
+// Company details — update these as needed
+const COMPANY = {
+  name1: 'PRISTINE PRINTS PRIVATE LIMITED',
+  name2: 'Multi Colour Digital, Package & Offset Printings',
+  address: 'Ground Floor, No-198, Thottasalai East, Power House Road, Perur Village, Coimbatore-641 010',
+  gstin: '33AANCP6204B1ZT',
+  phone: '+91 98765 43210',   // ← UPDATE with your actual phone
+  state: 'Tamil Nadu (33)',
+  bank: {
+    name: 'PRISTINE PRINTS PRIVATE LIMITED',
+    bank: 'HDFC BANK',
+    acc: '99999790958200',
+    ifsc: 'HDFC0001588',
+    branch: 'Gandhipuram',
+  }
+};
+
 let DB = { machines:[], rawMaterials:[], finishedStock:[], dieStock:[], productions:[], logs:[], invoices:[], parties:[] };
 let currentDocType = 'invoice';
 let docLineItems = [];
 let currentDocData = null;
 let currentGstType = 'cgst_sgst';
+let currentReport = 'stock-summary';
 
 // ============================================================ GAS API
 async function gasRequest(payload) {
@@ -704,7 +829,7 @@ function showLoading(msg) { document.getElementById('loading-msg').textContent=m
 function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
 // ============================================================ PANELS
-const PANELS=['dashboard','machine','rawmat','finished','dies','produce','parties','documents','logs'];
+const PANELS=['dashboard','machine','rawmat','finished','dies','produce','parties','documents','reports','logs'];
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -722,6 +847,7 @@ function renderPanel(id) {
   if(id==='produce') renderProdForm();
   if(id==='parties') renderParties();
   if(id==='documents') renderDocPanel();
+  if(id==='reports') renderReportsPanel();
   if(id==='logs') renderLogs();
 }
 function refreshCurrentPanel() { const a=document.querySelector('.panel.active'); if(!a) return; renderPanel(a.id.replace('panel-','')); }
@@ -847,7 +973,7 @@ function renderParties(filter='') {
   const typeF=document.getElementById('party-type-filter')?.value||'';
   if(typeF) rows=rows.filter(r=>r.partyType===typeF);
   document.getElementById('party-count').textContent=rows.length+' parties';
-  document.getElementById('party-tbody').innerHTML=rows.length===0?`<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No parties yet. Add customers & vendors.</td></tr>`:rows.map((r,i)=>`<tr>
+  document.getElementById('party-tbody').innerHTML=rows.length===0?`<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">No parties yet.</td></tr>`:rows.map((r,i)=>`<tr>
     <td class="mono" style="color:var(--muted)">${i+1}</td>
     <td><span class="badge ${r.partyType==='Customer'?'badge-green':r.partyType==='Vendor'?'badge-blue':'badge-orange'}">${r.partyType||'—'}</span></td>
     <td><strong>${r.name}</strong>${r.contactPerson?`<div style="font-size:11px;color:var(--muted)">${r.contactPerson}</div>`:''}</td>
@@ -858,27 +984,14 @@ function renderParties(filter='') {
   </tr>`).join('');
 }
 function filterParties(val) { renderParties(val); }
-
 function saveParty() {
   const name=document.getElementById('party-name').value.trim();
   if(!name){toast('Party name required','error');return;}
   const editId=parseInt(document.getElementById('party-edit-id').value)||0;
-  const payload={
-    action:editId?'updateParty':'addParty', id:editId,
-    partyType:document.getElementById('party-type').value,
-    name, address:document.getElementById('party-address').value.trim(),
-    contactPerson:document.getElementById('party-contact-person').value.trim(),
-    phone:document.getElementById('party-phone').value.trim(),
-    email:document.getElementById('party-email').value.trim(),
-    gstin:document.getElementById('party-gstin').value.trim().toUpperCase(),
-    pan:document.getElementById('party-pan').value.trim().toUpperCase(),
-    state:document.getElementById('party-state').value.trim(),
-    notes:document.getElementById('party-notes').value.trim()
-  };
+  const payload={action:editId?'updateParty':'addParty',id:editId,partyType:document.getElementById('party-type').value,name,address:document.getElementById('party-address').value.trim(),contactPerson:document.getElementById('party-contact-person').value.trim(),phone:document.getElementById('party-phone').value.trim(),email:document.getElementById('party-email').value.trim(),gstin:document.getElementById('party-gstin').value.trim().toUpperCase(),pan:document.getElementById('party-pan').value.trim().toUpperCase(),state:document.getElementById('party-state').value.trim(),notes:document.getElementById('party-notes').value.trim()};
   showLoading(editId?'Updating…':'Saving…');
   writeToSheet(payload).then(ok=>{if(ok){closeModal('modal-party');toast(editId?'Party updated!':'Party added!');}});
 }
-
 function editParty(id) {
   const r=DB.parties.find(x=>x.id==id); if(!r) return;
   document.getElementById('party-modal-title').textContent='Edit Party';
@@ -895,7 +1008,6 @@ function editParty(id) {
   document.getElementById('party-notes').value=r.notes||'';
   openModal('modal-party');
 }
-
 function deleteParty(id) {
   const r=DB.parties.find(x=>x.id==id); if(!r||!confirm('Delete party: '+r.name+'?')) return;
   showLoading('Deleting…');
@@ -906,14 +1018,10 @@ function deleteParty(id) {
 let recipeRows=[];
 function renderProdForm() {
   const list=document.getElementById('prod-machine-list');
-  if(DB.machines.length===0) { list.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px">No machines in database yet</div>'; }
+  if(DB.machines.length===0) { list.innerHTML='<div style="color:var(--muted);font-size:12px;padding:4px">No machines yet</div>'; }
   else {
     const checked=getCheckedMachines();
-    list.innerHTML=DB.machines.map(m=>`
-      <label class="machine-check-item">
-        <input type="checkbox" value="${m.id}" ${checked.includes(String(m.id))?'checked':''} onchange="updateProdPreview()">
-        <span>${m.name}${m.type?' <span style="color:var(--muted);font-size:11px">('+m.type+')</span>':''}</span>
-      </label>`).join('');
+    list.innerHTML=DB.machines.map(m=>`<label class="machine-check-item"><input type="checkbox" value="${m.id}" ${checked.includes(String(m.id))?'checked':''} onchange="updateProdPreview()"><span>${m.name}${m.type?' <span style="color:var(--muted);font-size:11px">('+m.type+')</span>':''}</span></label>`).join('');
   }
   const dieSel=document.getElementById('prod-die');
   const curDie=dieSel.value;
@@ -925,15 +1033,7 @@ function renderProdForm() {
 function getCheckedMachines() { return [...document.querySelectorAll('#prod-machine-list input[type=checkbox]:checked')].map(el=>el.value); }
 function addRecipeRow() { const id=Date.now(); recipeRows.push({id,rmId:'',qty:0}); renderRecipeRows(); }
 function renderRecipeRows() {
-  document.getElementById('recipe-rows').innerHTML=recipeRows.map(row=>`
-    <div class="recipe-row" id="rrow-${row.id}">
-      <select onchange="updateRecipeRow(${row.id},'rmId',this.value)">
-        <option value="">— Select Material —</option>
-        ${DB.rawMaterials.map(r=>`<option value="${r.id}" ${r.id==row.rmId?'selected':''}>${r.material}${r.sizeInch?' ('+r.sizeInch+')':''} [${fmtN(r.qty)} avail]</option>`).join('')}
-      </select>
-      <input type="number" placeholder="Qty used" value="${row.qty||''}" onchange="updateRecipeRow(${row.id},'qty',this.value)">
-      <button class="icon-btn del" onclick="removeRecipeRow(${row.id})">✕</button>
-    </div>`).join('');
+  document.getElementById('recipe-rows').innerHTML=recipeRows.map(row=>`<div class="recipe-row" id="rrow-${row.id}"><select onchange="updateRecipeRow(${row.id},'rmId',this.value)"><option value="">— Select Material —</option>${DB.rawMaterials.map(r=>`<option value="${r.id}" ${r.id==row.rmId?'selected':''}>${r.material}${r.sizeInch?' ('+r.sizeInch+')':''} [${fmtN(r.qty)} avail]</option>`).join('')}</select><input type="number" placeholder="Qty used" value="${row.qty||''}" onchange="updateRecipeRow(${row.id},'qty',this.value)"><button class="icon-btn del" onclick="removeRecipeRow(${row.id})">✕</button></div>`).join('');
   updateProdPreview();
 }
 function updateRecipeRow(id,field,val) { const row=recipeRows.find(r=>r.id===id); if(row){row[field]=field==='qty'?parseFloat(val)||0:parseInt(val)||'';} updateProdPreview(); }
@@ -942,7 +1042,7 @@ function updateProdPreview() {
   const itemName=document.getElementById('prod-item-name').value;
   const checkedIds=getCheckedMachines();
   const machines=DB.machines.filter(m=>checkedIds.includes(String(m.id)));
-  const machineStr=machines.length?machines.map(m=>m.name).join(', '):'— None selected —';
+  const machineStr=machines.length?machines.map(m=>m.name).join(', '):'— None —';
   const dieId=document.getElementById('prod-die').value;
   const die=dieId?DB.dieStock.find(d=>d.id==dieId):null;
   const mfr=document.getElementById('prod-mfr').value;
@@ -964,12 +1064,9 @@ function updateProdPreview() {
       <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">Raw Materials Used</div>
       ${usedMats.length===0?'<div style="color:var(--muted);font-size:12px">No materials added</div>':usedMats.map(u=>`<div class="rm-preview-row"><span>${u.mat.material}${u.mat.sizeInch?' ('+u.mat.sizeInch+')':''}</span><span style="color:${u.ok?'var(--accent2)':'var(--danger)'}">Use ${fmtN(u.qty)} / ${fmtN(u.mat.qty)} avail</span></div>`).join('')}
     </div>
-    <div style="margin-top:12px"><span class="badge ${allOk&&name&&qty&&checkedIds.length?'badge-green':'badge-red'}">${allOk&&name&&qty&&checkedIds.length?'✓ Ready to produce':'⚠ Check inputs'}</span></div>`;
+    <div style="margin-top:12px"><span class="badge ${allOk&&name&&qty&&checkedIds.length?'badge-green':'badge-red'}">${allOk&&name&&qty&&checkedIds.length?'✓ Ready':'⚠ Check inputs'}</span></div>`;
 }
-['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate','prod-die'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el){el.addEventListener('input',updateProdPreview);el.addEventListener('change',updateProdPreview);}
-});
+['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate','prod-die'].forEach(id=>{const el=document.getElementById(id);if(el){el.addEventListener('input',updateProdPreview);el.addEventListener('change',updateProdPreview);}});
 async function createProduction() {
   const itemName=document.getElementById('prod-item-name').value.trim();
   const checkedIds=getCheckedMachines();
@@ -984,11 +1081,7 @@ async function createProduction() {
   if(checkedIds.length===0){toast('Select at least one machine','error');return;}
   if(!mfr||!name||!qty){toast('Fill MFR, product name, and qty','error');return;}
   const usedMats=recipeRows.filter(r=>r.rmId&&r.qty>0);
-  for(const row of usedMats){
-    const mat=DB.rawMaterials.find(x=>x.id==row.rmId);
-    if(!mat){toast('Invalid material selected','error');return;}
-    if(mat.qty<row.qty){toast(`Insufficient: ${mat.material} (need ${row.qty}, have ${mat.qty})`,'error');return;}
-  }
+  for(const row of usedMats){const mat=DB.rawMaterials.find(x=>x.id==row.rmId);if(!mat){toast('Invalid material','error');return;}if(mat.qty<row.qty){toast(`Insufficient: ${mat.material}`,'error');return;}}
   showLoading('Recording production run…');
   const ok=await writeToSheet({action:'createProduction',itemName,machineIds:machines.map(m=>m.id),machineNames:machines.map(m=>m.name+(m.type?' ('+m.type+')':'')),dieId:die?die.id:'',dieName:die?die.name:'',mfr,name,qty,rate,materials:usedMats.map(r=>{const mat=DB.rawMaterials.find(x=>x.id==r.rmId);return{rmId:r.rmId,material:mat.material+(mat.sizeInch?' '+mat.sizeInch:''),qty:r.qty};})});
   if(ok){toast('Production recorded! ✓');clearProdForm();renderProdHistory();}
@@ -1003,21 +1096,10 @@ function clearProdForm() {
 function renderProdHistory() {
   const el=document.getElementById('prod-history');
   if(DB.productions.length===0){el.innerHTML='<div class="empty" style="padding:20px"><p>No production runs yet</p></div>';return;}
-  el.innerHTML=DB.productions.slice(0,8).map(p=>`
-    <div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>${p.itemName?`<div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:2px">${p.itemName}</div>`:''}<strong>${p.name}</strong></div>
-        <span class="badge badge-green">${fmtN(p.qty)} units</span>
-      </div>
-      <div style="color:var(--muted);font-size:11px;margin-top:4px">${p.mfr} · ${p.machineNames||''} ${p.dieName?'· Die: '+p.dieName:''} · ${p.date||''}</div>
-      ${p.materials&&p.materials.length?`<div style="font-size:11px;color:var(--muted);margin-top:4px">${p.materials.map(m=>(m.material||m.name||'')+'('+fmtN(m.qty)+')').join(', ')}</div>`:''}
-    </div>`).join('');
+  el.innerHTML=DB.productions.slice(0,8).map(p=>`<div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div>${p.itemName?`<div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:2px">${p.itemName}</div>`:''}<strong>${p.name}</strong></div><span class="badge badge-green">${fmtN(p.qty)} units</span></div><div style="color:var(--muted);font-size:11px;margin-top:4px">${p.mfr} · ${p.machineNames||''} ${p.dieName?'· Die: '+p.dieName:''} · ${p.date||''}</div></div>`).join('');
 }
 
-// ============================================================
-// DOCUMENTS — FIXED VERSION
-// ============================================================
-
+// ============================================================ DOCUMENTS
 function selectDocType(type) {
   currentDocType = type;
   document.querySelectorAll('.doc-type-card').forEach(c=>c.classList.remove('selected'));
@@ -1038,19 +1120,15 @@ function partyOptions(includeBlank=true) {
 }
 
 function fillPartyFromDD(selectEl) {
-  const id=selectEl.value;
-  if(!id) return;
+  const id=selectEl.value; if(!id) return;
   const p=DB.parties.find(x=>x.id==id); if(!p) return;
   const partyInput=document.getElementById('doc-party');
   const gstinInput=document.getElementById('doc-gstin');
   if(partyInput) partyInput.value=[p.name, p.address].filter(Boolean).join(', ');
   if(gstinInput) gstinInput.value=p.gstin||'';
-  if(p.state && p.state.toLowerCase().trim() !== 'tamil nadu') {
-    setGstType('igst');
-  }
+  if(p.state && p.state.toLowerCase().trim() !== 'tamil nadu') setGstType('igst');
 }
 
-// FIX: setGstType — properly applies active class without re-rendering the form
 function setGstType(type) {
   currentGstType = type;
   document.querySelectorAll('.gst-tab').forEach(t=>t.classList.remove('active'));
@@ -1065,53 +1143,21 @@ function renderDocForm(type) {
   const today=new Date().toISOString().split('T')[0];
   const nextNo=String((DB.invoices.filter(d=>d.docType===type).length||0)+1).padStart(3,'0');
   const isInvoiceDC=(type==='invoice'||type==='dc');
-
   document.getElementById('doc-form-area').innerHTML=`
     <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;">${labels[type]} Details</div>
     <div class="form-grid" style="margin-bottom:16px;">
       <div class="field"><label>${refLabel[type]}</label><input id="doc-ref" value="${type.toUpperCase()}-${nextNo}" placeholder="Auto-numbered"></div>
       <div class="field"><label>Date</label><input id="doc-date" type="date" value="${today}"></div>
-      <div class="field span2">
-        <label>${noLabel[type]} — Party</label>
-        <div style="display:flex;gap:8px;">
-          <select id="doc-party-dd" onchange="fillPartyFromDD(this)" style="flex:1">${partyOptions()}</select>
-          <button class="btn btn-ghost" style="white-space:nowrap;padding:8px 12px;font-size:12px" onclick="showPanel('parties');openModal('modal-party')">+ New</button>
-        </div>
-      </div>
+      <div class="field span2"><label>${noLabel[type]} — Party</label><div style="display:flex;gap:8px;"><select id="doc-party-dd" onchange="fillPartyFromDD(this)" style="flex:1">${partyOptions()}</select><button class="btn btn-ghost" style="white-space:nowrap;padding:8px 12px;font-size:12px" onclick="showPanel('parties');openModal('modal-party')">+ New</button></div></div>
       <div class="field span2"><label>Party Name & Address (editable)</label><input id="doc-party" placeholder="Name, Address..."></div>
       <div class="field"><label>GSTIN (Party)</label><input id="doc-gstin" placeholder="Optional"></div>
-      <div class="field">
-        <label>GST Classification</label>
-        <div class="gst-tabs" style="margin-top:4px;">
-          <button class="gst-tab ${currentGstType==='cgst_sgst'?'active':''}" id="gst-tab-cgst_sgst" onclick="setGstType('cgst_sgst')">CGST + SGST</button>
-          <button class="gst-tab ${currentGstType==='igst'?'active':''}" id="gst-tab-igst" onclick="setGstType('igst')">IGST</button>
-          <button class="gst-tab ${currentGstType==='none'?'active':''}" id="gst-tab-none" onclick="setGstType('none')">No GST</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>GST %</label>
-        <select id="doc-gst-pct"><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option><option value="0">0%</option></select>
-      </div>
-      ${type==='invoice'||type==='receipt'?`
-      <div class="field">
-        <label>Payment Mode</label>
-        <select id="doc-pay-mode"><option>Cash</option><option>NEFT/RTGS</option><option>UPI</option><option>Cheque</option><option>Credit</option></select>
-      </div>`:``}
-      ${!isInvoiceDC?`
-      <div class="field">
-        <label>Goods Type <span style="color:var(--accent)">*</span></label>
-        <select id="doc-goods-type" onchange="onGoodsTypeChange(this.value)">
-          <option value="">— Select Type —</option>
-          <option value="rawmat">Raw Material</option>
-          <option value="die">Die Stock</option>
-          <option value="machinery">Machinery</option>
-          <option value="finished">Finished Stock</option>
-          <option value="other">Others</option>
-        </select>
-      </div>`:``}
+      <div class="field"><label>GST Classification</label><div class="gst-tabs" style="margin-top:4px;"><button class="gst-tab ${currentGstType==='cgst_sgst'?'active':''}" id="gst-tab-cgst_sgst" onclick="setGstType('cgst_sgst')">CGST + SGST</button><button class="gst-tab ${currentGstType==='igst'?'active':''}" id="gst-tab-igst" onclick="setGstType('igst')">IGST</button><button class="gst-tab ${currentGstType==='none'?'active':''}" id="gst-tab-none" onclick="setGstType('none')">No GST</button></div></div>
+      <div class="field"><label>GST %</label><select id="doc-gst-pct"><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option><option value="0">0%</option></select></div>
+      ${type==='invoice'||type==='receipt'?`<div class="field"><label>Payment Mode</label><select id="doc-pay-mode"><option>Cash</option><option>NEFT/RTGS</option><option>UPI</option><option>Cheque</option><option>Credit</option></select></div>`:``}
+      ${!isInvoiceDC?`<div class="field"><label>Goods Type</label><select id="doc-goods-type" onchange="onGoodsTypeChange(this.value)"><option value="">— Select Type —</option><option value="rawmat">Raw Material</option><option value="die">Die Stock</option><option value="machinery">Machinery</option><option value="finished">Finished Stock</option><option value="other">Others</option></select></div>`:``}
       <div class="field span2"><label>Notes / Remarks</label><input id="doc-notes" placeholder="Optional remarks"></div>
     </div>
-    <div class="section-label">Line Items${isInvoiceDC?' <span style="color:var(--muted);font-weight:400;font-size:11px">(from Finished Stock)</span>':' <span style="color:var(--muted);font-weight:400;font-size:11px">(select goods type above to load stock)</span>'}</div>
+    <div class="section-label">Line Items</div>
     <div style="overflow-x:auto;">
       <div style="display:grid;grid-template-columns:1fr 80px 100px 100px auto;gap:8px;margin-bottom:6px;padding:0 2px;">
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Particulars</div>
@@ -1127,169 +1173,74 @@ function renderDocForm(type) {
       <button class="btn btn-ghost" onclick="clearDocForm()">Clear</button>
       <button class="btn btn-primary" onclick="generateDoc()">👁 Preview</button>
     </div>`;
-
   renderDocLines();
 }
 
-function onGoodsTypeChange(type) {
-  // Don't clear existing lines — just refresh their dropdowns
-  renderDocLines();
-}
+function onGoodsTypeChange(type) { renderDocLines(); }
 
 function getStockOptionsForType(goodsType) {
-  if(goodsType==='rawmat') return DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`, rate:r.rate}));
-  if(goodsType==='die') return DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`, rate:r.amount||0}));
-  if(goodsType==='finished') return DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`, rate:r.rate}));
-  if(goodsType==='machinery') return DB.machines.map(r=>({label:r.name, rate:0}));
+  if(goodsType==='rawmat') return DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate}));
+  if(goodsType==='die') return DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0}));
+  if(goodsType==='finished') return DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}));
+  if(goodsType==='machinery') return DB.machines.map(r=>({label:r.name,rate:0}));
   return [];
 }
 
 function addDocLine() {
   docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0,isManual:false});
   renderDocLines();
-  // Focus the last desc field
-  setTimeout(()=>{
-    const cont=document.getElementById('doc-line-items');
-    if(!cont) return;
-    const inputs=cont.querySelectorAll('input[data-desc]');
-    if(inputs.length) inputs[inputs.length-1].focus();
-  },50);
+  setTimeout(()=>{const cont=document.getElementById('doc-line-items');if(!cont)return;const inputs=cont.querySelectorAll('input[data-desc]');if(inputs.length)inputs[inputs.length-1].focus();},50);
 }
-
-function removeDocLine(id) {
-  docLineItems=docLineItems.filter(l=>l.id!==id);
-  if(docLineItems.length===0) addDocLine();
-  else renderDocLines();
-}
-
-// FIX: Update line data WITHOUT re-rendering the whole list (to avoid losing focus mid-type)
-function updateDocLineField(id, field, val) {
-  const l=docLineItems.find(x=>x.id===id);
-  if(!l) return;
+function removeDocLine(id) { docLineItems=docLineItems.filter(l=>l.id!==id); if(docLineItems.length===0) addDocLine(); else renderDocLines(); }
+function updateDocLineField(id,field,val) {
+  const l=docLineItems.find(x=>x.id===id); if(!l) return;
   if(field==='qty') l.qty=parseFloat(val)||0;
   else if(field==='rate') l.rate=parseFloat(val)||0;
   else if(field==='desc') l.desc=val;
-  // Update the readonly amount cell only
   const amtCell=document.getElementById('amt-'+id);
   if(amtCell) amtCell.value=fmtRaw(l.qty*l.rate);
 }
-
-// Called when dropdown selects a stock item — needs full re-render of that row to fill rate
-function selectStockItem(id, val, stockType) {
-  const l=docLineItems.find(x=>x.id===id);
-  if(!l) return;
-
+function selectStockItem(id,val,stockType) {
+  const l=docLineItems.find(x=>x.id===id); if(!l) return;
   if(val==='__manual__') {
-    l.isManual=true;
-    l.desc='';
-    // Replace just this row's desc cell with an input
+    l.isManual=true; l.desc='';
     const ddCell=document.getElementById('dd-'+id);
-    if(ddCell) {
-      ddCell.innerHTML=`<div class="manual-desc-wrap">
-        <input data-desc="1" type="text" value="" placeholder="Type description..." 
-          oninput="updateDocLineField(${id},'desc',this.value)"
-          onblur="updateDocLineField(${id},'desc',this.value)"
-          style="font-size:12px;padding:6px 10px;">
-        <button onclick="switchToDropdown(${id})">↩ Pick</button>
-      </div>`;
-      ddCell.querySelector('input').focus();
-    }
+    if(ddCell){ddCell.innerHTML=`<div class="manual-desc-wrap"><input data-desc="1" type="text" value="" placeholder="Type description..." oninput="updateDocLineField(${id},'desc',this.value)" onblur="updateDocLineField(${id},'desc',this.value)" style="font-size:12px;padding:6px 10px;"><button onclick="switchToDropdown(${id})">↩ Pick</button></div>`;ddCell.querySelector('input').focus();}
     return;
   }
-
-  l.desc=val;
-  l.isManual=false;
-
-  // Auto-fill rate
+  l.desc=val; l.isManual=false;
   let stockOpts=[];
   if(stockType==='fs') stockOpts=DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}));
   else if(stockType==='rawmat') stockOpts=DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate}));
   else if(stockType==='die') stockOpts=DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0}));
   const match=stockOpts.find(o=>o.label===val);
   if(match) l.rate=match.rate;
-
-  // Update rate input and amount for this row without full re-render
   const rateInput=document.getElementById('rate-'+id);
   if(rateInput) rateInput.value=l.rate;
   const amtCell=document.getElementById('amt-'+id);
   if(amtCell) amtCell.value=fmtRaw(l.qty*l.rate);
 }
-
-function switchToDropdown(id) {
-  const l=docLineItems.find(x=>x.id===id);
-  if(!l) return;
-  l.isManual=false;
-  l.desc='';
-  renderDocLines();
-}
-
-// FIX: renderDocLines — each row uses stable IDs for cells so we don't re-render on input
+function switchToDropdown(id) { const l=docLineItems.find(x=>x.id===id); if(!l) return; l.isManual=false; l.desc=''; renderDocLines(); }
 function renderDocLines() {
-  const cont=document.getElementById('doc-line-items');
-  if(!cont) return;
+  const cont=document.getElementById('doc-line-items'); if(!cont) return;
   const isInvoiceDC=(currentDocType==='invoice'||currentDocType==='dc');
   const goodsType=document.getElementById('doc-goods-type')?.value||'';
   const stockType=isInvoiceDC?'fs':goodsType;
-  const stockOpts=isInvoiceDC
-    ? DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}))
-    : getStockOptionsForType(goodsType);
-
+  const stockOpts=isInvoiceDC?DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate})):getStockOptionsForType(goodsType);
   const hasDropdown=stockOpts.length>0;
-
   cont.innerHTML=docLineItems.map(l=>{
     let descHtml='';
-    if(l.isManual) {
-      descHtml=`<div class="manual-desc-wrap">
-        <input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Type description..."
-          oninput="updateDocLineField(${l.id},'desc',this.value)"
-          onblur="updateDocLineField(${l.id},'desc',this.value)"
-          style="font-size:12px;padding:6px 10px;">
-        <button onclick="switchToDropdown(${l.id})">↩ Pick</button>
-      </div>`;
-    } else if(hasDropdown) {
-      descHtml=`<select onchange="selectStockItem(${l.id},this.value,'${stockType}')" style="font-size:12px;padding:6px 10px;width:100%">
-        <option value="">— Select Item —</option>
-        ${stockOpts.map(o=>`<option value="${escAttr(o.label)}" ${l.desc===o.label?'selected':''}>${o.label}</option>`).join('')}
-        <option value="__manual__">✏ Type manually...</option>
-      </select>`;
-    } else {
-      // No stock options (goods type not selected or 'other') — show plain text input
-      descHtml=`<input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Description"
-        oninput="updateDocLineField(${l.id},'desc',this.value)"
-        onblur="updateDocLineField(${l.id},'desc',this.value)"
-        style="font-size:12px;padding:6px 10px;width:100%">`;
-    }
-
-    return `<div class="line-item-row" id="row-${l.id}">
-      <div id="dd-${l.id}">${descHtml}</div>
-      <input id="qty-${l.id}" type="number" value="${l.qty||''}" placeholder="Qty" min="0"
-        oninput="updateDocLineField(${l.id},'qty',this.value)"
-        onblur="updateDocLineField(${l.id},'qty',this.value)"
-        style="font-size:12px;padding:6px 10px">
-      <input id="rate-${l.id}" type="number" value="${l.rate||''}" placeholder="Rate" step="0.01"
-        oninput="updateDocLineField(${l.id},'rate',this.value)"
-        onblur="updateDocLineField(${l.id},'rate',this.value)"
-        style="font-size:12px;padding:6px 10px">
-      <input id="amt-${l.id}" readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px">
-      <button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button>
-    </div>`;
+    if(l.isManual){descHtml=`<div class="manual-desc-wrap"><input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Type description..." oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;"><button onclick="switchToDropdown(${l.id})">↩ Pick</button></div>`;}
+    else if(hasDropdown){descHtml=`<select onchange="selectStockItem(${l.id},this.value,'${stockType}')" style="font-size:12px;padding:6px 10px;width:100%"><option value="">— Select Item —</option>${stockOpts.map(o=>`<option value="${escAttr(o.label)}" ${l.desc===o.label?'selected':''}>${o.label}</option>`).join('')}<option value="__manual__">✏ Type manually...</option></select>`;}
+    else{descHtml=`<input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Description" oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;width:100%">`;}
+    return `<div class="line-item-row" id="row-${l.id}"><div id="dd-${l.id}">${descHtml}</div><input id="qty-${l.id}" type="number" value="${l.qty||''}" placeholder="Qty" min="0" oninput="updateDocLineField(${l.id},'qty',this.value)" onblur="updateDocLineField(${l.id},'qty',this.value)" style="font-size:12px;padding:6px 10px"><input id="rate-${l.id}" type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" oninput="updateDocLineField(${l.id},'rate',this.value)" onblur="updateDocLineField(${l.id},'rate',this.value)" style="font-size:12px;padding:6px 10px"><input id="amt-${l.id}" readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px"><button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button></div>`;
   }).join('');
 }
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function escAttr(s){return String(s||'').replace(/"/g,'&quot;');}
+function clearDocForm() { docLineItems=[]; currentGstType='cgst_sgst'; renderDocForm(currentDocType); addDocLine(); document.getElementById('doc-preview-wrap').style.display='none'; }
 
-function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
-
-function clearDocForm() {
-  docLineItems=[];
-  currentGstType='cgst_sgst';
-  renderDocForm(currentDocType);
-  addDocLine();
-  document.getElementById('doc-preview-wrap').style.display='none';
-}
-
-// FIX: generateDoc — reads current values from DOM inputs since we stopped re-rendering on every keystroke
 function generateDoc() {
-  // Sync any active input values into docLineItems before generating
   docLineItems.forEach(l=>{
     const qtyEl=document.getElementById('qty-'+l.id);
     const rateEl=document.getElementById('rate-'+l.id);
@@ -1298,7 +1249,6 @@ function generateDoc() {
     if(rateEl) l.rate=parseFloat(rateEl.value)||0;
     if(descEl) l.desc=descEl.value;
   });
-
   const ref=document.getElementById('doc-ref')?.value.trim();
   const party=document.getElementById('doc-party')?.value.trim();
   const date=document.getElementById('doc-date')?.value;
@@ -1308,86 +1258,60 @@ function generateDoc() {
   const payMode=document.getElementById('doc-pay-mode')?.value||'';
   const notes=document.getElementById('doc-notes')?.value.trim();
   const goodsType=document.getElementById('doc-goods-type')?.value||'';
-
   if(!party){toast('Party name required','error');return;}
   const validLines=docLineItems.filter(l=>l.desc&&l.qty&&l.rate);
-  if(!validLines.length){toast('Add at least one line item with description, qty and rate','error');return;}
-
+  if(!validLines.length){toast('Add at least one line item','error');return;}
   const subTotal=validLines.reduce((s,l)=>s+l.qty*l.rate,0);
-  let taxAmount=0, taxRows='', grandTotal=subTotal;
-  let cgst_val=0, sgst_val=0, igst_val=0;
-
-  if(gstType==='cgst_sgst' && gstPct>0) {
-    cgst_val=(subTotal*gstPct/100)/2; sgst_val=cgst_val;
-    taxAmount=cgst_val+sgst_val; grandTotal=subTotal+taxAmount;
-    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst_val)}</td></tr>
-    <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst_val)}</td></tr>`;
-  } else if(gstType==='igst' && gstPct>0) {
-    igst_val=subTotal*gstPct/100; taxAmount=igst_val; grandTotal=subTotal+taxAmount;
-    taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(igst_val)}</td></tr>`;
-  }
-
-  const html=buildDocHTML({
-    docType:currentDocType, ref, party, date, gstin,
-    gstPct, gstType, payMode, notes, goodsType,
-    lines:validLines, subTotal, grandTotal,
-    cgst:cgst_val, sgst:sgst_val, igst:igst_val,
-    taxRows
-  });
-
+  let taxAmount=0,taxRows='',grandTotal=subTotal,cgst_val=0,sgst_val=0,igst_val=0;
+  if(gstType==='cgst_sgst'&&gstPct>0){cgst_val=(subTotal*gstPct/100)/2;sgst_val=cgst_val;taxAmount=cgst_val+sgst_val;grandTotal=subTotal+taxAmount;taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst_val)}</td></tr><tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst_val)}</td></tr>`;}
+  else if(gstType==='igst'&&gstPct>0){igst_val=subTotal*gstPct/100;taxAmount=igst_val;grandTotal=subTotal+taxAmount;taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(igst_val)}</td></tr>`;}
+  const html=buildDocHTML({docType:currentDocType,ref,party,date,gstin,gstPct,gstType,payMode,notes,goodsType,lines:validLines,subTotal,grandTotal,cgst:cgst_val,sgst:sgst_val,igst:igst_val,taxRows});
   document.getElementById('invoice-preview').innerHTML=html;
   document.getElementById('doc-preview-wrap').style.display='block';
   document.getElementById('doc-preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
-
-  currentDocData={
-    docType:currentDocType, ref, party, date, gstin,
-    gstPct, gstType,
-    cgst:cgst_val, sgst:sgst_val, igst:igst_val,
-    payMode, notes, goodsType,
-    lines:validLines, subTotal, grandTotal
-  };
+  currentDocData={docType:currentDocType,ref,party,date,gstin,gstPct,gstType,cgst:cgst_val,sgst:sgst_val,igst:igst_val,payMode,notes,goodsType,lines:validLines,subTotal,grandTotal};
 }
 
-// Centralised HTML builder — used by both generateDoc() and reconstructDocHTML()
+// ============================================================ DOCUMENT HTML BUILDER
+// Updated: Company GST + Phone shown on top-right of letterhead
 function buildDocHTML(d) {
   const typeLabels={invoice:'TAX INVOICE',receipt:'RECEIPT',dc:'DELIVERY CHALLAN',po:'PURCHASE ORDER'};
   const gstLabel=d.gstType==='cgst_sgst'?'CGST+SGST':d.gstType==='igst'?'IGST':'NO GST';
   const docDate=d.date?(typeof d.date==='string'&&d.date.includes('-')?new Date(d.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):d.date):'';
-
-  // Recompute taxRows if not passed in (for reconstruct)
   let taxRows=d.taxRows||'';
-  if(!taxRows) {
-    if(d.gstType==='cgst_sgst'&&d.gstPct>0) {
-      taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.cgst)}</td></tr>
-      <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.sgst)}</td></tr>`;
-    } else if(d.gstType==='igst'&&d.gstPct>0) {
-      taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${d.gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.igst)}</td></tr>`;
-    }
+  if(!taxRows){
+    if(d.gstType==='cgst_sgst'&&d.gstPct>0){taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.cgst)}</td></tr><tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.sgst)}</td></tr>`;}
+    else if(d.gstType==='igst'&&d.gstPct>0){taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${d.gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.igst)}</td></tr>`;}
   }
-
   const showGstCol=d.gstType!=='none'&&d.gstPct>0;
-
   return `<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
-    <table width="100%" style="margin-bottom:10px;border-collapse:collapse;">
+    <!-- LETTERHEAD -->
+    <table width="100%" style="margin-bottom:8px;border-collapse:collapse;">
       <tr>
-        <td style="width:200px;vertical-align:middle;padding-right:12px;">
-          <img src="https://pristineprints.in/images/ppb.png" style="width:190px;height:auto;" onerror="this.style.display='none'">
+        <td style="width:210px;vertical-align:middle;padding-right:12px;">
+          <img src="https://pristineprints.in/images/ppb.png" style="width:195px;height:auto;" onerror="this.style.display='none'">
         </td>
         <td style="text-align:right;vertical-align:middle;">
-          <div style="font-size:15px;font-weight:700;color:#1a3a6e;">Multi Colour Digital</div>
-          <div style="font-size:15px;font-weight:700;color:#1a3a6e;">Package &amp; Offset Printings</div>
+          <div style="font-size:20px;font-weight:700;color:#1a3a6e;">${COMPANY.name1}</div>
+          <div style="font-size:15px;font-weight:700;color:#1a3a6e;margin-bottom:5px;">${COMPANY.name2}</div>
+          <div style="font-size:11px;color:#444;line-height:1.6;">
+            GST No.: <strong>${COMPANY.gstin}</strong><br>
+            Phone: <strong>${COMPANY.phone}</strong>
+          </div>
         </td>
       </tr>
     </table>
     <div style="text-align:center;font-size:11px;color:#555;border-top:1px solid #1a3a6e;border-bottom:1px solid #1a3a6e;padding:4px 0;margin-bottom:10px;">
-      Ground Floor, No-198, Thottasalai East, Power House Road, Perur Village, Coimbatore-641 010
+      ${COMPANY.address}
     </div>
+    <!-- DOC TYPE HEADER -->
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1.5px solid #1a3a6e;">
       <tr style="background:#1a3a6e;color:#fff;">
         <td style="padding:6px 12px;font-weight:700;font-size:14px;">${typeLabels[d.docType]||d.docType}${d.payMode?' / '+d.payMode.toUpperCase()+' BILL':''} <span style="font-size:11px;font-weight:400;opacity:0.8">(${gstLabel})</span></td>
         <td style="padding:6px 12px;text-align:right;font-size:13px;">No <strong>${d.ref}</strong> &nbsp;&nbsp; Date: <strong>${docDate}</strong></td>
       </tr>
     </table>
+    <!-- PARTY + OUR DETAILS -->
     <table width="100%" style="margin-bottom:10px;border-collapse:collapse;border:1px solid #ccc;">
       <tr>
         <td style="padding:8px 12px;width:50%;">
@@ -1396,11 +1320,11 @@ function buildDocHTML(d) {
           ${d.gstin?`<div style="font-size:11px;color:#555;margin-top:4px;">GSTIN: ${d.gstin}</div>`:''}
         </td>
         <td style="padding:8px 12px;text-align:right;vertical-align:top;border-left:1px solid #ccc;">
-          <div style="font-size:11px;color:#555;">GST No.: 33AANCP6204B1ZT</div>
-          <div style="font-size:11px;color:#555;">State: Tamil Nadu (33)</div>
+          <div style="font-size:11px;color:#555;">State: ${COMPANY.state}</div>
         </td>
       </tr>
     </table>
+    <!-- LINE ITEMS TABLE -->
     <table width="100%" style="border-collapse:collapse;border:1px solid #1a3a6e;margin-bottom:10px;font-size:12px;">
       <thead>
         <tr style="background:#1a3a6e;color:#fff;">
@@ -1413,26 +1337,20 @@ function buildDocHTML(d) {
         </tr>
       </thead>
       <tbody>
-        ${(d.lines||[]).map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}">
-          <td style="padding:7px 10px;text-align:center;">${i+1}.</td>
-          <td style="padding:7px 10px;">${l.desc}</td>
-          <td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td>
-          <td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>
-          ${showGstCol?`<td style="padding:7px 10px;text-align:center;">${d.gstPct}%</td>`:''}
-          <td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td>
-        </tr>`).join('')}
+        ${(d.lines||[]).map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}"><td style="padding:7px 10px;text-align:center;">${i+1}.</td><td style="padding:7px 10px;">${l.desc}</td><td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td><td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>${showGstCol?`<td style="padding:7px 10px;text-align:center;">${d.gstPct}%</td>`:''}<td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td></tr>`).join('')}
       </tbody>
     </table>
+    <!-- TOTALS + BANK -->
     <table width="100%" style="border-collapse:collapse;margin-bottom:14px;">
       <tr>
         <td style="width:55%;vertical-align:top;padding-right:20px;">
           <div style="background:#f5f5f5;border:1px solid #ddd;border-radius:4px;padding:10px 14px;font-size:11px;">
             <div style="font-weight:700;margin-bottom:6px;">BANK DETAILS:</div>
-            <div>Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>PRISTINE PRINTS PRIVATE LIMITED</strong></div>
-            <div>Bank Name &nbsp;&nbsp;: HDFC BANK</div>
-            <div>Acc. No. &nbsp;&nbsp;&nbsp;&nbsp;: 99999790958200</div>
-            <div>IFSC &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: HDFC0001588</div>
-            <div>Branch &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Gandhipuram</div>
+            <div>Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <strong>${COMPANY.bank.name}</strong></div>
+            <div>Bank Name &nbsp;&nbsp;: ${COMPANY.bank.bank}</div>
+            <div>Acc. No. &nbsp;&nbsp;&nbsp;&nbsp;: ${COMPANY.bank.acc}</div>
+            <div>IFSC &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ${COMPANY.bank.ifsc}</div>
+            <div>Branch &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ${COMPANY.bank.branch}</div>
           </div>
           ${d.notes?`<div style="margin-top:8px;font-size:11px;color:#555;border:1px solid #ddd;padding:8px;border-radius:4px;">${d.notes}</div>`:''}
         </td>
@@ -1440,13 +1358,12 @@ function buildDocHTML(d) {
           <table width="100%" style="border-collapse:collapse;border:1px solid #ccc;font-size:12px;">
             <tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SUB TOTAL</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;"><strong>${fmtRaw(d.subTotal)}</strong></td></tr>
             ${taxRows}
-            <tr style="background:#1a3a6e;color:#fff;font-weight:700;">
-              <td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(d.grandTotal)}</td>
-            </tr>
+            <tr style="background:#1a3a6e;color:#fff;font-weight:700;"><td style="padding:8px 10px;">GRAND TOTAL</td><td style="padding:8px 10px;text-align:right;">₹ ${fmtRaw(d.grandTotal)}</td></tr>
           </table>
         </td>
       </tr>
     </table>
+    <!-- FOOTER -->
     <table width="100%" style="border-collapse:collapse;border-top:1px solid #1a3a6e;padding-top:10px;margin-top:4px;">
       <tr>
         <td style="padding:10px 0;font-size:11px;width:65%;">
@@ -1464,142 +1381,442 @@ function numberToWords(n) {
   const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
   const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
   function convert(num) {
-    if(num===0) return '';
-    if(num<20) return a[num]+' ';
-    if(num<100) return b[Math.floor(num/10)]+' '+(num%10?a[num%10]+' ':'');
-    if(num<1000) return a[Math.floor(num/100)]+' Hundred '+(num%100?convert(num%100):'');
-    if(num<100000) return convert(Math.floor(num/1000))+' Thousand '+(num%1000?convert(num%1000):'');
-    if(num<10000000) return convert(Math.floor(num/100000))+' Lakh '+(num%100000?convert(num%100000):'');
+    if(num===0)return'';if(num<20)return a[num]+' ';if(num<100)return b[Math.floor(num/10)]+' '+(num%10?a[num%10]+' ':'');
+    if(num<1000)return a[Math.floor(num/100)]+' Hundred '+(num%100?convert(num%100):'');
+    if(num<100000)return convert(Math.floor(num/1000))+' Thousand '+(num%1000?convert(num%1000):'');
+    if(num<10000000)return convert(Math.floor(num/100000))+' Lakh '+(num%100000?convert(num%100000):'');
     return convert(Math.floor(num/10000000))+' Crore '+(num%10000000?convert(num%10000000):'');
   }
   return convert(Math.round(n)).trim()||'Zero';
 }
 
-function printDoc() {
-  const pa=document.getElementById('print-area');
-  pa.innerHTML=document.getElementById('invoice-preview').innerHTML;
-  pa.style.display='block';
-  window.print();
-  setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
-}
-
-async function saveDoc() {
-  if(!currentDocData){toast('Generate a preview first','error');return;}
-  showLoading('Saving document…');
-  const ok=await writeToSheet({action:'saveDocument',...currentDocData,html:''});
-  if(ok){toast('Document saved ✓');showDocHistory();}
-}
+function printDoc() { const pa=document.getElementById('print-area'); pa.innerHTML=document.getElementById('invoice-preview').innerHTML; pa.style.display='block'; window.print(); setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000); }
+async function saveDoc() { if(!currentDocData){toast('Generate a preview first','error');return;} showLoading('Saving document…'); const ok=await writeToSheet({action:'saveDocument',...currentDocData,html:''}); if(ok){toast('Document saved ✓');showDocHistory();} }
 
 // ============================================================ PO TO RECEIPT
 function populatePOList() {
   const list=document.getElementById('po-select-list');
   const pos=DB.invoices.filter(d=>d.docType==='po');
   if(pos.length===0){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">No Purchase Orders found</div>';return;}
-  list.innerHTML=pos.map(p=>`
-    <div class="po-item" onclick="convertPOtoReceipt(${p.id})">
-      <div class="po-ref">${p.ref||'PO'} <span class="badge badge-blue" style="margin-left:6px">${fmt(p.grandTotal)}</span></div>
-      <div class="po-meta">${p.party||'—'} · ${p.date||''} · ${(p.lines||[]).length} items · Goods: ${p.goodsType||'—'}</div>
-    </div>`).join('');
+  list.innerHTML=pos.map(p=>`<div class="po-item" onclick="convertPOtoReceipt(${p.id})"><div class="po-ref">${p.ref||'PO'} <span class="badge badge-blue" style="margin-left:6px">${fmt(p.grandTotal)}</span></div><div class="po-meta">${p.party||'—'} · ${p.date||''} · ${(p.lines||[]).length} items · Goods: ${p.goodsType||'—'}</div></div>`).join('');
 }
-
 async function convertPOtoReceipt(poId) {
-  const po=DB.invoices.find(d=>d.id==poId);
-  if(!po){toast('PO not found','error');return;}
-  closeModal('modal-po-to-receipt');
-  selectDocType('receipt');
-  showPanel('documents');
-
+  const po=DB.invoices.find(d=>d.id==poId); if(!po){toast('PO not found','error');return;}
+  closeModal('modal-po-to-receipt'); selectDocType('receipt'); showPanel('documents');
   setTimeout(()=>{
     const today=new Date().toISOString().split('T')[0];
     const nextNo=String((DB.invoices.filter(d=>d.docType==='receipt').length)+1).padStart(3,'0');
-    const refEl=document.getElementById('doc-ref');
-    if(refEl) refEl.value='RCPT-'+nextNo+' [PO:'+po.ref+']';
-    const dateEl=document.getElementById('doc-date');
-    if(dateEl) dateEl.value=today;
-    const partyEl=document.getElementById('doc-party');
-    if(partyEl) partyEl.value=po.party||'';
-    const gstinEl=document.getElementById('doc-gstin');
-    if(gstinEl) gstinEl.value=po.gstin||'';
-    const gstEl=document.getElementById('doc-gst-pct');
-    if(gstEl) gstEl.value=po.gstPct||5;
+    const refEl=document.getElementById('doc-ref'); if(refEl) refEl.value='RCPT-'+nextNo+' [PO:'+po.ref+']';
+    const dateEl=document.getElementById('doc-date'); if(dateEl) dateEl.value=today;
+    const partyEl=document.getElementById('doc-party'); if(partyEl) partyEl.value=po.party||'';
+    const gstinEl=document.getElementById('doc-gstin'); if(gstinEl) gstinEl.value=po.gstin||'';
+    const gstEl=document.getElementById('doc-gst-pct'); if(gstEl) gstEl.value=po.gstPct||5;
     setGstType(po.gstType||'cgst_sgst');
-    const gtEl=document.getElementById('doc-goods-type');
-    if(gtEl){ gtEl.value=po.goodsType||''; }
-    const notesEl=document.getElementById('doc-notes');
-    if(notesEl) notesEl.value='Converted from PO: '+(po.ref||'');
+    const gtEl=document.getElementById('doc-goods-type'); if(gtEl) gtEl.value=po.goodsType||'';
+    const notesEl=document.getElementById('doc-notes'); if(notesEl) notesEl.value='Converted from PO: '+(po.ref||'');
     docLineItems=(po.lines||[]).map(l=>({id:Date.now()+Math.random(),desc:l.desc,qty:l.qty,rate:l.rate,isManual:true}));
-    renderDocLines();
-    toast('PO loaded into Receipt form ✓');
-  }, 200);
+    renderDocLines(); toast('PO loaded into Receipt form ✓');
+  },200);
 }
 
 // ============================================================ SAVED DOCS
-function showDocHistory() {
-  const wrap=document.getElementById('doc-history-wrap');
-  wrap.style.display='block';
-  renderDocHistoryTable();
-}
-
+function showDocHistory() { const wrap=document.getElementById('doc-history-wrap'); wrap.style.display='block'; renderDocHistoryTable(); }
 function filterSavedDocs(val) { renderDocHistoryTable(val); }
-
 function renderDocHistoryTable(filter='') {
   const tbody=document.getElementById('doc-history-tbody');
   let docs=DB.invoices;
   const typeF=document.getElementById('saved-doc-type-filter')?.value||'';
   if(typeF) docs=docs.filter(d=>d.docType===typeF);
   if(filter) docs=docs.filter(d=>(d.ref+d.party+d.date).toLowerCase().includes(filter.toLowerCase()));
-  if(docs.length===0){tbody.innerHTML='<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No saved documents yet.</td></tr>';return;}
+  if(docs.length===0){tbody.innerHTML='<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No saved documents.</td></tr>';return;}
   const typeLabels={invoice:'Invoice',receipt:'Receipt',dc:'DC',po:'PO'};
   const typeBadge={invoice:'badge-green',receipt:'badge-orange',dc:'badge-blue',po:'badge-purple'};
-  tbody.innerHTML=docs.map((d,i)=>`
-    <tr>
-      <td class="mono" style="color:var(--muted)">${i+1}</td>
-      <td><span class="badge ${typeBadge[d.docType]||'badge-blue'}">${typeLabels[d.docType]||d.docType}</span></td>
-      <td class="mono">${d.ref||'—'}</td>
-      <td>${d.party||'—'}</td>
-      <td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td>
-      <td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':d.gstType==='cgst_sgst'?'C+S GST':'No GST'}</span></td>
-      <td class="mono">${fmt(d.grandTotal)}</td>
-      <td><div class="action-cell">
-        <button class="icon-btn view-btn" onclick="viewDoc(${d.id})">👁 View</button>
-        <button class="icon-btn print-btn" onclick="viewAndPrintDoc(${d.id})">🖨 Print</button>
-        <button class="icon-btn del" onclick="deleteDoc(${d.id})">✕</button>
-      </div></td>
-    </tr>`).join('');
+  tbody.innerHTML=docs.map((d,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="badge ${typeBadge[d.docType]||'badge-blue'}">${typeLabels[d.docType]||d.docType}</span></td><td class="mono">${d.ref||'—'}</td><td>${d.party||'—'}</td><td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td><td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':d.gstType==='cgst_sgst'?'C+S GST':'No GST'}</span></td><td class="mono">${fmt(d.grandTotal)}</td><td><div class="action-cell"><button class="icon-btn view-btn" onclick="viewDoc(${d.id})">👁 View</button><button class="icon-btn print-btn" onclick="viewAndPrintDoc(${d.id})">🖨 Print</button><button class="icon-btn del" onclick="deleteDoc(${d.id})">✕</button></div></td></tr>`).join('');
+}
+function viewDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; const html=buildDocHTML(d); document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+(d.party||''); document.getElementById('doc-view-content').innerHTML=html; openModal('modal-doc-view'); }
+function viewAndPrintDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; const html=buildDocHTML(d); const pa=document.getElementById('print-area'); pa.innerHTML=html; pa.style.display='block'; window.print(); setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000); }
+function printViewedDoc() { const content=document.getElementById('doc-view-content').innerHTML; const pa=document.getElementById('print-area'); pa.innerHTML=content; pa.style.display='block'; closeModal('modal-doc-view'); window.print(); setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000); }
+async function deleteDoc(id) { if(!confirm('Delete this document?')) return; showLoading('Deleting…'); const ok=await writeToSheet({action:'deleteDocument',id}); if(ok){toast('Deleted');renderDocHistoryTable();} }
+
+// ============================================================
+// REPORTS PANEL
+// ============================================================
+
+function renderReportsPanel() {
+  // Populate MFR filter
+  const mfrs=[...new Set([...DB.finishedStock.map(r=>r.mfr),...DB.dieStock.map(r=>r.mfr)])].sort();
+  const mfrSel=document.getElementById('rpt-mfr-filter');
+  if(mfrSel){ const cur=mfrSel.value; mfrSel.innerHTML='<option value="">All MFRs</option>'+mfrs.map(m=>`<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join(''); }
+  // Populate party filter
+  const partySel=document.getElementById('rpt-party-filter');
+  if(partySel){ const cur=partySel.value; partySel.innerHTML='<option value="">All Parties</option>'+DB.parties.map(p=>`<option value="${p.name}" ${p.name===cur?'selected':''}>${p.name}</option>`).join(''); }
+  generateCurrentReport();
 }
 
-// FIX: viewDoc now uses buildDocHTML (same as live preview) instead of raw data
-function viewDoc(id) {
-  const d=DB.invoices.find(x=>x.id==id); if(!d) return;
-  const html=buildDocHTML(d);
-  document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+(d.party||'');
-  document.getElementById('doc-view-content').innerHTML=html;
-  openModal('modal-doc-view');
+function selectReport(type) {
+  currentReport = type;
+  document.querySelectorAll('.report-type-card').forEach(c=>c.classList.remove('active'));
+  const el=document.getElementById('rt-'+type);
+  if(el) el.classList.add('active');
+  generateCurrentReport();
 }
 
-function viewAndPrintDoc(id) {
-  const d=DB.invoices.find(x=>x.id==id); if(!d) return;
-  const html=buildDocHTML(d);
+function generateCurrentReport() {
+  const from=document.getElementById('rpt-from')?.value||'';
+  const to=document.getElementById('rpt-to')?.value||'';
+  const mfrFilter=document.getElementById('rpt-mfr-filter')?.value||'';
+  const partyFilter=document.getElementById('rpt-party-filter')?.value||'';
+  const out=document.getElementById('report-output');
+  if(!out) return;
+
+  let html='';
+  const filters={from,to,mfr:mfrFilter,party:partyFilter};
+
+  switch(currentReport) {
+    case 'stock-summary':       html=reportStockSummary(filters); break;
+    case 'inventory-valuation': html=reportInventoryValuation(filters); break;
+    case 'low-stock':           html=reportLowStock(filters); break;
+    case 'production-summary':  html=reportProductionSummary(filters); break;
+    case 'mfr-wise':            html=reportMfrWise(filters); break;
+    case 'sales-summary':       html=reportSalesSummary(filters); break;
+    case 'party-wise':          html=reportPartyWise(filters); break;
+    case 'gst-report':          html=reportGST(filters); break;
+    case 'die-register':        html=reportDieRegister(filters); break;
+    case 'machine-utilization': html=reportMachineUtilization(filters); break;
+    default: html='<div class="empty"><p>Select a report type above</p></div>';
+  }
+  out.innerHTML=html;
+}
+
+function reportHeader(title, subtitle) {
+  return `<div class="report-wrap" style="padding-bottom:0;border-bottom:none;background:transparent;border:none;padding:0 0 14px 0;">
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">${title}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:3px;">${subtitle||''} · Generated ${new Date().toLocaleString('en-IN')}</div>
+  </div>`;
+}
+
+function barChart(rows, maxVal, colorVar='var(--accent3)') {
+  if(!rows.length) return '<div class="empty" style="padding:20px"><p>No data</p></div>';
+  return rows.map(r=>`<div class="chart-bar-row">
+    <div class="chart-bar-label" title="${r.label}">${r.label}</div>
+    <div class="chart-bar-track"><div class="chart-bar-fill" style="background:${r.color||colorVar};width:${maxVal>0?Math.round((r.val/maxVal)*100):0}%">${r.val>0?fmtRaw(r.val):''}</div></div>
+    <div class="chart-bar-val">${r.display||fmt(r.val)}</div>
+  </div>`).join('');
+}
+
+// 1. STOCK SUMMARY
+function reportStockSummary(f) {
+  const rmTotal=DB.rawMaterials.reduce((s,r)=>s+(r.qty*r.rate),0);
+  const fsTotal=DB.finishedStock.reduce((s,r)=>s+(r.qty*r.rate),0);
+  const dieTotal=DB.dieStock.reduce((s,r)=>s+(r.amount||0),0);
+  const grand=rmTotal+fsTotal+dieTotal;
+  return reportHeader('Stock Summary Report','All categories')
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Raw Materials</div><div class="report-kpi-value" style="color:var(--accent3)">${DB.rawMaterials.length}</div><div class="report-kpi-sub">Value ${fmt(rmTotal)}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Finished Stock</div><div class="report-kpi-value" style="color:var(--accent2)">${DB.finishedStock.length}</div><div class="report-kpi-sub">Value ${fmt(fsTotal)}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Die Stock</div><div class="report-kpi-value" style="color:var(--accent)">${DB.dieStock.length}</div><div class="report-kpi-sub">Value ${fmt(dieTotal)}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Inventory Value</div><div class="report-kpi-value">${fmt(grand)}</div><div class="report-kpi-sub">All categories</div></div>
+  </div>
+  <div class="report-wrap">
+    <div class="section-label" style="margin-top:0">Raw Materials</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Material</th><th>Size</th><th>Qty</th><th>Rate</th><th>Value</th></tr></thead><tbody>
+    ${DB.rawMaterials.length===0?'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">No data</td></tr>':DB.rawMaterials.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${r.material}</strong></td><td class="mono">${r.sizeInch||'—'}</td><td><span class="badge ${r.qty<10?'badge-red':r.qty<50?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td><td class="mono">${fmt(r.rate)}</td><td class="mono">${fmt(r.qty*r.rate)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="section-label">Finished Stock</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>MFR</th><th>Carton</th><th>Qty</th><th>Rate</th><th>Value</th></tr></thead><tbody>
+    ${DB.finishedStock.length===0?'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">No data</td></tr>':DB.finishedStock.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="mfr-tag">${r.mfr}</span></td><td><strong>${r.carton}</strong></td><td><span class="badge ${r.qty<500?'badge-red':r.qty<5000?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td><td class="mono">${fmt(r.rate)}</td><td class="mono">${fmt(r.qty*r.rate)}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+// 2. INVENTORY VALUATION
+function reportInventoryValuation(f) {
+  const cats=[
+    {label:'Raw Materials',val:DB.rawMaterials.reduce((s,r)=>s+(r.qty*r.rate),0),color:'var(--accent3)',count:DB.rawMaterials.length},
+    {label:'Finished Stock',val:DB.finishedStock.reduce((s,r)=>s+(r.qty*r.rate),0),color:'var(--accent2)',count:DB.finishedStock.length},
+    {label:'Die Stock',val:DB.dieStock.reduce((s,r)=>s+(r.amount||0),0),color:'var(--accent)',count:DB.dieStock.length},
+  ];
+  const grand=cats.reduce((s,c)=>s+c.val,0);
+  const maxV=Math.max(...cats.map(c=>c.val),1);
+  return reportHeader('Inventory Valuation Report','Total value across all stock categories')
+  +`<div class="report-kpi-grid">
+    ${cats.map(c=>`<div class="report-kpi"><div class="report-kpi-label">${c.label}</div><div class="report-kpi-value" style="color:${c.color}">${fmt(c.val)}</div><div class="report-kpi-sub">${c.count} items</div></div>`).join('')}
+    <div class="report-kpi" style="border-color:var(--accent)"><div class="report-kpi-label">Grand Total</div><div class="report-kpi-value" style="color:var(--accent)">${fmt(grand)}</div><div class="report-kpi-sub">All combined</div></div>
+  </div>
+  <div class="report-wrap">
+    <div class="section-label" style="margin-top:0">Valuation Chart</div>
+    ${barChart(cats.map(c=>({label:c.label,val:c.val,color:c.color})),maxV)}
+    <div class="section-label" style="margin-top:18px">Top 10 Finished Stock by Value</div>
+    ${barChart([...DB.finishedStock].sort((a,b)=>(b.qty*b.rate)-(a.qty*a.rate)).slice(0,10).map(r=>({label:r.carton+' ('+r.mfr+')',val:r.qty*r.rate,color:'var(--accent2)'})),Math.max(...DB.finishedStock.map(r=>r.qty*r.rate),1))}
+  </div>`;
+}
+
+// 3. LOW STOCK ALERT
+function reportLowStock(f) {
+  const lowRM=DB.rawMaterials.filter(r=>r.qty<10);
+  const lowFS=DB.finishedStock.filter(r=>r.qty<500);
+  const lowDie=DB.dieStock.filter(r=>r.qty<2);
+  return reportHeader('Low Stock Alert Report','Items below minimum thresholds')
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Raw Materials Critical</div><div class="report-kpi-value" style="color:var(--danger)">${lowRM.length}</div><div class="report-kpi-sub">Below 10 units</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Finished Stock Low</div><div class="report-kpi-value" style="color:var(--accent)">${lowFS.length}</div><div class="report-kpi-sub">Below 500 units</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Die Stock Low</div><div class="report-kpi-value" style="color:var(--accent)">${lowDie.length}</div><div class="report-kpi-sub">Below 2 units</div></div>
+  </div>
+  <div class="report-wrap">
+    ${lowRM.length===0&&lowFS.length===0&&lowDie.length===0?'<div class="empty"><div class="empty-icon">✅</div><p>All stock levels are healthy!</p></div>':''}
+    ${lowRM.length?`<div class="section-label" style="margin-top:0;color:var(--danger)">⚠ Raw Materials — Critical (qty &lt; 10)</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Material</th><th>Size</th><th>Current Qty</th><th>Rate</th></tr></thead><tbody>
+    ${lowRM.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong style="color:var(--danger)">${r.material}</strong></td><td class="mono">${r.sizeInch||'—'}</td><td><span class="badge badge-red">${fmtN(r.qty)}</span></td><td class="mono">${fmt(r.rate)}</td></tr>`).join('')}
+    </tbody></table></div>`:''}
+    ${lowFS.length?`<div class="section-label" style="color:var(--accent)">⚠ Finished Stock — Low (qty &lt; 500)</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>MFR</th><th>Carton</th><th>Current Qty</th><th>Rate</th></tr></thead><tbody>
+    ${lowFS.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="mfr-tag">${r.mfr}</span></td><td><strong>${r.carton}</strong></td><td><span class="badge badge-orange">${fmtN(r.qty)}</span></td><td class="mono">${fmt(r.rate)}</td></tr>`).join('')}
+    </tbody></table></div>`:''}
+    ${lowDie.length?`<div class="section-label" style="color:var(--accent)">⚠ Die Stock — Low (qty &lt; 2)</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Die Name</th><th>MFR</th><th>Qty</th></tr></thead><tbody>
+    ${lowDie.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${r.name}</strong></td><td><span class="mfr-tag">${r.mfr}</span></td><td><span class="badge badge-orange">${r.qty}</span></td></tr>`).join('')}
+    </tbody></table></div>`:''}
+  </div>`;
+}
+
+// 4. PRODUCTION SUMMARY
+function reportProductionSummary(f) {
+  let prods=DB.productions;
+  if(f.from) prods=prods.filter(p=>p.date&&p.date>=f.from);
+  if(f.to) prods=prods.filter(p=>p.date&&p.date<=f.to);
+  if(f.mfr) prods=prods.filter(p=>p.mfr===f.mfr);
+  const totalQty=prods.reduce((s,p)=>s+(p.qty||0),0);
+  const totalVal=prods.reduce((s,p)=>s+(p.qty||0)*(p.rate||0),0);
+  const byMfr={};
+  prods.forEach(p=>{byMfr[p.mfr]=(byMfr[p.mfr]||0)+(p.qty||0);});
+  const mfrRows=Object.entries(byMfr).sort((a,b)=>b[1]-a[1]);
+  const maxMfr=mfrRows.length?mfrRows[0][1]:1;
+  return reportHeader('Production Summary Report',`${prods.length} production runs`)
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Total Runs</div><div class="report-kpi-value" style="color:var(--accent3)">${prods.length}</div><div class="report-kpi-sub">Production entries</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Units Produced</div><div class="report-kpi-value" style="color:var(--accent2)">${fmtN(totalQty)}</div><div class="report-kpi-sub">All batches</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Production Value</div><div class="report-kpi-value">${fmt(totalVal)}</div><div class="report-kpi-sub">At recorded rates</div></div>
+  </div>
+  <div class="report-wrap">
+    ${mfrRows.length?`<div class="section-label" style="margin-top:0">Output by MFR</div>
+    ${barChart(mfrRows.map(([label,val])=>({label,val,display:fmtN(val)+' units',color:'var(--accent3)'})),maxMfr)}`:'' }
+    <div class="section-label" style="margin-top:18px">Production Log</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Production Name</th><th>MFR</th><th>Product</th><th>Machines</th><th>Die</th><th>Qty</th><th>Rate</th><th>Value</th><th>Date</th></tr></thead><tbody>
+    ${prods.length===0?'<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--muted)">No data</td></tr>':prods.map((p,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td style="font-size:11px;color:var(--accent)">${p.itemName||'—'}</td><td><span class="mfr-tag">${p.mfr||'—'}</span></td><td><strong>${p.name}</strong></td><td style="font-size:11px;color:var(--muted)">${p.machineNames||'—'}</td><td style="font-size:11px;color:var(--muted)">${p.dieName||'—'}</td><td><span class="badge badge-green">${fmtN(p.qty)}</span></td><td class="mono">${fmt(p.rate)}</td><td class="mono">${fmt((p.qty||0)*(p.rate||0))}</td><td class="mono" style="font-size:11px;color:var(--muted)">${p.date||'—'}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+// 5. MFR-WISE STOCK
+function reportMfrWise(f) {
+  const mfrs=[...new Set(DB.finishedStock.map(r=>r.mfr))].sort();
+  const filtered=f.mfr?mfrs.filter(m=>m===f.mfr):mfrs;
+  return reportHeader('MFR-wise Stock Report','Finished stock grouped by manufacturer')
+  +filtered.map(mfr=>{
+    const items=DB.finishedStock.filter(r=>r.mfr===mfr);
+    const totalQty=items.reduce((s,r)=>s+r.qty,0);
+    const totalVal=items.reduce((s,r)=>s+(r.qty*r.rate),0);
+    return `<div class="report-wrap" style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div><span class="mfr-tag" style="font-size:13px;padding:4px 12px;">${mfr}</span></div>
+        <div style="display:flex;gap:16px;font-size:12px;"><span>Total Qty: <strong>${fmtN(totalQty)}</strong></span><span>Value: <strong style="color:var(--accent2)">${fmt(totalVal)}</strong></span><span>${items.length} items</span></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Carton Name</th><th>Qty</th><th>Rate</th><th>Value</th></tr></thead><tbody>
+      ${items.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${r.carton}</strong></td><td><span class="badge ${r.qty<500?'badge-red':r.qty<5000?'badge-orange':'badge-green'}">${fmtN(r.qty)}</span></td><td class="mono">${fmt(r.rate)}</td><td class="mono">${fmt(r.qty*r.rate)}</td></tr>`).join('')}
+      </tbody></table></div>
+    </div>`;
+  }).join('')||(filtered.length===0?'<div class="empty"><p>No MFR data found</p></div>':'');
+}
+
+// 6. SALES SUMMARY (Invoices)
+function reportSalesSummary(f) {
+  let docs=DB.invoices.filter(d=>d.docType==='invoice');
+  if(f.from) docs=docs.filter(d=>d.date&&d.date>=f.from);
+  if(f.to) docs=docs.filter(d=>d.date&&d.date<=f.to);
+  if(f.party) docs=docs.filter(d=>d.party&&d.party.includes(f.party));
+  const totalSales=docs.reduce((s,d)=>s+(d.grandTotal||0),0);
+  const totalSub=docs.reduce((s,d)=>s+(d.subTotal||0),0);
+  const totalCGST=docs.reduce((s,d)=>s+(d.cgst||0),0);
+  const totalSGST=docs.reduce((s,d)=>s+(d.sgst||0),0);
+  const totalIGST=docs.reduce((s,d)=>s+(d.igst||0),0);
+  return reportHeader('Sales Summary Report',`${docs.length} invoices`)
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Total Invoices</div><div class="report-kpi-value" style="color:var(--accent3)">${docs.length}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Sales</div><div class="report-kpi-value" style="color:var(--accent2)">${fmt(totalSales)}</div><div class="report-kpi-sub">Grand total billed</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Sub Total (excl. GST)</div><div class="report-kpi-value">${fmt(totalSub)}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total GST Collected</div><div class="report-kpi-value" style="color:var(--accent)">${fmt(totalCGST+totalSGST+totalIGST)}</div></div>
+  </div>
+  <div class="report-wrap">
+    <div class="section-label" style="margin-top:0">Invoice List</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Invoice No.</th><th>Party</th><th>Date</th><th>GST Type</th><th>Sub Total</th><th>GST</th><th>Grand Total</th></tr></thead><tbody>
+    ${docs.length===0?'<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--muted)">No invoices found</td></tr>':docs.map((d,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td class="mono">${d.ref||'—'}</td><td>${d.party||'—'}</td><td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td><td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':'C+SGST'}</span></td><td class="mono">${fmt(d.subTotal)}</td><td class="mono">${fmt((d.cgst||0)+(d.sgst||0)+(d.igst||0))}</td><td class="mono"><strong>${fmt(d.grandTotal)}</strong></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+// 7. PARTY-WISE SALES
+function reportPartyWise(f) {
+  let docs=DB.invoices.filter(d=>d.docType==='invoice');
+  if(f.from) docs=docs.filter(d=>d.date&&d.date>=f.from);
+  if(f.to) docs=docs.filter(d=>d.date&&d.date<=f.to);
+  const byParty={};
+  docs.forEach(d=>{
+    const k=d.party||'Unknown';
+    if(!byParty[k]) byParty[k]={count:0,total:0,invoices:[]};
+    byParty[k].count++;
+    byParty[k].total+=(d.grandTotal||0);
+    byParty[k].invoices.push(d);
+  });
+  const rows=Object.entries(byParty).sort((a,b)=>b[1].total-a[1].total);
+  const maxV=rows.length?rows[0][1].total:1;
+  return reportHeader('Party-wise Sales Report','Revenue grouped by customer')
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Customers Billed</div><div class="report-kpi-value" style="color:var(--accent3)">${rows.length}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Revenue</div><div class="report-kpi-value" style="color:var(--accent2)">${fmt(rows.reduce((s,[,v])=>s+v.total,0))}</div></div>
+  </div>
+  <div class="report-wrap">
+    <div class="section-label" style="margin-top:0">Revenue by Party</div>
+    ${barChart(rows.map(([label,v])=>({label,val:v.total,color:'var(--accent2)'})),maxV)}
+    <div class="section-label" style="margin-top:18px">Detail</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Party</th><th>Invoices</th><th>Total Billed</th></tr></thead><tbody>
+    ${rows.length===0?'<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted)">No data</td></tr>':rows.map(([party,v],i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${party}</strong></td><td><span class="badge badge-blue">${v.count}</span></td><td class="mono"><strong style="color:var(--accent2)">${fmt(v.total)}</strong></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+// 8. GST REPORT
+function reportGST(f) {
+  let docs=DB.invoices.filter(d=>d.docType==='invoice');
+  if(f.from) docs=docs.filter(d=>d.date&&d.date>=f.from);
+  if(f.to) docs=docs.filter(d=>d.date&&d.date<=f.to);
+  const cgstDocs=docs.filter(d=>d.gstType==='cgst_sgst');
+  const igstDocs=docs.filter(d=>d.gstType==='igst');
+  const noGstDocs=docs.filter(d=>d.gstType==='none'||!d.gstType);
+  const totCGST=cgstDocs.reduce((s,d)=>s+(d.cgst||0),0);
+  const totSGST=cgstDocs.reduce((s,d)=>s+(d.sgst||0),0);
+  const totIGST=igstDocs.reduce((s,d)=>s+(d.igst||0),0);
+  const gstByRate={};
+  docs.forEach(d=>{const k=d.gstPct+'%';if(!gstByRate[k])gstByRate[k]={sub:0,tax:0};gstByRate[k].sub+=(d.subTotal||0);gstByRate[k].tax+=((d.cgst||0)+(d.sgst||0)+(d.igst||0));});
+  return reportHeader('GST Report',`Tax collected across ${docs.length} invoices`)
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">CGST Collected</div><div class="report-kpi-value" style="color:var(--accent3)">${fmt(totCGST)}</div><div class="report-kpi-sub">${cgstDocs.length} invoices</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">SGST Collected</div><div class="report-kpi-value" style="color:var(--accent3)">${fmt(totSGST)}</div><div class="report-kpi-sub">Matches CGST</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">IGST Collected</div><div class="report-kpi-value" style="color:var(--accent2)">${fmt(totIGST)}</div><div class="report-kpi-sub">${igstDocs.length} invoices</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Tax Collected</div><div class="report-kpi-value" style="color:var(--accent)">${fmt(totCGST+totSGST+totIGST)}</div></div>
+  </div>
+  <div class="report-wrap">
+    <div class="section-label" style="margin-top:0">GST by Rate</div>
+    <div class="table-wrap"><table><thead><tr><th>GST Rate</th><th>Taxable Amount</th><th>Tax Amount</th></tr></thead><tbody>
+    ${Object.entries(gstByRate).length===0?'<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--muted)">No data</td></tr>':Object.entries(gstByRate).sort((a,b)=>parseFloat(a[0])-parseFloat(b[0])).map(([rate,v])=>`<tr><td><span class="badge badge-blue">${rate}</span></td><td class="mono">${fmt(v.sub)}</td><td class="mono"><strong style="color:var(--accent)">${fmt(v.tax)}</strong></td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="section-label" style="margin-top:18px">Invoice-wise GST Detail</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Invoice No.</th><th>Party</th><th>Date</th><th>Type</th><th>Rate</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total Tax</th></tr></thead><tbody>
+    ${docs.length===0?'<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--muted)">No invoices</td></tr>':docs.map((d,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td class="mono">${d.ref||'—'}</td><td>${d.party||'—'}</td><td class="mono" style="font-size:11px;color:var(--muted)">${d.date||''}</td><td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':'C+S'}</span></td><td class="mono">${d.gstPct||0}%</td><td class="mono">${fmt(d.cgst||0)}</td><td class="mono">${fmt(d.sgst||0)}</td><td class="mono">${fmt(d.igst||0)}</td><td class="mono"><strong>${fmt((d.cgst||0)+(d.sgst||0)+(d.igst||0))}</strong></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+// 9. DIE REGISTER
+function reportDieRegister(f) {
+  let dies=DB.dieStock;
+  if(f.mfr) dies=dies.filter(d=>d.mfr===f.mfr);
+  const mfrs=[...new Set(dies.map(d=>d.mfr))].sort();
+  const totalVal=dies.reduce((s,d)=>s+(d.amount||0),0);
+  return reportHeader('Die Register','Complete die inventory by manufacturer')
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Total Dies</div><div class="report-kpi-value" style="color:var(--accent)">${dies.length}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Manufacturers</div><div class="report-kpi-value">${mfrs.length}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Die Value</div><div class="report-kpi-value" style="color:var(--accent2)">${fmt(totalVal)}</div></div>
+  </div>
+  <div class="report-wrap">
+    ${mfrs.map(mfr=>{
+      const items=dies.filter(d=>d.mfr===mfr);
+      const mfrVal=items.reduce((s,d)=>s+(d.amount||0),0);
+      return `<div style="margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="mfr-tag" style="font-size:13px;padding:4px 12px;">${mfr}</span>
+          <span style="font-size:12px;color:var(--muted)">${items.length} dies · Value ${fmt(mfrVal)}</span>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>#</th><th>Die Name</th><th>Qty</th><th>Amount (₹)</th></tr></thead><tbody>
+        ${items.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${r.name}</strong></td><td><span class="badge ${r.qty<2?'badge-orange':'badge-green'}">${r.qty}</span></td><td class="mono">${r.amount?fmt(r.amount):'—'}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>`;
+    }).join('')||'<div class="empty"><p>No die data found</p></div>'}
+  </div>`;
+}
+
+// 10. MACHINE UTILIZATION
+function reportMachineUtilization(f) {
+  const usage={};
+  DB.machines.forEach(m=>{ usage[m.id]={name:m.name,type:m.type,count:0,productions:[]}; });
+  DB.productions.forEach(p=>{
+    (p.machineIds||[]).forEach(mid=>{
+      if(usage[mid]){ usage[mid].count++; usage[mid].productions.push(p.name||'—'); }
+    });
+  });
+  const rows=Object.values(usage).sort((a,b)=>b.count-a.count);
+  const maxC=rows.length?rows[0].count:1;
+  return reportHeader('Machine Utilization Report','Production run count per machine')
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Total Machines</div><div class="report-kpi-value" style="color:var(--accent3)">${DB.machines.length}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Production Runs</div><div class="report-kpi-value">${DB.productions.length}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Most Used</div><div class="report-kpi-value" style="font-size:14px;color:var(--accent2)">${rows.length?rows[0].name:'—'}</div><div class="report-kpi-sub">${rows.length?rows[0].count+' runs':''}</div></div>
+  </div>
+  <div class="report-wrap">
+    <div class="section-label" style="margin-top:0">Usage Chart (production runs)</div>
+    ${barChart(rows.map(r=>({label:r.name+(r.type?' ('+r.type+')':''),val:r.count,display:r.count+' runs',color:'var(--accent3)'})),maxC||1)}
+    <div class="section-label" style="margin-top:18px">Detail</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Machine</th><th>Type</th><th>Production Runs</th><th>Last Used For</th></tr></thead><tbody>
+    ${rows.length===0?'<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">No data</td></tr>':rows.map((r,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><strong>${r.name}</strong></td><td><span class="type-tag">${r.type||'—'}</span></td><td><span class="badge badge-green">${r.count}</span></td><td style="font-size:11px;color:var(--muted)">${r.productions.slice(-3).join(', ')||'—'}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+// Report print
+function printReport() {
+  const out=document.getElementById('report-output');
+  if(!out) return;
   const pa=document.getElementById('print-area');
-  pa.innerHTML=html; pa.style.display='block';
+  pa.innerHTML=`<div style="font-family:Arial,sans-serif;padding:20px;background:#fff;color:#000;">
+    <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #1a3a6e;padding-bottom:12px;">
+      <div style="font-size:32px; color:#1a3a6e; font-weight:bold;">
+  ${COMPANY.name1}
+</div>
+      <div style="font-size:16px;font-weight:700;color:#e5a623;">${COMPANY.name2}</div>
+      <div style="font-size:11px;color:#555;">${COMPANY.address}</div>
+    </div>
+    ${out.innerHTML}
+  </div>`;
+  pa.style.display='block';
   window.print();
   setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
 }
 
-function printViewedDoc() {
-  const content=document.getElementById('doc-view-content').innerHTML;
-  const pa=document.getElementById('print-area');
-  pa.innerHTML=content; pa.style.display='block';
-  closeModal('modal-doc-view');
-  window.print();
-  setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
-}
-
-async function deleteDoc(id) {
-  if(!confirm('Delete this document?')) return;
-  showLoading('Deleting…');
-  const ok=await writeToSheet({action:'deleteDocument',id});
-  if(ok){toast('Deleted');renderDocHistoryTable();}
+// Report CSV export
+function exportReportCSV() {
+  let csv='Report: '+currentReport+'\nGenerated: '+new Date().toLocaleString('en-IN')+'\n\n';
+  switch(currentReport) {
+    case 'stock-summary':
+      csv+='RAW MATERIALS\nMaterial,Size,Qty,Rate,Value\n'+DB.rawMaterials.map(r=>[r.material,r.sizeInch||'',r.qty,r.rate,r.qty*r.rate].join(',')).join('\n');
+      csv+='\n\nFINISHED STOCK\nMFR,Carton,Qty,Rate,Value\n'+DB.finishedStock.map(r=>[r.mfr,r.carton,r.qty,r.rate,r.qty*r.rate].join(',')).join('\n');
+      break;
+    case 'production-summary':
+      csv+='Production,MFR,Product,Machines,Die,Qty,Rate,Value,Date\n'+DB.productions.map(p=>[p.itemName,p.mfr,p.name,p.machineNames,p.dieName,p.qty,p.rate,(p.qty||0)*(p.rate||0),p.date].join(',')).join('\n');
+      break;
+    case 'sales-summary':
+      csv+='Invoice No.,Party,Date,GST Type,Sub Total,CGST,SGST,IGST,Grand Total\n'+DB.invoices.filter(d=>d.docType==='invoice').map(d=>[d.ref,d.party,d.date,d.gstType,d.subTotal,d.cgst||0,d.sgst||0,d.igst||0,d.grandTotal].join(',')).join('\n');
+      break;
+    case 'die-register':
+      csv+='Die Name,MFR,Qty,Amount\n'+DB.dieStock.map(r=>[r.name,r.mfr,r.qty,r.amount].join(',')).join('\n');
+      break;
+    default:
+      csv+='No CSV export available for this report type.\nUse the main CSV export (⬇ CSV) from the top navigation instead.';
+  }
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=currentReport+'_report.csv';a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported!');
 }
 
 // ============================================================ LOGS
@@ -1609,12 +1826,7 @@ function renderLogs() {
   const colors={'PRODUCTION':'var(--accent3)','RAW MATERIAL':'var(--accent2)','FINISHED STOCK':'var(--accent)','MACHINE':'var(--accent3)','DIE STOCK':'var(--accent)','DOCUMENT':'var(--accent3)','EDIT':'var(--muted)','PARTY':'var(--accent2)'};
   el.innerHTML=DB.logs.map(l=>`<div class="log-item"><div class="log-type" style="background:${colors[l.type]||'var(--muted)'}"></div><div class="log-time">${l.time||l.date||''}</div><div class="log-msg">${l.action||l.msg||''}${l.details?`<span style="color:var(--muted);font-size:11px"> — ${l.details}</span>`:''}</div></div>`).join('');
 }
-async function clearLogs() {
-  if(!confirm('Clear all logs?')) return;
-  showLoading('Clearing…');
-  const ok=await writeToSheet({action:'clearLogs'});
-  if(ok) toast('Logs cleared');
-}
+async function clearLogs() { if(!confirm('Clear all logs?')) return; showLoading('Clearing…'); const ok=await writeToSheet({action:'clearLogs'}); if(ok) toast('Logs cleared'); }
 
 // ============================================================ CSV EXPORT
 function exportToCSV() {
