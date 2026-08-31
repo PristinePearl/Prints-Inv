@@ -227,9 +227,78 @@
     #print-area, #print-area * { visibility: visible; }
     #print-area { position: fixed; inset: 0; background: #fff; padding: 20px; }
   }
+
+  /* ===== LOGIN OVERLAY ===== */
+  #login-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #login-overlay.hidden { display: none; }
+  .login-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 40px 36px; width: 360px; max-width: 92vw;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .login-logo { margin-bottom: 20px; }
+  .login-logo img { width: 180px; height: auto; }
+  .login-title {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+    letter-spacing: -0.3px; margin-bottom: 4px; text-align: center;
+  }
+  .login-sub { font-size: 12px; color: var(--muted); margin-bottom: 28px; text-align: center; }
+  .login-field { width: 100%; margin-bottom: 14px; }
+  .login-field label {
+    display: block; font-size: 11px; color: var(--muted);
+    font-family: 'DM Mono', monospace; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-bottom: 5px;
+  }
+  .login-field input {
+    width: 100%; padding: 10px 14px; font-size: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: 7px; outline: none;
+    font-family: 'DM Sans', sans-serif; transition: border-color 0.15s;
+    letter-spacing: 2px;
+  }
+  .login-field input:focus { border-color: var(--accent); }
+  .login-btn {
+    width: 100%; padding: 11px; background: var(--accent); color: #000;
+    border: none; border-radius: 7px; font-size: 14px; font-weight: 700;
+    font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px;
+    transition: opacity 0.15s;
+  }
+  .login-btn:hover { opacity: 0.87; }
+  .login-error {
+    color: var(--danger); font-size: 12px; text-align: center;
+    margin-top: 10px; min-height: 18px;
+  }
+  .login-shake { animation: shake 0.35s ease; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)} 60%{transform:translateX(-6px)}
+    80%{transform:translateX(6px)}
+  }
+
 </style>
 </head>
 <body>
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div class="login-box" id="login-box">
+    <div class="login-logo">
+      <img src="https://pristineprints.in/images/ppb.png" alt="Pristine Prints" onerror="this.style.display='none'">
+    </div>
+    <div class="login-title">PRINTS — Stock Manager</div>
+    <div class="login-sub">Enter password to continue</div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Unlock</button>
+    <div class="login-error" id="login-err"></div>
+  </div>
+</div>
+
 
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
@@ -253,6 +322,7 @@
     <button class="nav-tab" onclick="showPanel('logs')">Logs</button>
   </div>
   <div class="nav-right">
+    <button class="sync-btn" style="background:var(--card);color:var(--danger);border:1px solid var(--danger);" onclick="doLogout()">⏻ Logout</button>
     <div class="conn-status" id="conn-status">
       <div class="conn-dot" id="conn-dot"></div>
       <span id="conn-text">Connecting…</span>
@@ -390,7 +460,7 @@
             <input id="prod-qty" type="number" placeholder="e.g. 5000" oninput="updateProdPreview()">
           </div>
           <div class="field">
-            <label>Rate per unit (₹)</label>
+            <label>Rate per unit (₹) <span id="prod-rate-hint" style="color:var(--accent2);font-size:10px;text-transform:none;font-style:italic;font-weight:400;"></span></label>
             <input id="prod-rate" type="number" step="0.01" placeholder="e.g. 1.55" oninput="updateProdPreview()">
           </div>
         </div>
@@ -409,7 +479,12 @@
         <div id="prod-preview"><div class="empty"><div class="empty-icon">📋</div><p>Fill the form to see a preview</p></div></div>
       </div>
       <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;">Recent Productions</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;">Recent Productions</div>
+          <select id="prod-mfr-filter" onchange="renderProdHistory()" style="font-size:12px;padding:5px 9px;min-width:120px;">
+            <option value="">All MFRs</option>
+          </select>
+        </div>
         <div id="prod-history"></div>
       </div>
     </div>
@@ -742,7 +817,7 @@ const COMPANY = {
   name2: 'Multi Colour Digital, Package & Offset Printings',
   address: 'Ground Floor, No-198, Thottasalai East, Power House Road, Perur Village, Coimbatore-641 010',
   gstin: '33AANCP6204B1ZT',
-  phone: '+91 98765 43210',   // ← UPDATE with your actual phone
+  phone: '',   // ← SET YOUR ACTUAL PHONE NUMBER HERE (e.g. '+91 98765 43210')
   state: 'Tamil Nadu (33)',
   bank: {
     name: 'PRISTINE PRINTS PRIVATE LIMITED',
@@ -1066,7 +1141,23 @@ function updateProdPreview() {
     </div>
     <div style="margin-top:12px"><span class="badge ${allOk&&name&&qty&&checkedIds.length?'badge-green':'badge-red'}">${allOk&&name&&qty&&checkedIds.length?'✓ Ready':'⚠ Check inputs'}</span></div>`;
 }
+function autoFillProdRate() {
+  const mfr=(document.getElementById('prod-mfr')?.value||'').trim().toLowerCase();
+  const name=(document.getElementById('prod-name')?.value||'').trim().toLowerCase();
+  if(!mfr||!name) return;
+  const match=DB.finishedStock.find(r=>r.mfr.toLowerCase()===mfr&&r.carton.toLowerCase()===name);
+  const rateEl=document.getElementById('prod-rate');
+  const hint=document.getElementById('prod-rate-hint');
+  if(match&&match.rate&&!(rateEl.value)){
+    rateEl.value=match.rate;
+    if(hint) hint.textContent='(auto-filled from stock)';
+    updateProdPreview();
+  } else if(!match&&hint){
+    hint.textContent='';
+  }
+}
 ['prod-item-name','prod-mfr','prod-name','prod-qty','prod-rate','prod-die'].forEach(id=>{const el=document.getElementById(id);if(el){el.addEventListener('input',updateProdPreview);el.addEventListener('change',updateProdPreview);}});
+['prod-mfr','prod-name'].forEach(id=>{const el=document.getElementById(id);if(el){el.addEventListener('blur',autoFillProdRate);}});
 async function createProduction() {
   const itemName=document.getElementById('prod-item-name').value.trim();
   const checkedIds=getCheckedMachines();
@@ -1095,8 +1186,18 @@ function clearProdForm() {
 }
 function renderProdHistory() {
   const el=document.getElementById('prod-history');
-  if(DB.productions.length===0){el.innerHTML='<div class="empty" style="padding:20px"><p>No production runs yet</p></div>';return;}
-  el.innerHTML=DB.productions.slice(0,8).map(p=>`<div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div>${p.itemName?`<div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:2px">${p.itemName}</div>`:''}<strong>${p.name}</strong></div><span class="badge badge-green">${fmtN(p.qty)} units</span></div><div style="color:var(--muted);font-size:11px;margin-top:4px">${p.mfr} · ${p.machineNames||''} ${p.dieName?'· Die: '+p.dieName:''} · ${p.date||''}</div></div>`).join('');
+  // Populate MFR dropdown
+  const mfrSel=document.getElementById('prod-mfr-filter');
+  if(mfrSel){
+    const mfrs=[...new Set(DB.productions.map(p=>p.mfr).filter(Boolean))].sort();
+    const cur=mfrSel.value;
+    mfrSel.innerHTML='<option value="">All MFRs</option>'+mfrs.map(m=>`<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
+  }
+  let prods=DB.productions;
+  const mfrFilter=mfrSel?mfrSel.value:'';
+  if(mfrFilter) prods=prods.filter(p=>p.mfr===mfrFilter);
+  if(prods.length===0){el.innerHTML='<div class="empty" style="padding:20px"><p>No production runs'+(mfrFilter?' for '+mfrFilter:' yet')+'</p></div>';return;}
+  el.innerHTML=prods.slice(0,10).map(p=>`<div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div>${p.itemName?`<div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-bottom:2px">${p.itemName}</div>`:''}<strong>${p.name}</strong> <span class="mfr-tag" style="font-size:10px">${p.mfr||''}</span></div><span class="badge badge-green">${fmtN(p.qty)} units</span></div><div style="color:var(--muted);font-size:11px;margin-top:4px">${p.machineNames||''} ${p.dieName?'· Die: '+p.dieName:''} · ${p.date||''}</div></div>`).join('');
 }
 
 // ============================================================ DOCUMENTS
@@ -1110,8 +1211,15 @@ function selectDocType(type) {
 }
 
 function renderDocPanel() {
+  // Preserve any existing line items when switching back to this panel.
+  // Only selectDocType() and clearDocForm() should wipe them.
+  const savedLines = docLineItems.slice();
   renderDocForm(currentDocType);
-  if(docLineItems.length===0) addDocLine();
+  if(savedLines.length > 0) {
+    docLineItems = savedLines;
+  }
+  if(docLineItems.length === 0) addDocLine();
+  else renderDocLines();
 }
 
 function partyOptions(includeBlank=true) {
@@ -1295,8 +1403,7 @@ function buildDocHTML(d) {
           <div style="font-size:20px;font-weight:700;color:#1a3a6e;">${COMPANY.name1}</div>
           <div style="font-size:15px;font-weight:700;color:#1a3a6e;margin-bottom:5px;">${COMPANY.name2}</div>
           <div style="font-size:11px;color:#444;line-height:1.6;">
-            GST No.: <strong>${COMPANY.gstin}</strong><br>
-            Phone: <strong>${COMPANY.phone}</strong>
+            GST No.: <strong>${COMPANY.gstin}</strong>${COMPANY.phone?`<br>Phone: <strong>${COMPANY.phone}</strong>`:''}
           </div>
         </td>
       </tr>
@@ -1391,7 +1498,14 @@ function numberToWords(n) {
 }
 
 function printDoc() { const pa=document.getElementById('print-area'); pa.innerHTML=document.getElementById('invoice-preview').innerHTML; pa.style.display='block'; window.print(); setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000); }
-async function saveDoc() { if(!currentDocData){toast('Generate a preview first','error');return;} showLoading('Saving document…'); const ok=await writeToSheet({action:'saveDocument',...currentDocData,html:''}); if(ok){toast('Document saved ✓');showDocHistory();} }
+async function saveDoc() {
+  if(!currentDocData){toast('Generate a preview first','error');return;}
+  showLoading('Saving document…');
+  // Stock deduction/addition is handled entirely by the backend saveDocument action.
+  // Do NOT call updateFinishedStock / updateRawMaterial here — that would double-write.
+  const ok=await writeToSheet({action:'saveDocument',...currentDocData,html:''});
+  if(ok){toast('Document saved ✓');showDocHistory();}
+}
 
 // ============================================================ PO TO RECEIPT
 function populatePOList() {
@@ -1851,6 +1965,44 @@ function exportToCSV() {
 // ============================================================ BOOT
 document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 syncAll();
+
+// ===== LOGIN =====
+(function(){
+  const PW = 'prints@2026';
+  const SK = 'prints_auth';
+  function doLogin() {
+    const val = document.getElementById('login-pw').value;
+    if(val === PW) {
+      sessionStorage.setItem(SK, '1');
+      document.getElementById('login-overlay').classList.add('hidden');
+    } else {
+      const box = document.getElementById('login-box');
+      const err = document.getElementById('login-err');
+      err.textContent = 'Incorrect password. Try again.';
+      box.classList.remove('login-shake');
+      void box.offsetWidth;
+      box.classList.add('login-shake');
+      document.getElementById('login-pw').value = '';
+      document.getElementById('login-pw').focus();
+    }
+  }
+  window.doLogin = doLogin;
+  function doLogout() {
+    if(!confirm('Logout and lock the app?')) return;
+    sessionStorage.removeItem(SK);
+    document.getElementById('login-pw').value = '';
+    document.getElementById('login-err').textContent = '';
+    document.getElementById('login-overlay').classList.remove('hidden');
+    document.getElementById('login-pw').focus();
+  }
+  window.doLogout = doLogout;
+  if(sessionStorage.getItem(SK) === '1') {
+    document.getElementById('login-overlay').classList.add('hidden');
+  } else {
+    setTimeout(()=>{ const el=document.getElementById('login-pw'); if(el)el.focus(); }, 350);
+  }
+})();
+
 </script>
 </body>
 </html>
