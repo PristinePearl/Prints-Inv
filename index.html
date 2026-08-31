@@ -223,9 +223,9 @@
   .report-print-wrap { background: #fff; color: #000; border-radius: 8px; padding: 0; margin-top: 16px; overflow: hidden; display: none; }
 
   @media print {
-    body * { visibility: hidden; }
-    #print-area, #print-area * { visibility: visible; }
-    #print-area { position: fixed; inset: 0; background: #fff; padding: 20px; }
+    body > *:not(#print-area) { display: none !important; }
+    #print-area { display: block !important; position: static !important; inset: auto !important; width: 100% !important; padding: 0 !important; }
+    @page { margin: 12mm; }
   }
 
   /* ===== LOGIN OVERLAY ===== */
@@ -581,6 +581,7 @@
     <div class="toolbar">
       <button class="btn btn-ghost" onclick="printReport()">🖨 Print Report</button>
       <button class="btn btn-ghost" onclick="exportReportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-ghost" onclick="exportReportExcel()">📊 Export Excel</button>
       <button class="btn btn-primary" onclick="generateCurrentReport()">⟳ Generate</button>
     </div>
   </div>
@@ -635,6 +636,11 @@
       <div class="rt-icon">⚙️</div>
       <div class="rt-title">Machine Utilization</div>
       <div class="rt-desc">Usage count per machine</div>
+    </div>
+    <div class="report-type-card" id="rt-documents-report" onclick="selectReport('documents-report')">
+      <div class="rt-icon">📑</div>
+      <div class="rt-title">Documents Report</div>
+      <div class="rt-desc">All Invoices, Receipts, DC & PO</div>
     </div>
   </div>
 
@@ -808,6 +814,7 @@
 <div id="print-area" style="display:none;"></div>
 <div id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxMV3UK6ywnI1QdiJPHWmueonivtmzE7T5YlJ-6j-7yKctsQTgHe7u9dwQc-zFgg5gS/exec';
 
@@ -1518,7 +1525,17 @@ function numberToWords(n) {
   return convert(Math.round(n)).trim()||'Zero';
 }
 
-function printDoc() { const pa=document.getElementById('print-area'); pa.innerHTML=document.getElementById('invoice-preview').innerHTML; pa.style.display='block'; window.print(); setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000); }
+function printDoc() { doSafePrint(document.getElementById('invoice-preview').innerHTML); }
+function doSafePrint(html){
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=html;
+  pa.style.display='block';
+  let cleared=false;
+  const clear=()=>{ if(cleared) return; cleared=true; pa.style.display='none'; pa.innerHTML=''; window.removeEventListener('afterprint',clear); };
+  window.addEventListener('afterprint',clear);
+  setTimeout(clear,15000); // fallback in case afterprint never fires
+  window.print();
+}
 async function saveDoc() {
   if(!currentDocData){toast('Generate a preview first','error');return;}
   showLoading('Saving document…');
@@ -1557,6 +1574,7 @@ async function convertPOtoReceipt(poId) {
 // ============================================================ SAVED DOCS
 function showDocHistory() { const wrap=document.getElementById('doc-history-wrap'); wrap.style.display='block'; renderDocHistoryTable(); }
 function filterSavedDocs(val) { renderDocHistoryTable(val); }
+function partyNameOnly(s){ return String(s||'').split(',')[0].trim(); }
 function renderDocHistoryTable(filter='') {
   const tbody=document.getElementById('doc-history-tbody');
   let docs=DB.invoices;
@@ -1566,11 +1584,11 @@ function renderDocHistoryTable(filter='') {
   if(docs.length===0){tbody.innerHTML='<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No saved documents.</td></tr>';return;}
   const typeLabels={invoice:'Invoice',receipt:'Receipt',dc:'DC',po:'PO'};
   const typeBadge={invoice:'badge-green',receipt:'badge-orange',dc:'badge-blue',po:'badge-purple'};
-  tbody.innerHTML=docs.map((d,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="badge ${typeBadge[d.docType]||'badge-blue'}">${typeLabels[d.docType]||d.docType}</span></td><td class="mono">${d.ref||'—'}</td><td>${d.party||'—'}</td><td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td><td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':d.gstType==='cgst_sgst'?'C+S GST':'No GST'}</span></td><td class="mono">${fmt(d.grandTotal)}</td><td><div class="action-cell"><button class="icon-btn view-btn" onclick="viewDoc(${d.id})">👁 View</button><button class="icon-btn print-btn" onclick="viewAndPrintDoc(${d.id})">🖨 Print</button><button class="icon-btn del" onclick="deleteDoc(${d.id})">✕</button></div></td></tr>`).join('');
+  tbody.innerHTML=docs.map((d,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="badge ${typeBadge[d.docType]||'badge-blue'}">${typeLabels[d.docType]||d.docType}</span></td><td class="mono">${d.ref||'—'}</td><td>${partyNameOnly(d.party)||'—'}</td><td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td><td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':d.gstType==='cgst_sgst'?'C+S GST':'No GST'}</span></td><td class="mono">${fmt(d.grandTotal)}</td><td><div class="action-cell"><button class="icon-btn view-btn" onclick="viewDoc(${d.id})">👁 View</button><button class="icon-btn print-btn" onclick="viewAndPrintDoc(${d.id})">🖨 Print</button><button class="icon-btn del" onclick="deleteDoc(${d.id})">✕</button></div></td></tr>`).join('');
 }
-function viewDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; const html=buildDocHTML(d); document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+(d.party||''); document.getElementById('doc-view-content').innerHTML=html; openModal('modal-doc-view'); }
-function viewAndPrintDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; const html=buildDocHTML(d); const pa=document.getElementById('print-area'); pa.innerHTML=html; pa.style.display='block'; window.print(); setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000); }
-function printViewedDoc() { const content=document.getElementById('doc-view-content').innerHTML; const pa=document.getElementById('print-area'); pa.innerHTML=content; pa.style.display='block'; closeModal('modal-doc-view'); window.print(); setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000); }
+function viewDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; const html=buildDocHTML(d); document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+partyNameOnly(d.party); document.getElementById('doc-view-content').innerHTML=html; openModal('modal-doc-view'); }
+function viewAndPrintDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; doSafePrint(buildDocHTML(d)); }
+function printViewedDoc() { const content=document.getElementById('doc-view-content').innerHTML; closeModal('modal-doc-view'); doSafePrint(content); }
 async function deleteDoc(id) { if(!confirm('Delete this document?')) return; showLoading('Deleting…'); const ok=await writeToSheet({action:'deleteDocument',id}); if(ok){toast('Deleted');renderDocHistoryTable();} }
 
 // ============================================================
@@ -1618,6 +1636,7 @@ function generateCurrentReport() {
     case 'gst-report':          html=reportGST(filters); break;
     case 'die-register':        html=reportDieRegister(filters); break;
     case 'machine-utilization': html=reportMachineUtilization(filters); break;
+    case 'documents-report':    html=reportDocumentsReport(filters); break;
     default: html='<div class="empty"><p>Select a report type above</p></div>';
   }
   out.innerHTML=html;
@@ -1763,7 +1782,43 @@ function reportMfrWise(f) {
   }).join('')||(filtered.length===0?'<div class="empty"><p>No MFR data found</p></div>':'');
 }
 
-// 6. SALES SUMMARY (Invoices)
+// 6. DOCUMENTS REPORT (all doc types)
+function docTotalQty(d) {
+  return (d.lines||[]).reduce((s,l)=>s+(parseFloat(l.qty)||0),0);
+}
+function reportDocumentsReport(f) {
+  let docs=DB.invoices.slice();
+  if(f.from) docs=docs.filter(d=>d.date&&d.date>=f.from);
+  if(f.to) docs=docs.filter(d=>d.date&&d.date<=f.to);
+  if(f.party) docs=docs.filter(d=>d.party&&d.party.includes(f.party));
+  docs.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const typeLabels={invoice:'Invoice',receipt:'Receipt',dc:'DC',po:'PO'};
+  const totalGrand=docs.reduce((s,d)=>s+(d.grandTotal||0),0);
+  const totalQtyAll=docs.reduce((s,d)=>s+docTotalQty(d),0);
+  const byType={};
+  docs.forEach(d=>{ byType[d.docType]=(byType[d.docType]||0)+1; });
+  const rows=[];
+  docs.forEach(d=>{
+    const lines=(d.lines&&d.lines.length)?d.lines:[{desc:'—',qty:'',rate:''}];
+    lines.forEach((l,li)=>{
+      rows.push(`<tr><td class="mono" style="color:var(--muted)">${rows.length+1}</td><td><span class="badge badge-blue" style="font-size:10px">${typeLabels[d.docType]||d.docType}</span></td><td class="mono">${d.ref||'—'}</td><td>${partyNameOnly(d.party)||'—'}</td><td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td><td style="font-size:12px">${l.desc||'—'}</td><td class="mono">${l.qty!==''?fmtN(l.qty||0):''}</td><td class="mono">${l.rate!==''?fmtRaw(l.rate||0):''}</td><td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':d.gstType==='cgst_sgst'?'C+SGST':'No GST'}</span></td><td class="mono">${li===0?'<strong>'+fmt(d.grandTotal||0)+'</strong>':''}</td></tr>`);
+    });
+  });
+  return reportHeader('Documents Report',`${docs.length} documents · Invoices ${byType.invoice||0} · Receipts ${byType.receipt||0} · DC ${byType.dc||0} · PO ${byType.po||0}`)
+  +`<div class="report-kpi-grid">
+    <div class="report-kpi"><div class="report-kpi-label">Total Documents</div><div class="report-kpi-value" style="color:var(--accent3)">${docs.length}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Qty</div><div class="report-kpi-value" style="color:var(--accent)">${fmtN(totalQtyAll)}</div></div>
+    <div class="report-kpi"><div class="report-kpi-label">Total Value</div><div class="report-kpi-value" style="color:var(--accent2)">${fmt(totalGrand)}</div></div>
+  </div>
+  <div class="report-wrap">
+    <div class="section-label" style="margin-top:0">Document List</div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Type</th><th>Ref No.</th><th>Party</th><th>Date</th><th>Product</th><th>Qty</th><th>Rate</th><th>GST Type</th><th>Grand Total</th></tr></thead><tbody>
+    ${docs.length===0?'<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--muted)">No documents found</td></tr>':rows.join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+
 function reportSalesSummary(f) {
   let docs=DB.invoices.filter(d=>d.docType==='invoice');
   if(f.from) docs=docs.filter(d=>d.date&&d.date>=f.from);
@@ -1911,8 +1966,7 @@ function reportMachineUtilization(f) {
 function printReport() {
   const out=document.getElementById('report-output');
   if(!out) return;
-  const pa=document.getElementById('print-area');
-  pa.innerHTML=`<div style="font-family:Arial,sans-serif;padding:20px;background:#fff;color:#000;">
+  doSafePrint(`<div style="font-family:Arial,sans-serif;padding:20px;background:#fff;color:#000;">
     <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #1a3a6e;padding-bottom:12px;">
       <div style="font-size:32px; color:#1a3a6e; font-weight:bold;">
   ${COMPANY.name1}
@@ -1921,10 +1975,7 @@ function printReport() {
       <div style="font-size:11px;color:#555;">${COMPANY.address}</div>
     </div>
     ${out.innerHTML}
-  </div>`;
-  pa.style.display='block';
-  window.print();
-  setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},2000);
+  </div>`);
 }
 
 // Report CSV export
@@ -1944,6 +1995,16 @@ function exportReportCSV() {
     case 'die-register':
       csv+='Die Name,MFR,Qty,Amount\n'+DB.dieStock.map(r=>[r.name,r.mfr,r.qty,r.amount].join(',')).join('\n');
       break;
+    case 'documents-report': {
+      csv+='Type,Ref No.,Party,Date,Product,Qty,Rate,GST Type,Grand Total\n';
+      DB.invoices.forEach(d=>{
+        const lines=(d.lines&&d.lines.length)?d.lines:[{desc:'—',qty:'',rate:''}];
+        lines.forEach((l,li)=>{
+          csv+=[d.docType,d.ref,partyNameOnly(d.party),d.date,'"'+String(l.desc||'—').replace(/"/g,'""')+'"',l.qty||'',l.rate||'',d.gstType||'',li===0?(d.grandTotal||0):''].join(',')+'\n';
+        });
+      });
+      break;
+    }
     default:
       csv+='No CSV export available for this report type.\nUse the main CSV export (⬇ CSV) from the top navigation instead.';
   }
@@ -1951,6 +2012,24 @@ function exportReportCSV() {
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=currentReport+'_report.csv';a.click();
   URL.revokeObjectURL(url);
+  toast('Exported!');
+}
+
+// Report Excel export (any report — builds one sheet per table currently shown)
+function exportReportExcel() {
+  if(typeof XLSX==='undefined'){ toast('Excel library failed to load — check your internet connection','error'); return; }
+  const out=document.getElementById('report-output');
+  if(!out){ toast('Generate a report first','error'); return; }
+  const tables=out.querySelectorAll('table');
+  if(!tables.length){ toast('No data to export','error'); return; }
+  const wb=XLSX.utils.book_new();
+  tables.forEach((tbl,i)=>{
+    const ws=XLSX.utils.table_to_sheet(tbl);
+    let name=(out.querySelectorAll('.section-label')[i]?.textContent||('Sheet'+(i+1))).slice(0,31).replace(/[\\\/\?\*\[\]:]/g,'');
+    if(!name) name='Sheet'+(i+1);
+    XLSX.utils.book_append_sheet(wb,ws,name);
+  });
+  XLSX.writeFile(wb,currentReport+'_report.xlsx');
   toast('Exported!');
 }
 
