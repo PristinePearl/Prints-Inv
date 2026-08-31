@@ -1287,10 +1287,10 @@ function renderDocForm(type) {
 function onGoodsTypeChange(type) { renderDocLines(); }
 
 function getStockOptionsForType(goodsType) {
-  if(goodsType==='rawmat') return DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate}));
-  if(goodsType==='die') return DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0}));
-  if(goodsType==='finished') return DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}));
-  if(goodsType==='machinery') return DB.machines.map(r=>({label:r.name,rate:0}));
+  if(goodsType==='rawmat') return DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate,qty:r.qty||0}));
+  if(goodsType==='die') return DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0,qty:r.qty||0}));
+  if(goodsType==='finished') return DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate,qty:r.qty||0}));
+  if(goodsType==='machinery') return DB.machines.map(r=>({label:r.name,rate:0,qty:Infinity}));
   return [];
 }
 
@@ -1302,7 +1302,15 @@ function addDocLine() {
 function removeDocLine(id) { docLineItems=docLineItems.filter(l=>l.id!==id); if(docLineItems.length===0) addDocLine(); else renderDocLines(); }
 function updateDocLineField(id,field,val) {
   const l=docLineItems.find(x=>x.id===id); if(!l) return;
-  if(field==='qty') l.qty=parseFloat(val)||0;
+  if(field==='qty'){
+    l.qty=parseFloat(val)||0;
+    if(l.availQty!=null&&isFinite(l.availQty)&&l.qty>l.availQty){
+      toast('Only '+fmtN(l.availQty)+' available in stock — qty capped','error');
+      l.qty=l.availQty;
+      const qtyEl=document.getElementById('qty-'+id);
+      if(qtyEl) qtyEl.value=l.qty;
+    }
+  }
   else if(field==='rate') l.rate=parseFloat(val)||0;
   else if(field==='desc') l.desc=val;
   const amtCell=document.getElementById('amt-'+id);
@@ -1318,13 +1326,21 @@ function selectStockItem(id,val,stockType) {
   }
   l.desc=val; l.isManual=false;
   let stockOpts=[];
-  if(stockType==='fs') stockOpts=DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate}));
-  else if(stockType==='rawmat') stockOpts=DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate}));
-  else if(stockType==='die') stockOpts=DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0}));
+  if(stockType==='fs') stockOpts=DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate,qty:r.qty||0}));
+  else if(stockType==='rawmat') stockOpts=DB.rawMaterials.map(r=>({label:`${r.material}${r.sizeInch?' ('+r.sizeInch+')':''}`,rate:r.rate,qty:r.qty||0}));
+  else if(stockType==='die') stockOpts=DB.dieStock.map(r=>({label:`${r.name} [${r.mfr}]`,rate:r.amount||0,qty:r.qty||0}));
   const match=stockOpts.find(o=>o.label===val);
   if(match) l.rate=match.rate;
+  l.availQty=match?match.qty:null;
   const rateInput=document.getElementById('rate-'+id);
   if(rateInput) rateInput.value=l.rate;
+  const avlEl=document.getElementById('avl-'+id);
+  if(avlEl) avlEl.textContent=(l.availQty!=null&&isFinite(l.availQty))?('Avl: '+fmtN(l.availQty)):'';
+  const qtyEl=document.getElementById('qty-'+id);
+  if(qtyEl&&l.availQty!=null&&isFinite(l.availQty)){
+    qtyEl.max=l.availQty;
+    if(l.qty>l.availQty){ l.qty=l.availQty; qtyEl.value=l.availQty; toast('Only '+fmtN(l.availQty)+' available in stock — qty capped','error'); }
+  }
   const amtCell=document.getElementById('amt-'+id);
   if(amtCell) amtCell.value=fmtRaw(l.qty*l.rate);
 }
@@ -1334,14 +1350,17 @@ function renderDocLines() {
   const isInvoiceDC=(currentDocType==='invoice'||currentDocType==='dc');
   const goodsType=document.getElementById('doc-goods-type')?.value||'';
   const stockType=isInvoiceDC?'fs':goodsType;
-  const stockOpts=isInvoiceDC?DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate})):getStockOptionsForType(goodsType);
+  const stockOpts=isInvoiceDC?DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate,qty:r.qty||0})):getStockOptionsForType(goodsType);
   const hasDropdown=stockOpts.length>0;
   cont.innerHTML=docLineItems.map(l=>{
     let descHtml='';
+    if(hasDropdown&&!l.isManual&&l.desc){const m=stockOpts.find(o=>o.label===l.desc);l.availQty=m?m.qty:null;}
     if(l.isManual){descHtml=`<div class="manual-desc-wrap"><input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Type description..." oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;"><button onclick="switchToDropdown(${l.id})">↩ Pick</button></div>`;}
-    else if(hasDropdown){descHtml=`<select onchange="selectStockItem(${l.id},this.value,'${stockType}')" style="font-size:12px;padding:6px 10px;width:100%"><option value="">— Select Item —</option>${stockOpts.map(o=>`<option value="${escAttr(o.label)}" ${l.desc===o.label?'selected':''}>${o.label}</option>`).join('')}<option value="__manual__">✏ Type manually...</option></select>`;}
+    else if(hasDropdown){descHtml=`<select onchange="selectStockItem(${l.id},this.value,'${stockType}')" style="font-size:12px;padding:6px 10px;width:100%"><option value="">— Select Item —</option>${stockOpts.map(o=>`<option value="${escAttr(o.label)}" ${l.desc===o.label?'selected':''}>${o.label} (Avl: ${isFinite(o.qty)?fmtN(o.qty):'—'})</option>`).join('')}<option value="__manual__">✏ Type manually...</option></select>`;}
     else{descHtml=`<input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Description" oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;width:100%">`;}
-    return `<div class="line-item-row" id="row-${l.id}"><div id="dd-${l.id}">${descHtml}</div><input id="qty-${l.id}" type="number" value="${l.qty||''}" placeholder="Qty" min="0" oninput="updateDocLineField(${l.id},'qty',this.value)" onblur="updateDocLineField(${l.id},'qty',this.value)" style="font-size:12px;padding:6px 10px"><input id="rate-${l.id}" type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" oninput="updateDocLineField(${l.id},'rate',this.value)" onblur="updateDocLineField(${l.id},'rate',this.value)" style="font-size:12px;padding:6px 10px"><input id="amt-${l.id}" readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px"><button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button></div>`;
+    const hasAvl=l.availQty!=null&&isFinite(l.availQty);
+    const avlLabel=hasAvl?`<div id="avl-${l.id}" style="font-size:10px;color:${l.qty>l.availQty?'var(--danger,#e5484d)':'var(--muted)'};margin-top:2px;">Avl: ${fmtN(l.availQty)}</div>`:`<div id="avl-${l.id}" style="font-size:10px;color:var(--muted);margin-top:2px;"></div>`;
+    return `<div class="line-item-row" id="row-${l.id}"><div id="dd-${l.id}">${descHtml}</div><div><input id="qty-${l.id}" type="number" value="${l.qty||''}" placeholder="Qty" min="0" ${hasAvl?`max="${l.availQty}"`:''} oninput="updateDocLineField(${l.id},'qty',this.value)" onblur="updateDocLineField(${l.id},'qty',this.value)" style="font-size:12px;padding:6px 10px;width:100%">${avlLabel}</div><input id="rate-${l.id}" type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" oninput="updateDocLineField(${l.id},'rate',this.value)" onblur="updateDocLineField(${l.id},'rate',this.value)" style="font-size:12px;padding:6px 10px"><input id="amt-${l.id}" readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px"><button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button></div>`;
   }).join('');
 }
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
@@ -1369,6 +1388,8 @@ function generateDoc() {
   if(!party){toast('Party name required','error');return;}
   const validLines=docLineItems.filter(l=>l.desc&&l.qty&&l.rate);
   if(!validLines.length){toast('Add at least one line item','error');return;}
+  const overStock=validLines.find(l=>l.availQty!=null&&isFinite(l.availQty)&&l.qty>l.availQty);
+  if(overStock){toast(`"${overStock.desc}" — only ${fmtN(overStock.availQty)} available, entered ${fmtN(overStock.qty)}`,'error');return;}
   const subTotal=validLines.reduce((s,l)=>s+l.qty*l.rate,0);
   let taxAmount=0,taxRows='',grandTotal=subTotal,cgst_val=0,sgst_val=0,igst_val=0;
   if(gstType==='cgst_sgst'&&gstPct>0){cgst_val=(subTotal*gstPct/100)/2;sgst_val=cgst_val;taxAmount=cgst_val+sgst_val;grandTotal=subTotal+taxAmount;taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst_val)}</td></tr><tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst_val)}</td></tr>`;}
