@@ -166,7 +166,7 @@
   .doc-type-card .dt-desc { font-size: 10px; color: var(--muted); margin-top: 4px; }
   .doc-form-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
 
-  .line-item-row { display: grid; grid-template-columns: 1fr 80px 100px 100px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .line-item-row { display: grid; grid-template-columns: 1fr 70px 90px 70px 90px auto; gap: 8px; align-items: center; margin-bottom: 8px; }
   .line-item-row input, .line-item-row select { font-size: 12px; padding: 6px 10px; width: 100%; }
 
   .invoice-preview-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 20px; }
@@ -1267,23 +1267,27 @@ function renderDocForm(type) {
       <div class="field span2"><label>Party Name & Address (editable)</label><input id="doc-party" placeholder="Name, Address..."></div>
       <div class="field"><label>GSTIN (Party)</label><input id="doc-gstin" placeholder="Optional"></div>
       <div class="field"><label>GST Classification</label><div class="gst-tabs" style="margin-top:4px;"><button class="gst-tab ${currentGstType==='cgst_sgst'?'active':''}" id="gst-tab-cgst_sgst" onclick="setGstType('cgst_sgst')">CGST + SGST</button><button class="gst-tab ${currentGstType==='igst'?'active':''}" id="gst-tab-igst" onclick="setGstType('igst')">IGST</button><button class="gst-tab ${currentGstType==='none'?'active':''}" id="gst-tab-none" onclick="setGstType('none')">No GST</button></div></div>
-      <div class="field"><label>GST %</label><select id="doc-gst-pct"><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option><option value="0">0%</option></select></div>
+      <div class="field" id="doc-gst-pct-wrap" style="display:none;"></div><!-- GST% now per line item -->
       ${type==='invoice'||type==='receipt'?`<div class="field"><label>Payment Mode</label><select id="doc-pay-mode"><option>Cash</option><option>NEFT/RTGS</option><option>UPI</option><option>Cheque</option><option>Credit</option></select></div>`:``}
       ${!isInvoiceDC?`<div class="field"><label>Goods Type</label><select id="doc-goods-type" onchange="onGoodsTypeChange(this.value)"><option value="">— Select Type —</option><option value="rawmat">Raw Material</option><option value="die">Die Stock</option><option value="machinery">Machinery</option><option value="finished">Finished Stock</option><option value="other">Others</option></select></div>`:``}
       <div class="field span2"><label>Notes / Remarks</label><input id="doc-notes" placeholder="Optional remarks"></div>
     </div>
     <div class="section-label">Line Items</div>
     <div style="overflow-x:auto;">
-      <div style="display:grid;grid-template-columns:1fr 80px 100px 100px auto;gap:8px;margin-bottom:6px;padding:0 2px;">
+      <div style="display:grid;grid-template-columns:1fr 70px 90px 70px 90px auto;gap:8px;margin-bottom:6px;padding:0 2px;">
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Particulars</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Qty</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Rate (₹)</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">GST%</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase">Amount (₹)</div>
         <div></div>
       </div>
       <div id="doc-line-items"></div>
     </div>
-    <button class="add-row-btn" onclick="addDocLine()" style="margin-top:8px;">+ Add Line</button>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="add-row-btn" onclick="addDocLine()" style="flex:1;">+ Add Line</button>
+      <button class="add-row-btn" onclick="addDieChargeLine()" style="flex:1;border-color:var(--accent);color:var(--accent);">✂️ + Die Charges</button>
+    </div>
     <div style="margin-top:20px;display:flex;gap:8px;justify-content:flex-end;">
       <button class="btn btn-ghost" onclick="clearDocForm()">Clear</button>
       <button class="btn btn-primary" onclick="generateDoc()">👁 Preview</button>
@@ -1302,9 +1306,15 @@ function getStockOptionsForType(goodsType) {
 }
 
 function addDocLine() {
-  docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0,isManual:false});
+  docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0,gstPct:0,isManual:false,isDieCharge:false});
   renderDocLines();
   setTimeout(()=>{const cont=document.getElementById('doc-line-items');if(!cont)return;const inputs=cont.querySelectorAll('input[data-desc]');if(inputs.length)inputs[inputs.length-1].focus();},50);
+}
+function addDieChargeLine() {
+  // Build die options from DB
+  const dieOpts=DB.dieStock.map(r=>r.name+' ['+r.mfr+']');
+  docLineItems.push({id:Date.now(),desc:'',qty:1,rate:0,gstPct:18,isManual:false,isDieCharge:true,dieOpts});
+  renderDocLines();
 }
 function removeDocLine(id) { docLineItems=docLineItems.filter(l=>l.id!==id); if(docLineItems.length===0) addDocLine(); else renderDocLines(); }
 function updateDocLineField(id,field,val) {
@@ -1319,6 +1329,7 @@ function updateDocLineField(id,field,val) {
     }
   }
   else if(field==='rate') l.rate=parseFloat(val)||0;
+  else if(field==='gstPct') l.gstPct=parseFloat(val)||0;
   else if(field==='desc') l.desc=val;
   const amtCell=document.getElementById('amt-'+id);
   if(amtCell) amtCell.value=fmtRaw(l.qty*l.rate);
@@ -1359,16 +1370,59 @@ function renderDocLines() {
   const stockType=isInvoiceDC?'fs':goodsType;
   const stockOpts=isInvoiceDC?DB.finishedStock.map(r=>({label:`${r.carton} (${r.mfr})`,rate:r.rate,qty:r.qty||0})):getStockOptionsForType(goodsType);
   const hasDropdown=stockOpts.length>0;
+  const showGst=currentGstType!=='none';
+  const gstOptions=[0,5,12,18,28];
   cont.innerHTML=docLineItems.map(l=>{
     let descHtml='';
-    if(hasDropdown&&!l.isManual&&l.desc){const m=stockOpts.find(o=>o.label===l.desc);l.availQty=m?m.qty:null;}
-    if(l.isManual){descHtml=`<div class="manual-desc-wrap"><input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Type description..." oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;"><button onclick="switchToDropdown(${l.id})">↩ Pick</button></div>`;}
-    else if(hasDropdown){descHtml=`<select onchange="selectStockItem(${l.id},this.value,'${stockType}')" style="font-size:12px;padding:6px 10px;width:100%"><option value="">— Select Item —</option>${stockOpts.map(o=>`<option value="${escAttr(o.label)}" ${l.desc===o.label?'selected':''}>${o.label} (Avl: ${isFinite(o.qty)?fmtN(o.qty):'—'})</option>`).join('')}<option value="__manual__">✏ Type manually...</option></select>`;}
-    else{descHtml=`<input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Description" oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;width:100%">`;}
-    const hasAvl=l.availQty!=null&&isFinite(l.availQty);
+    if(l.isDieCharge) {
+      // Die charge: dropdown of dies, qty locked to 1, rate = die amount, no stock deduction
+      const dieOpts=DB.dieStock;
+      descHtml=`<div style="display:flex;align-items:center;gap:4px;">
+        <select onchange="selectDieCharge(${l.id},this.value)" style="font-size:12px;padding:6px 10px;flex:1;">
+          <option value="">— Select Die —</option>
+          ${dieOpts.map(d=>`<option value="${escAttr(d.id)}" ${l.dieId==d.id?'selected':''}>${d.name} [${d.mfr}]</option>`).join('')}
+        </select>
+        <span style="font-size:10px;color:var(--accent);white-space:nowrap;font-family:'DM Mono',monospace;">DIE CHARGE</span>
+      </div>`;
+    } else {
+      if(hasDropdown&&!l.isManual&&l.desc){const m=stockOpts.find(o=>o.label===l.desc);l.availQty=m?m.qty:null;}
+      if(l.isManual){descHtml=`<div class="manual-desc-wrap"><input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Type description..." oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;"><button onclick="switchToDropdown(${l.id})">↩ Pick</button></div>`;}
+      else if(hasDropdown){descHtml=`<select onchange="selectStockItem(${l.id},this.value,'${stockType}')" style="font-size:12px;padding:6px 10px;width:100%"><option value="">— Select Item —</option>${stockOpts.map(o=>`<option value="${escAttr(o.label)}" ${l.desc===o.label?'selected':''}>${o.label} (Avl: ${isFinite(o.qty)?fmtN(o.qty):'—'})</option>`).join('')}<option value="__manual__">✏ Type manually...</option></select>`;}
+      else{descHtml=`<input data-desc="1" type="text" value="${escHtml(l.desc)}" placeholder="Description" oninput="updateDocLineField(${l.id},'desc',this.value)" onblur="updateDocLineField(${l.id},'desc',this.value)" style="font-size:12px;padding:6px 10px;width:100%">`;}
+    }
+    const hasAvl=!l.isDieCharge&&l.availQty!=null&&isFinite(l.availQty);
     const avlLabel=hasAvl?`<div id="avl-${l.id}" style="font-size:10px;color:${l.qty>l.availQty?'var(--danger,#e5484d)':'var(--muted)'};margin-top:2px;">Avl: ${fmtN(l.availQty)}</div>`:`<div id="avl-${l.id}" style="font-size:10px;color:var(--muted);margin-top:2px;"></div>`;
-    return `<div class="line-item-row" id="row-${l.id}"><div id="dd-${l.id}">${descHtml}</div><div><input id="qty-${l.id}" type="number" value="${l.qty||''}" placeholder="Qty" min="0" ${hasAvl?`max="${l.availQty}"`:''} oninput="updateDocLineField(${l.id},'qty',this.value)" onblur="updateDocLineField(${l.id},'qty',this.value)" style="font-size:12px;padding:6px 10px;width:100%">${avlLabel}</div><input id="rate-${l.id}" type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" oninput="updateDocLineField(${l.id},'rate',this.value)" onblur="updateDocLineField(${l.id},'rate',this.value)" style="font-size:12px;padding:6px 10px"><input id="amt-${l.id}" readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px"><button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button></div>`;
+    const gstSel=showGst
+      ? `<select id="gst-${l.id}" onchange="updateDocLineField(${l.id},'gstPct',this.value)" style="font-size:12px;padding:6px 8px;width:100%">${gstOptions.map(g=>`<option value="${g}" ${(l.gstPct||0)==g?'selected':''}>${g}%</option>`).join('')}</select>`
+      : `<span style="font-size:11px;color:var(--muted)">—</span>`;
+    return `<div class="line-item-row" id="row-${l.id}">
+      <div id="dd-${l.id}">${descHtml}</div>
+      <div>
+        <input id="qty-${l.id}" type="number" value="${l.qty||''}" placeholder="Qty" min="0" ${hasAvl?`max="${l.availQty}"`:''} ${l.isDieCharge?'readonly style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px;width:100%"':'style="font-size:12px;padding:6px 10px;width:100%"'} oninput="updateDocLineField(${l.id},'qty',this.value)" onblur="updateDocLineField(${l.id},'qty',this.value)">
+        ${avlLabel}
+      </div>
+      <input id="rate-${l.id}" type="number" value="${l.rate||''}" placeholder="Rate" step="0.01" style="font-size:12px;padding:6px 10px" oninput="updateDocLineField(${l.id},'rate',this.value)" onblur="updateDocLineField(${l.id},'rate',this.value)">
+      <div>${gstSel}</div>
+      <input id="amt-${l.id}" readonly value="${fmtRaw(l.qty*l.rate)}" style="background:var(--surface);color:var(--muted);font-size:12px;padding:6px 10px">
+      <button class="icon-btn del" onclick="removeDocLine(${l.id})">✕</button>
+    </div>`;
   }).join('');
+}
+function selectDieCharge(lineId, dieId) {
+  const l=docLineItems.find(x=>x.id===lineId); if(!l) return;
+  const die=DB.dieStock.find(d=>d.id==dieId);
+  if(die){
+    l.dieId=die.id;
+    l.desc='Die Charges — '+die.name+' ['+die.mfr+']';
+    l.rate=die.amount||0;
+    l.qty=1;
+    const rateEl=document.getElementById('rate-'+lineId);
+    const qtyEl=document.getElementById('qty-'+lineId);
+    const amtEl=document.getElementById('amt-'+lineId);
+    if(rateEl) rateEl.value=l.rate;
+    if(qtyEl) qtyEl.value=1;
+    if(amtEl) amtEl.value=fmtRaw(l.rate);
+  }
 }
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function escAttr(s){return String(s||'').replace(/"/g,'&quot;');}
@@ -1378,16 +1432,17 @@ function generateDoc() {
   docLineItems.forEach(l=>{
     const qtyEl=document.getElementById('qty-'+l.id);
     const rateEl=document.getElementById('rate-'+l.id);
+    const gstEl=document.getElementById('gst-'+l.id);
     const descEl=document.querySelector(`#dd-${l.id} input[data-desc]`);
     if(qtyEl) l.qty=parseFloat(qtyEl.value)||0;
     if(rateEl) l.rate=parseFloat(rateEl.value)||0;
+    if(gstEl) l.gstPct=parseFloat(gstEl.value)||0;
     if(descEl) l.desc=descEl.value;
   });
   const ref=document.getElementById('doc-ref')?.value.trim();
   const party=document.getElementById('doc-party')?.value.trim();
   const date=document.getElementById('doc-date')?.value;
   const gstin=document.getElementById('doc-gstin')?.value.trim();
-  const gstPct=parseFloat(document.getElementById('doc-gst-pct')?.value||5);
   const gstType=currentGstType;
   const payMode=document.getElementById('doc-pay-mode')?.value||'';
   const notes=document.getElementById('doc-notes')?.value.trim();
@@ -1395,17 +1450,45 @@ function generateDoc() {
   if(!party){toast('Party name required','error');return;}
   const validLines=docLineItems.filter(l=>l.desc&&l.qty&&l.rate);
   if(!validLines.length){toast('Add at least one line item','error');return;}
-  const overStock=validLines.find(l=>l.availQty!=null&&isFinite(l.availQty)&&l.qty>l.availQty);
+  const overStock=validLines.find(l=>!l.isDieCharge&&l.availQty!=null&&isFinite(l.availQty)&&l.qty>l.availQty);
   if(overStock){toast(`"${overStock.desc}" — only ${fmtN(overStock.availQty)} available, entered ${fmtN(overStock.qty)}`,'error');return;}
   const subTotal=validLines.reduce((s,l)=>s+l.qty*l.rate,0);
-  let taxAmount=0,taxRows='',grandTotal=subTotal,cgst_val=0,sgst_val=0,igst_val=0;
-  if(gstType==='cgst_sgst'&&gstPct>0){cgst_val=(subTotal*gstPct/100)/2;sgst_val=cgst_val;taxAmount=cgst_val+sgst_val;grandTotal=subTotal+taxAmount;taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(cgst_val)}</td></tr><tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(sgst_val)}</td></tr>`;}
-  else if(gstType==='igst'&&gstPct>0){igst_val=subTotal*gstPct/100;taxAmount=igst_val;grandTotal=subTotal+taxAmount;taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(igst_val)}</td></tr>`;}
-  const html=buildDocHTML({docType:currentDocType,ref,party,date,gstin,gstPct,gstType,payMode,notes,goodsType,lines:validLines,subTotal,grandTotal,cgst:cgst_val,sgst:sgst_val,igst:igst_val,taxRows});
+  let taxAmount=0,grandTotal=subTotal,cgst_val=0,sgst_val=0,igst_val=0;
+  // Per-line GST aggregation
+  const gstBuckets={};  // key: "pct" → {cgst, sgst, igst}
+  if(gstType!=='none'){
+    validLines.forEach(l=>{
+      const pct=l.gstPct||0; if(pct<=0) return;
+      const base=l.qty*l.rate;
+      if(!gstBuckets[pct]) gstBuckets[pct]={cgst:0,sgst:0,igst:0,base:0};
+      gstBuckets[pct].base+=base;
+      if(gstType==='cgst_sgst'){gstBuckets[pct].cgst+=base*pct/100/2;gstBuckets[pct].sgst+=base*pct/100/2;}
+      else if(gstType==='igst'){gstBuckets[pct].igst+=base*pct/100;}
+    });
+    Object.values(gstBuckets).forEach(b=>{cgst_val+=b.cgst;sgst_val+=b.sgst;igst_val+=b.igst;});
+    taxAmount=cgst_val+sgst_val+igst_val;
+    grandTotal=subTotal+taxAmount;
+  }
+  // Build tax rows for preview
+  let taxRows='';
+  if(gstType==='cgst_sgst'&&taxAmount>0){
+    Object.entries(gstBuckets).filter(([p,b])=>b.cgst>0).forEach(([p,b])=>{
+      taxRows+=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${p/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(b.cgst)}</td></tr>`;
+      taxRows+=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${p/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(b.sgst)}</td></tr>`;
+    });
+  } else if(gstType==='igst'&&taxAmount>0){
+    Object.entries(gstBuckets).filter(([p,b])=>b.igst>0).forEach(([p,b])=>{
+      taxRows+=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${p}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(b.igst)}</td></tr>`;
+    });
+  }
+  // Use first line's gstPct as the "doc gstPct" for legacy compatibility
+  const gstPct=validLines[0]?.gstPct||0;
+  const html=buildDocHTML({docType:currentDocType,ref,party,date,gstin,gstPct,gstType,payMode,notes,goodsType,lines:validLines,subTotal,grandTotal,cgst:cgst_val,sgst:sgst_val,igst:igst_val,taxRows,perLineGst:true});
   document.getElementById('invoice-preview').innerHTML=html;
   document.getElementById('doc-preview-wrap').style.display='block';
   document.getElementById('doc-preview-wrap').scrollIntoView({behavior:'smooth',block:'start'});
-  currentDocData={docType:currentDocType,ref,party,date,gstin,gstPct,gstType,cgst:cgst_val,sgst:sgst_val,igst:igst_val,payMode,notes,goodsType,lines:validLines,subTotal,grandTotal};
+  // FIXED: Store complete lines array with individual gstPct + isDieCharge for each line
+  currentDocData={docType:currentDocType,ref,party,date,gstin,gstPct,gstType,cgst:cgst_val,sgst:sgst_val,igst:igst_val,payMode,notes,goodsType,lines:validLines.map(l=>({desc:l.desc,qty:l.qty,rate:l.rate,gstPct:l.gstPct||0,isDieCharge:l.isDieCharge||false})),subTotal,grandTotal,perLineGst:true};
 }
 
 // ============================================================ DOCUMENT HTML BUILDER
@@ -1416,10 +1499,43 @@ function buildDocHTML(d) {
   const docDate=d.date?(typeof d.date==='string'&&d.date.includes('-')?new Date(d.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):d.date):'';
   let taxRows=d.taxRows||'';
   if(!taxRows){
-    if(d.gstType==='cgst_sgst'&&d.gstPct>0){taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.cgst)}</td></tr><tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.sgst)}</td></tr>`;}
-    else if(d.gstType==='igst'&&d.gstPct>0){taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${d.gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.igst)}</td></tr>`;}
+    if(d.perLineGst&&d.lines&&d.gstType!=='none'){
+      // FIXED: Rebuild per-line tax rows from individual line items with their gstPct
+      const buckets={};
+      d.lines.forEach(l=>{
+        const p=l.gstPct||0;
+        if(p<=0) return;
+        const base=l.qty*l.rate;
+        if(!buckets[p]) buckets[p]={cgst:0,sgst:0,igst:0};
+        if(d.gstType==='cgst_sgst'){
+          buckets[p].cgst+=base*p/100/2;
+          buckets[p].sgst+=base*p/100/2;
+        } else if(d.gstType==='igst'){
+          buckets[p].igst+=base*p/100;
+        }
+      });
+      // Sort by percentage for consistent display
+      const sortedBuckets=Object.entries(buckets).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+      if(d.gstType==='cgst_sgst'){
+        sortedBuckets.forEach(([p,b])=>{
+          if(b.cgst>0){
+            taxRows+=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${p/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(b.cgst)}</td></tr>`;
+            taxRows+=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${p/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(b.sgst)}</td></tr>`;
+          }
+        });
+      } else if(d.gstType==='igst'){
+        sortedBuckets.forEach(([p,b])=>{
+          if(b.igst>0){
+            taxRows+=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${p}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(b.igst)}</td></tr>`;
+          }
+        });
+      }
+    } else {
+      if(d.gstType==='cgst_sgst'&&d.gstPct>0){taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">CGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.cgst)}</td></tr><tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">SGST ${d.gstPct/2}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.sgst)}</td></tr>`;}
+      else if(d.gstType==='igst'&&d.gstPct>0){taxRows=`<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;">IGST ${d.gstPct}%</td><td style="padding:5px 10px;text-align:right;border-bottom:1px solid #eee;">${fmtRaw(d.igst)}</td></tr>`;}
+    }
   }
-  const showGstCol=d.gstType!=='none'&&d.gstPct>0;
+  const showGstCol=d.gstType!=='none';
   return `<div style="font-family:Arial,sans-serif;padding:24px;max-width:780px;margin:0 auto;background:#fff;color:#000;font-size:13px;">
     <!-- LETTERHEAD -->
     <table width="100%" style="margin-bottom:8px;border-collapse:collapse;">
@@ -1472,7 +1588,7 @@ function buildDocHTML(d) {
         </tr>
       </thead>
       <tbody>
-        ${(d.lines||[]).map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}"><td style="padding:7px 10px;text-align:center;">${i+1}.</td><td style="padding:7px 10px;">${l.desc}</td><td style="padding:7px 10px;text-align:center;">${fmtN(l.qty)}</td><td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>${showGstCol?`<td style="padding:7px 10px;text-align:center;">${d.gstPct}%</td>`:''}<td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td></tr>`).join('')}
+        ${(d.lines||[]).map((l,i)=>`<tr style="border-bottom:1px solid #ddd;${i%2===1?'background:#f8f9fa':''}${l.isDieCharge?';background:#fff8e1':''}"><td style="padding:7px 10px;text-align:center;">${i+1}.</td><td style="padding:7px 10px;">${l.desc}${l.isDieCharge?` <span style="font-size:10px;color:#b45309;font-weight:600;border:1px solid #b45309;border-radius:3px;padding:1px 5px;">DIE CHARGE</span>`:''}</td><td style="padding:7px 10px;text-align:center;">${l.isDieCharge?'—':fmtN(l.qty)}</td><td style="padding:7px 10px;text-align:center;">${fmtRaw(l.rate)}</td>${showGstCol?`<td style="padding:7px 10px;text-align:center;">${(l.gstPct||0)>0?l.gstPct+'%':'—'}</td>`:''}<td style="padding:7px 10px;text-align:right;">${fmtRaw(l.qty*l.rate)}</td></tr>`).join('')}
       </tbody>
     </table>
     <!-- TOTALS + BANK -->
@@ -1586,8 +1702,8 @@ function renderDocHistoryTable(filter='') {
   const typeBadge={invoice:'badge-green',receipt:'badge-orange',dc:'badge-blue',po:'badge-purple'};
   tbody.innerHTML=docs.map((d,i)=>`<tr><td class="mono" style="color:var(--muted)">${i+1}</td><td><span class="badge ${typeBadge[d.docType]||'badge-blue'}">${typeLabels[d.docType]||d.docType}</span></td><td class="mono">${d.ref||'—'}</td><td>${partyNameOnly(d.party)||'—'}</td><td class="mono" style="color:var(--muted);font-size:11px">${d.date||''}</td><td><span class="badge badge-blue" style="font-size:10px">${d.gstType==='igst'?'IGST':d.gstType==='cgst_sgst'?'C+S GST':'No GST'}</span></td><td class="mono">${fmt(d.grandTotal)}</td><td><div class="action-cell"><button class="icon-btn view-btn" onclick="viewDoc(${d.id})">👁 View</button><button class="icon-btn print-btn" onclick="viewAndPrintDoc(${d.id})">🖨 Print</button><button class="icon-btn del" onclick="deleteDoc(${d.id})">✕</button></div></td></tr>`).join('');
 }
-function viewDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; const html=buildDocHTML(d); document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+partyNameOnly(d.party); document.getElementById('doc-view-content').innerHTML=html; openModal('modal-doc-view'); }
-function viewAndPrintDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; doSafePrint(buildDocHTML(d)); }
+function viewDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; if(d.lines&&d.lines.length) d.perLineGst=true; const html=buildDocHTML(d); document.getElementById('doc-view-title').textContent=(d.ref||'Document')+' — '+partyNameOnly(d.party); document.getElementById('doc-view-content').innerHTML=html; openModal('modal-doc-view'); }
+function viewAndPrintDoc(id) { const d=DB.invoices.find(x=>x.id==id); if(!d) return; if(d.lines&&d.lines.length) d.perLineGst=true; doSafePrint(buildDocHTML(d)); }
 function printViewedDoc() { const content=document.getElementById('doc-view-content').innerHTML; closeModal('modal-doc-view'); doSafePrint(content); }
 async function deleteDoc(id) { if(!confirm('Delete this document?')) return; showLoading('Deleting…'); const ok=await writeToSheet({action:'deleteDocument',id}); if(ok){toast('Deleted');renderDocHistoryTable();} }
 
