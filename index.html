@@ -847,20 +847,15 @@ async function gasRequest(payload) {
   try {
     setConnStatus('syncing','Syncing…');
     const url = new URL(GAS_URL);
-    let resp;
     if (payload.action === 'getAll') {
       url.searchParams.set('action','getAll');
-      resp = await fetch(url.toString(),{method:'GET',redirect:'follow'});
-    } else {
-      resp = await fetch(url.toString(),{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+      const resp = await fetch(url.toString(),{method:'GET',redirect:'follow'});
+      const data = await resp.json();
+      setConnStatus('online','Connected');
+      return data;
     }
-    const text = await resp.text();
-    // GAS sometimes returns an HTML error page mid-write instead of JSON.
-    // Detect and throw a clean error rather than crashing on JSON.parse.
-    if (!text.trim().startsWith('{') && !text.trim().startsWith('[')) {
-      throw new Error('GAS returned non-JSON. Script may still be processing — please try again.');
-    }
-    const data = JSON.parse(text);
+    const resp = await fetch(url.toString(),{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+    const data = await resp.json();
     setConnStatus('online','Connected');
     return data;
   } catch(err) {
@@ -872,50 +867,25 @@ async function gasRequest(payload) {
 
 async function syncAll(silent=false) {
   if (!silent) showLoading('Fetching data…');
-  let synced = false;
   try {
     const data = await gasRequest({action:'getAll'});
     if (data && data.success) {
-      // Only update DB when we have a confirmed successful response with real data.
-      // This prevents overwriting a good DB with empty arrays on a bad/partial response.
-      const incoming = {
-        machines:      data.machines      || [],
-        rawMaterials:  data.rawMaterials  || [],
-        finishedStock: data.finishedStock || [],
-        dieStock:      data.dieStock      || [],
-        productions:   data.productions   || [],
-        logs:          data.logs          || [],
-        invoices:      data.invoices      || [],
-        parties:       data.parties       || [],
-      };
-      // Guard: if every array is empty but DB already has data, treat as suspect response
-      const allEmpty = Object.values(incoming).every(a => a.length === 0);
-      const dbHasData = Object.values(DB).some(a => Array.isArray(a) && a.length > 0);
-      if (allEmpty && dbHasData) {
-        // Likely a transient empty response — keep existing DB, warn user
-        if (!silent) toast('Sync returned empty data — keeping existing data. Try again.', 'warn');
-        setConnStatus('online', 'Connected');
-      } else {
-        DB.machines      = incoming.machines;
-        DB.rawMaterials  = incoming.rawMaterials;
-        DB.finishedStock = incoming.finishedStock;
-        DB.dieStock      = incoming.dieStock;
-        DB.productions   = incoming.productions;
-        DB.logs          = incoming.logs;
-        DB.invoices      = incoming.invoices;
-        DB.parties       = incoming.parties;
-        if (!silent) toast('Synced ✓');
-      }
-      synced = true;
-    } else {
-      throw new Error(data?.error || 'Unknown error');
-    }
+      DB.machines      = data.machines      || [];
+      DB.rawMaterials  = data.rawMaterials  || [];
+      DB.finishedStock = data.finishedStock || [];
+      DB.dieStock      = data.dieStock      || [];
+      DB.productions   = data.productions   || [];
+      DB.logs          = data.logs          || [];
+      DB.invoices      = data.invoices      || [];
+      DB.parties       = data.parties       || [];
+      if (!silent) toast('Synced ✓');
+    } else throw new Error(data?.error||'Unknown error');
   } catch(err) {
-    if (!silent) toast('Sync failed: ' + err.message, 'error');
+    toast('Sync failed: '+err.message,'error');
     setConnStatus('offline','Offline');
   } finally {
     hideLoading();
-    if (synced) refreshCurrentPanel();
+    refreshCurrentPanel();
   }
 }
 
@@ -923,9 +893,6 @@ async function writeToSheet(payload) {
   try {
     const result = await gasRequest(payload);
     if (!result?.success) throw new Error(result?.error||'Write failed');
-    // Wait for GAS to finish committing to the sheet before reading back.
-    // Without this delay the GET often hits GAS mid-write and returns HTML.
-    await new Promise(r => setTimeout(r, 1200));
     await syncAll(true);
     return true;
   } catch(err) {
